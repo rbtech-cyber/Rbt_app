@@ -1,0 +1,3209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur Achat Immobilier</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --bg2: #ece9e3;
+  --bg3: #ddd9d0;
+  --surface: #ffffff;
+  --surface2: #f9f8f5;
+  --border: #d4cfc5;
+  --text: #1a1814;
+  --text2: #5a5650;
+  --text3: #8a8680;
+  --accent: #c8732a;
+  --accent2: #e8943d;
+  --accent-bg: rgba(200,115,42,0.08);
+  --green: #2a7a4a;
+  --green-bg: rgba(42,122,74,0.08);
+  --blue: #2a5c8a;
+  --blue-bg: rgba(42,92,138,0.08);
+  --red: #a83232;
+  --red-bg: rgba(168,50,50,0.08);
+  --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+  --radius: 10px;
+  --radius-sm: 6px;
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --bg: #141210;
+  --bg2: #1e1c19;
+  --bg3: #28251f;
+  --surface: #231f1a;
+  --surface2: #2d2920;
+  --border: #3d3930;
+  --text: #f0ece4;
+  --text2: #a09890;
+  --text3: #706860;
+  --accent: #e8943d;
+  --accent2: #f0a855;
+  --accent-bg: rgba(232,148,61,0.12);
+  --green: #4aad6a;
+  --green-bg: rgba(74,173,106,0.10);
+  --blue: #5a8ec8;
+  --blue-bg: rgba(90,142,200,0.10);
+  --red: #d85555;
+  --red-bg: rgba(216,85,85,0.10);
+  --shadow: 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141210; --bg2: #1e1c19; --bg3: #28251f;
+    --surface: #231f1a; --surface2: #2d2920; --border: #3d3930;
+    --text: #f0ece4; --text2: #a09890; --text3: #706860;
+    --accent: #e8943d; --accent2: #f0a855; --accent-bg: rgba(232,148,61,0.12);
+    --green: #4aad6a; --green-bg: rgba(74,173,106,0.10);
+    --blue: #5a8ec8; --blue-bg: rgba(90,142,200,0.10);
+    --red: #d85555; --red-bg: rgba(216,85,85,0.10);
+    --shadow: 0 2px 8px rgba(0,0,0,0.25); --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:56px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--accent);letter-spacing:-0.5px;white-space:nowrap}
+.topbar-logo span{color:var(--text);font-weight:400}
+.topbar-spacer{flex:1}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--bg2);color:var(--text);border-color:var(--text3)}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-accent:hover{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-icon{padding:7px;width:34px;height:34px;justify-content:center}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* TABS */
+.tabs-wrap{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;overflow-x:auto;padding:0 20px;gap:2px;scrollbar-width:none}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tab{padding:12px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2);white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--text);border-bottom-color:var(--border)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-add{padding:10px 14px;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;transition:all .15s;border-bottom:3px solid transparent}
+.tab-add:hover{color:var(--accent)}
+.tab-close{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;background:transparent;border:none;cursor:pointer;color:var(--text3);transition:all .15s}
+.tab-close:hover{background:var(--red-bg);color:var(--red)}
+
+/* MAIN CONTENT */
+.content{padding:24px 20px;max-width:1200px;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.card-title .icon{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+
+/* FIELD */
+.field{display:flex;flex-direction:column;gap:5px;position:relative}
+.field label{font-size:12px;color:var(--text2);font-weight:500;letter-spacing:0.02em}
+.field-row{display:flex;align-items:center;gap:6px}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:all .15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.field .unit{font-size:12px;color:var(--text3);white-space:nowrap}
+.field-inline{display:flex;gap:8px;align-items:center}
+.field-inline input{flex:1}
+
+/* EDITABLE */
+.editable-wrap{display:flex;align-items:center;gap:6px}
+.editable-wrap .pencil-btn{opacity:0;transition:opacity .15s;background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px 5px;border-radius:4px}
+.editable-wrap:hover .pencil-btn{opacity:1}
+.pencil-btn:hover{color:var(--accent);background:var(--accent-bg)!important}
+.edit-title-input{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;border:1px solid var(--accent);border-radius:4px;padding:3px 8px;background:var(--surface);color:var(--text);width:220px}
+
+/* RESULT BOX */
+.result-box{background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.result-box.green{background:var(--green-bg);border-color:var(--green)}
+.result-box.red{background:var(--red-bg);border-color:var(--red)}
+.result-box.blue{background:var(--blue-bg);border-color:var(--blue)}
+.result-label{font-size:12px;color:var(--text2);font-weight:500}
+.result-value{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:var(--accent)}
+.result-box.green .result-value{color:var(--green)}
+.result-box.red .result-value{color:var(--red)}
+.result-box.blue .result-value{color:var(--blue)}
+.result-sub{font-size:11px;color:var(--text3)}
+
+/* SUMMARY ROW */
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--border)}
+.summary-row:last-child{border-bottom:none;font-weight:600;padding-top:12px}
+.summary-row span{font-size:13px;color:var(--text2)}
+.summary-row strong{font-size:13px;color:var(--text);font-weight:600}
+.summary-row.total span{color:var(--text);font-size:14px;font-family:'Syne',sans-serif;font-weight:700}
+.summary-row.total strong{color:var(--accent);font-size:16px;font-family:'Syne',sans-serif;font-weight:700}
+
+/* TOGGLE */
+.toggle-wrap{display:flex;gap:4px;padding:4px;background:var(--bg2);border-radius:var(--radius-sm)}
+.toggle-opt{padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.toggle-opt.active{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+
+/* AMORTISSEMENT TABLE */
+.amort-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.amort-table th{background:var(--bg2);padding:8px 10px;text-align:right;font-weight:600;font-size:11px;color:var(--text2);border:1px solid var(--border);white-space:nowrap}
+.amort-table th:first-child{text-align:left}
+.amort-table td{padding:6px 10px;text-align:right;border:1px solid var(--border);color:var(--text)}
+.amort-table td:first-child{text-align:left;color:var(--text2);font-weight:500}
+.amort-table tr:nth-child(even){background:var(--surface2)}
+.amort-table tr.year-row{background:var(--accent-bg);font-weight:600}
+.amort-table tr.year-row td{color:var(--accent)}
+.amort-wrap{max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm)}
+
+/* CHARGES LIST */
+.charge-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border)}
+.charge-item:last-child{border-bottom:none}
+.charge-item input[type="text"]{flex:1;border:1px solid var(--border);border-radius:4px;padding:5px 8px;background:var(--bg);color:var(--text);font-size:13px}
+.charge-item input[type="number"]{width:90px;border:1px solid var(--border);border-radius:4px;padding:5px 8px;background:var(--bg);color:var(--text);font-size:13px;text-align:right}
+.charge-remove{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0 4px;transition:color .15s}
+.charge-remove:hover{color:var(--red)}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-orange{background:var(--accent-bg);color:var(--accent)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+
+/* SECTION DIVIDER */
+.section-label{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* PROGRESS */
+.progress-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s;background:var(--accent)}
+.progress-fill.green{background:var(--green)}
+.progress-fill.red{background:var(--red)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:460px;width:90%;box-shadow:var(--shadow-md)}
+.modal h3{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.export-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.export-opt{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface2)}
+.export-opt:hover{border-color:var(--accent);background:var(--accent-bg)}
+.export-opt .eo-icon{font-size:26px;display:block;margin-bottom:6px}
+.export-opt .eo-label{font-size:12px;font-weight:600;color:var(--text)}
+.export-opt .eo-sub{font-size:11px;color:var(--text3)}
+
+/* NOTIFICATION */
+.notif{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;box-shadow:var(--shadow-md);font-size:13px;z-index:300;transform:translateY(20px);opacity:0;transition:all .25s;display:flex;align-items:center;gap:8px}
+.notif.show{transform:translateY(0);opacity:1}
+.notif.success{border-color:var(--green);background:var(--green-bg)}
+.notif.error{border-color:var(--red);background:var(--red-bg)}
+
+/* PRINT */
+@media print {
+  .topbar,.tabs-wrap,.topbar-actions,.tab-add,.tab-close,.pencil-btn,.btn,.notif{display:none!important}
+  .tab-panel{display:block!important}
+  body{background:#fff;color:#000}
+}
+/* CHK ROWS (synthese ROI) */
+.chk-row{display:flex;align-items:center;gap:10px;padding:5px 8px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s;user-select:none}
+.chk-row:hover:not(.chk-fixed){background:var(--bg2)}
+.chk-row input[type="checkbox"]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.chk-row.chk-fixed{cursor:default;opacity:.75}
+.chk-row.chk-fixed input[type="checkbox"]{cursor:default}
+.chk-label{font-size:13px;color:var(--text2);flex:1;line-height:1.4}
+.chk-val{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;white-space:nowrap}
+.chk-val.pos{color:var(--green)}
+.chk-val.neg{color:var(--red)}
+.chk-val.neutral{color:var(--text)}
+.chk-subtotal{display:flex;justify-content:space-between;align-items:center;padding:7px 8px;margin:4px 0;border-radius:var(--radius-sm);font-weight:600;font-size:13px;border-top:1px solid var(--border)}
+.chk-group-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:10px 8px 4px;display:flex;align-items:center;gap:8px}
+.chk-group-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.chk-total-box{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:var(--radius-sm);margin-top:8px;border:2px solid var(--accent);background:var(--accent-bg)}
+.chk-total-label{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.chk-total-val{font-family:'Syne',sans-serif;font-weight:800;font-size:22px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">🏠 Immo<span>Sim</span></div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-actions">
+    <button class="btn btn-sm" onclick="showModal('import-modal')" title="Importer">📂 Importer</button>
+    <button class="btn btn-sm btn-accent" onclick="saveData()" title="Sauvegarder">💾 Sauvegarder</button>
+    <button class="btn btn-sm" onclick="undo()" id="btn-undo" disabled title="Annuler">↩</button>
+    <button class="btn btn-sm" onclick="redo()" id="btn-redo" disabled title="Rétablir">↪</button>
+    <button class="btn btn-sm" onclick="showModal('export-modal')" title="Exporter">⬆️ Exporter</button>
+    <button class="btn btn-icon btn-sm" onclick="toggleTheme()" id="theme-btn" title="Thème">🌙</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap" id="tabs-wrap">
+  <div class="tab active" data-panel="ressources" onclick="switchTab('ressources',this)">
+    <span>👤 Déclaration des ressources</span>
+  </div>
+  <!-- dynamic projet tabs here -->
+  <div class="tab-add" onclick="addProjet()" title="Ajouter un projet">＋</div>
+  <div class="tab" data-panel="revente" onclick="switchTab('revente',this);calcRevente()" id="tab-revente">
+    <span>🏷️ Analyse Revente</span>
+  </div>
+  <div class="tab" data-panel="roi" onclick="switchTab('roi',this);calcROI()" id="tab-roi">
+    <span>📈 Retour sur investissement</span>
+  </div>
+</div>
+
+<!-- PANEL RESSOURCES -->
+<div class="tab-panel active" id="panel-ressources">
+<div class="content">
+
+  <!-- Revenus -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--accent-bg);color:var(--accent)">💰</div>
+      <div class="editable-wrap" id="title-revenus">
+        <span>Revenus du foyer</span>
+        <button class="pencil-btn" onclick="editTitle('title-revenus')">✏️</button>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">Monsieur</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Salaire net mensuel</label>
+            <div class="field-inline"><input type="number" id="sal_m" value="2800" oninput="syncSal('m','mens')"><span class="unit">€/mois</span></div>
+          </div>
+          <div class="field">
+            <label>Salaire net annuel <span style="color:var(--text3);font-weight:400">(= ×12)</span></label>
+            <div class="field-inline"><input type="number" id="sal_m_an" value="33600" oninput="syncSal('m','an')"><span class="unit">€/an</span></div>
+          </div>
+          <div class="field">
+            <label>Salaire brut annuel</label>
+            <div class="field-inline"><input type="number" id="sal_m_brut" value="42000" oninput="calcAll()"><span class="unit">€/an</span></div>
+          </div>
+          <div class="field">
+            <label>Primes annuelles</label>
+            <div class="field-inline"><input type="number" id="prime_m" value="2000" oninput="calcAll()"><span class="unit">€/an</span></div>
+          </div>
+          <div class="field">
+            <label>Autres revenus mensuels</label>
+            <div class="field-inline"><input type="number" id="autre_m" value="0" oninput="calcAll()"><span class="unit">€/mois</span></div>
+          </div>
+          <div class="field">
+            <label>Revenu fiscal de référence N-1</label>
+            <div class="field-inline"><input type="number" id="rfr_m" value="35000" oninput="calcAll()"><span class="unit">€/an</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Madame</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Salaire net mensuel</label>
+            <div class="field-inline"><input type="number" id="sal_f" value="2200" oninput="syncSal('f','mens')"><span class="unit">€/mois</span></div>
+          </div>
+          <div class="field">
+            <label>Salaire net annuel <span style="color:var(--text3);font-weight:400">(= ×12)</span></label>
+            <div class="field-inline"><input type="number" id="sal_f_an" value="26400" oninput="syncSal('f','an')"><span class="unit">€/an</span></div>
+          </div>
+          <div class="field">
+            <label>Salaire brut annuel</label>
+            <div class="field-inline"><input type="number" id="sal_f_brut" value="33000" oninput="calcAll()"><span class="unit">€/an</span></div>
+          </div>
+          <div class="field">
+            <label>Primes annuelles</label>
+            <div class="field-inline"><input type="number" id="prime_f" value="1000" oninput="calcAll()"><span class="unit">€/an</span></div>
+          </div>
+          <div class="field">
+            <label>Autres revenus mensuels</label>
+            <div class="field-inline"><input type="number" id="autre_f" value="0" oninput="calcAll()"><span class="unit">€/mois</span></div>
+          </div>
+          <div class="field">
+            <label>Revenu fiscal de référence N-1</label>
+            <div class="field-inline"><input type="number" id="rfr_f" value="28000" oninput="calcAll()"><span class="unit">€/an</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- RFR foyer -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="font-size:12px;color:var(--text2);font-weight:500">Revenu fiscal de référence foyer (N-1) :</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--blue)" id="r_rfr_foyer">—</div>
+      <div style="font-size:11px;color:var(--text3)">(M + F — utilisé pour PTZ, aides, barèmes CAF)</div>
+    </div>
+  </div>
+
+  <!-- Capacité emprunt -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--blue-bg);color:var(--blue)">📊</div>
+      <div class="editable-wrap" id="title-capacite">
+        <span>Capacité d'emprunt</span>
+        <button class="pencil-btn" onclick="editTitle('title-capacite')">✏️</button>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="field">
+          <label>Apport personnel disponible</label>
+          <div class="field-inline"><input type="number" id="apport_res" value="30000" oninput="calcAll()"><span class="unit">€</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Épargne mensuelle possible</label>
+          <div class="field-inline"><input type="number" id="epargne_mens" value="500" oninput="calcAll()"><span class="unit">€/mois</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Crédit(s) en cours — total mensualités</label>
+          <div class="field-inline"><input type="number" id="credits_cours" value="350" oninput="calcAll()"><span class="unit">€/mois</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Autres charges fixes mensuelles</label>
+          <div class="field-inline"><input type="number" id="charges_fixes" value="200" oninput="calcAll()"><span class="unit">€/mois</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="result-box blue">
+          <div><div class="result-label">Revenus nets mensuels combinés</div><div class="result-sub">Salaires + autres</div></div>
+          <div><div class="result-value" id="r_revenus_totaux">—</div></div>
+        </div>
+        <div class="result-box">
+          <div><div class="result-label">Mensualité max (taux 35%)</div><div class="result-sub">HCSF — tous crédits confondus</div></div>
+          <div><div class="result-value" id="r_mens_max_35">—</div></div>
+        </div>
+        <div class="result-box green">
+          <div><div class="result-label">Mensualité dispo achat immo</div><div class="result-sub">Après déduction crédits en cours</div></div>
+          <div><div class="result-value" id="r_mens_dispo">—</div></div>
+        </div>
+        <div class="result-box">
+          <div>
+            <div class="result-label">Taux d'endettement actuel</div>
+            <div class="progress-bar" style="width:160px"><div class="progress-fill" id="taux-endt-bar" style="width:0%"></div></div>
+          </div>
+          <div><div class="result-value" id="r_taux_endt">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Situation pro -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--green-bg);color:var(--green)">📋</div>
+      <span>Situation professionnelle</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">Monsieur</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Statut</label>
+            <select id="statut_m" onchange="calcAll()">
+              <option>CDI</option><option>Fonctionnaire</option><option>CDD</option><option>Indépendant</option><option>Retraité</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ancienneté (ans)</label>
+            <input type="number" id="anciennete_m" value="5" oninput="calcAll()">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Madame</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Statut</label>
+            <select id="statut_f" onchange="calcAll()">
+              <option>CDI</option><option>Fonctionnaire</option><option>CDD</option><option>Indépendant</option><option>Retraité</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ancienneté (ans)</label>
+            <input type="number" id="anciennete_f" value="3" oninput="calcAll()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- PANEL REVENTE -->
+<div class="tab-panel" id="panel-revente">
+<div class="content">
+
+  <div class="grid-2" style="align-items:start">
+
+    <!-- VOLET GAUCHE : profil acheteur -->
+    <div>
+      <div class="card" style="border-top:3px solid var(--blue)">
+        <div class="card-title">
+          <div class="icon" style="background:var(--blue-bg);color:var(--blue)">🏠</div>
+          <span style="color:var(--blue)">Profil Acheteur</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--text3)">Données issues d'un projet</span>
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label>Projet à analyser</label>
+          <select id="rev_projet" onchange="calcRevente()"></select>
+        </div>
+        <div id="rev-acheteur-infos" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <!-- Récapitulatif coûts achat -->
+      <div class="card">
+        <div class="card-title">
+          <div class="icon" style="background:var(--accent-bg);color:var(--accent)">📋</div>
+          <span>Coûts irrécupérables à l'achat</span>
+        </div>
+        <div id="rev-couts-achat" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <!-- VOLET DROIT : paramètres revente -->
+    <div>
+      <div class="card" style="border-top:3px solid var(--green)">
+        <div class="card-title">
+          <div class="icon" style="background:var(--green-bg);color:var(--green)">🔑</div>
+          <span style="color:var(--green)">Paramètres de la Revente</span>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Durée détention avant revente</label>
+            <div class="field-inline"><input type="number" id="rev_duree" value="7" min="1" max="30" oninput="calcRevente()"><span class="unit">ans</span></div>
+          </div>
+          <div class="field">
+            <label>Prix de revente envisagé</label>
+            <div class="field-inline"><input type="number" id="rev_prix" value="270000" oninput="calcRevente()"><span class="unit">€</span></div>
+          </div>
+          <div class="field">
+            <label>Commission agence revente</label>
+            <div class="field-inline"><input type="number" id="rev_commission" value="4.5" step="0.1" oninput="calcRevente()"><span class="unit">%</span></div>
+          </div>
+          <div class="field">
+            <label>Frais diagnostics (DPE, amiante…)</label>
+            <div class="field-inline"><input type="number" id="rev_diag" value="800" oninput="calcRevente()"><span class="unit">€</span></div>
+          </div>
+          <div class="field">
+            <label>Mainlevée hypothèque / IRA</label>
+            <div class="field-inline"><input type="number" id="rev_ira" value="0" oninput="calcRevente()"><span class="unit">€</span></div>
+          </div>
+          <div class="field">
+            <label>Travaux avant revente</label>
+            <div class="field-inline"><input type="number" id="rev_travaux" value="0" oninput="calcRevente()"><span class="unit">€</span></div>
+          </div>
+          <div class="field">
+            <label>Taxe sur plus-value (si applicable)</label>
+            <div class="toggle-wrap" id="rev-tpv-toggle">
+              <button class="toggle-opt active" onclick="setRevToggle('rev-tpv-toggle',this,'rev_tpv',0,calcRevente)">Non</button>
+              <button class="toggle-opt" onclick="setRevToggle('rev-tpv-toggle',this,'rev_tpv',1,calcRevente)">19%+prélèv.</button>
+            </div>
+            <input type="hidden" id="rev_tpv" value="0">
+          </div>
+          <div class="field">
+            <label>Autres frais à la revente</label>
+            <div class="field-inline"><input type="number" id="rev_autres" value="0" oninput="calcRevente()"><span class="unit">€</span></div>
+          </div>
+        </div>
+        <!-- Frais crédit payés -->
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="section-label">Frais de crédit payés sur la période de détention</div>
+          <div id="rev-frais-credit" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SYNTHÈSE PLUS-VALUE -->
+  <div class="card" style="margin-top:4px">
+    <div class="card-title">
+      <div class="icon" style="background:var(--green-bg);color:var(--green)">💰</div>
+      <span>Synthèse — Plus-value nette</span>
+      <span id="rev-badge-result" style="margin-left:auto"></span>
+    </div>
+
+    <div class="grid-2" style="gap:24px">
+      <!-- Tableau de calcul -->
+      <div id="rev-synthese-table"></div>
+
+      <!-- KPIs -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div id="rev-kpi-plusvalue" class="result-box green">
+          <div><div class="result-label">💰 Plus-value nette</div><div class="result-sub">Prix revente net − total investi irrécupérable</div></div>
+          <div class="result-value" id="rev-r-plusvalue">—</div>
+        </div>
+        <div id="rev-kpi-rentabilite" class="result-box blue">
+          <div><div class="result-label">📐 Rentabilité annualisée</div><div class="result-sub">Plus-value / mise initiale / durée</div></div>
+          <div class="result-value" id="rev-r-rentabilite">—</div>
+        </div>
+        <div class="result-box" id="rev-kpi-seuil">
+          <div><div class="result-label">⏱ Seuil de rentabilité estimé</div><div class="result-sub">Année où la plus-value devient positive</div></div>
+          <div class="result-value" id="rev-r-seuil">—</div>
+        </div>
+      </div>
+    </div>
+    <div id="rev-syn-total" style="margin-top:12px"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--accent-bg);color:var(--accent)">📊</div>
+      <span>Évolution de la plus-value nette selon la durée de détention</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--text3)">La courbe croise zéro au seuil de rentabilité</span>
+    </div>
+    <div style="position:relative;height:280px;width:100%"><canvas id="rev-chart"></canvas></div>
+  </div>
+
+  <!-- Tableau annuel -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--bg3)">📋</div>
+      <span>Tableau annuel — Plus-value selon l'année de revente</span>
+      <button class="btn btn-sm" style="margin-left:auto" onclick="toggleRevTable()">▲ Masquer</button>
+    </div>
+    <div id="rev-table-wrap" style="overflow-x:auto">
+      <table class="amort-table" id="rev-table" style="min-width:900px">
+        <thead>
+          <tr>
+            <th style="text-align:left">Année revente</th>
+            <th>Capital restant dû</th>
+            <th>Intérêts cumulés</th>
+            <th>Assurance cumulée</th>
+            <th>Mens. spéc. cumulées</th>
+            <th>Total investi irrécup.</th>
+            <th>Prix revente (revalorisation)</th>
+            <th>Frais revente</th>
+            <th>Produit net revente</th>
+            <th style="background:var(--green-bg);color:var(--green)">Plus-value nette</th>
+          </tr>
+        </thead>
+        <tbody id="rev-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- PANEL ROI -->
+<div class="tab-panel" id="panel-roi">
+<div class="content">
+
+  <!-- Paramètres -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--accent-bg);color:var(--accent)">📈</div>
+      <span>Modèle patrimonial — Paramètres</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--text3);font-weight:400">Méthode marché : seuls les intérêts, assurance, TF et charges sont des coûts réels</span>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Projet à analyser</label>
+        <select id="roi_projet" onchange="calcROI()"></select>
+      </div>
+      <div class="field">
+        <label>Loyer de référence marché</label>
+        <div class="field-inline"><input type="number" id="roi_loyer" value="900" oninput="calcROI()"><span class="unit">€/mois</span></div>
+      </div>
+      <div class="field">
+        <label>Revalorisation loyer / an</label>
+        <div class="field-inline"><input type="number" id="roi_revalorisation" value="1.5" step="0.1" oninput="calcROI()"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <label>Charges copro + entretien forfaitaire</label>
+        <div class="field-inline"><input type="number" id="roi_charges_forfait" value="150" oninput="calcROI()"><span class="unit">€/mois</span></div>
+      </div>
+      <div class="field">
+        <label>Inflation annuelle (TF, charges)</label>
+        <div class="field-inline"><input type="number" id="roi_inflation" value="2.0" step="0.1" oninput="calcROI()"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <label>Revalorisation immobilière / an</label>
+        <div class="field-inline"><input type="number" id="roi_revalorisation_bien" value="2.5" step="0.1" oninput="calcROI()"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <label>Commission agence revente</label>
+        <div class="field-inline"><input type="number" id="roi_commission" value="4.5" step="0.1" oninput="calcROI()"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <label>Frais fixes revente (diagnostics…)</label>
+        <div class="field-inline"><input type="number" id="roi_frais_revente" value="1500" oninput="calcROI()"><span class="unit">€</span></div>
+      </div>
+    </div>
+    <!-- Légende modèle -->
+    <div style="margin-top:14px;padding:12px 14px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);line-height:1.8">
+      <strong style="color:var(--blue)">Coût réel annuel propriétaire</strong> =
+      Intérêts annuels + Assurance crédit + Taxe foncière + Charges copro/entretien
+      <span style="color:var(--text3)"> — la part capital de la mensualité est de l'épargne, pas une dépense</span><br>
+      <strong style="color:var(--blue)">Coût annuel locataire</strong> = Loyers indexés<br>
+      <strong style="color:var(--blue)">Seuil de rentabilité</strong> = année où le cumulatif propriétaire passe sous le cumulatif locataire
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div id="roi-kpis" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px"></div>
+
+  <!-- SYNTHÈSE PERSONNALISABLE -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">
+      <div class="icon" style="background:var(--accent-bg);color:var(--accent)">🧮</div>
+      <span>Synthèse revente — Composantes du calcul</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--text3)">Afficher pour l'année :</span>
+        <input type="number" id="roi_syn_ann" value="10" min="1" style="width:60px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:13px" oninput="renderROISynthese()">
+        <button class="btn btn-sm" onclick="resetROIChk()">↺ Réinitialiser</button>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;padding:8px 12px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:var(--radius-sm);font-size:12px;color:var(--text2)">
+      <strong style="color:var(--blue)">Cocher / décocher</strong> chaque composante pour voir sa contribution au gain net.
+      Le <strong>capital restant dû</strong> est toujours déduit du produit de vente (remboursement obligatoire du prêt).
+      Par défaut, les intérêts et assurance ne sont pas inclus (vue patrimoniale) — cochez-les pour la vue "coût réel tout inclus".
+    </div>
+    <div class="grid-2" style="gap:24px;align-items:start">
+      <div id="roi-syn-left"></div>
+      <div id="roi-syn-right"></div>
+    </div>
+    <div id="roi-syn-total" style="margin-top:12px"></div>
+  </div>
+
+  <!-- Graphique principal -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--green-bg);color:var(--green)">📊</div>
+      <span>Coût réel cumulé : Propriétaire vs Locataire</span>
+      <span id="roi-break-badge" style="margin-left:auto"></span>
+    </div>
+    <div style="margin-bottom:8px;font-size:11px;color:var(--text3)">
+      Propriétaire : cumul des coûts réels (intérêts + ass + TF + charges) — hors remboursement capital (épargne)
+    </div>
+    <div style="position:relative;height:300px;width:100%"><canvas id="roi-chart-main"></canvas></div>
+  </div>
+
+  <!-- Graphiques secondaires -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon" style="background:var(--blue-bg);color:var(--blue)">🏷️</div>
+        <span>Patrimoine net constitué</span>
+      </div>
+      <div style="margin-bottom:6px;font-size:11px;color:var(--text3)">Valeur bien estimée vs capital restant dû</div>
+      <div style="position:relative;height:260px;width:100%"><canvas id="roi-chart-patrimoine"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <div class="icon" style="background:var(--accent-bg);color:var(--accent)">💰</div>
+        <span>Gain net si revente à cette année</span>
+      </div>
+      <div style="margin-bottom:6px;font-size:11px;color:var(--text3)">Prix vente − dette − frais revente − mise initiale</div>
+      <div style="position:relative;height:260px;width:100%"><canvas id="roi-chart-revente"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Tableau annuel -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--bg3)">📋</div>
+      <span>Tableau annuel détaillé</span>
+      <button class="btn btn-sm" style="margin-left:auto" onclick="toggleROITable()" id="roi-table-btn">▲ Masquer le tableau</button>
+    </div>
+    <div id="roi-table-wrap" style="overflow-x:auto;display:block">
+            <table class="amort-table" id="roi-table" style="min-width:1200px">
+        <thead>
+          <tr>
+            <th style="text-align:left">Année</th>
+            <th>Intérêts annuels</th>
+            <th>Ass + TF + Charges</th>
+            <th>Coût réel proprio/an</th>
+            <th>Loyers/an</th>
+            <th>Cumulatif proprio</th>
+            <th>Cumulatif locataire</th>
+            <th>Écart</th>
+            <th>Capital remboursé cumulé</th>
+            <th style="background:var(--green-bg);color:var(--green)">Épargne proprio/an</th>
+            <th style="background:var(--blue-bg);color:var(--blue)">Épargne locataire/an</th>
+            <th>Valeur nette patrimoine</th>
+            <th>Gain net si revente</th>
+          </tr>
+          <tr>
+            <th colspan="9" style="font-size:10px;font-weight:400;color:var(--text3);padding:2px 8px;background:var(--surface2)"></th>
+            <th style="font-size:10px;font-weight:400;color:var(--green);background:var(--green-bg);padding:2px 6px">Part capital mensualité</th>
+            <th style="font-size:10px;font-weight:400;color:var(--blue);background:var(--blue-bg);padding:2px 6px">Mensualité crédit − loyer (&gt;0)</th>
+            <th colspan="2" style="background:var(--surface2)"></th>
+          </tr>
+        </thead>
+        <tbody id="roi-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL EXPORT -->
+<div class="modal-overlay" id="export-modal">
+<div class="modal">
+  <h3>Exporter le simulateur</h3>
+  <div class="export-opts">
+    <div class="export-opt" onclick="exportAs('pdf')"><span class="eo-icon">📄</span><span class="eo-label">PDF</span><span class="eo-sub">Pour impression</span></div>
+    <div class="export-opt" onclick="exportAs('png')"><span class="eo-icon">🖼</span><span class="eo-label">PNG</span><span class="eo-sub">Image HD</span></div>
+    <div class="export-opt" onclick="exportAs('jpeg')"><span class="eo-icon">📸</span><span class="eo-label">JPEG</span><span class="eo-sub">Image compressée</span></div>
+    <div class="export-opt" onclick="exportAs('csv')"><span class="eo-icon">📊</span><span class="eo-label">CSV / Excel</span><span class="eo-sub">Données tabulaires</span></div>
+    <div class="export-opt" onclick="exportAs('rtf')"><span class="eo-icon">📝</span><span class="eo-label">RTF / Word</span><span class="eo-sub">Document éditable</span></div>
+    <div class="export-opt" onclick="exportAs('json')"><span class="eo-icon">💾</span><span class="eo-label">JSON</span><span class="eo-sub">Sauvegarde complète</span></div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('export-modal')">Fermer</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL IMPORT -->
+<div class="modal-overlay" id="import-modal">
+<div class="modal">
+  <h3>Importer des données</h3>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Importez un fichier JSON (sauvegarde complète) ou CSV (données tableurs).</p>
+  <div class="field">
+    <label>Fichier à importer</label>
+    <input type="file" id="import-file" accept=".json,.csv" style="padding:8px 0;border:none;background:none;color:var(--text)">
+  </div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('import-modal')">Annuler</button>
+    <button class="btn btn-accent" onclick="importData()">Importer</button>
+  </div>
+</div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+
+<script>
+// ============================================================
+// STATE & HISTORY
+// ============================================================
+let projets = [];
+let projetCount = 0;
+let history = [];
+let historyIdx = -1;
+let _saving = false;
+
+function snapshot() {
+  if (_saving) return;
+  const state = JSON.stringify(getFullState());
+  if (historyIdx >= 0 && history[historyIdx] === state) return;
+  history = history.slice(0, historyIdx + 1);
+  history.push(state);
+  historyIdx++;
+  if (history.length > 60) { history.shift(); historyIdx--; }
+  updateUndoRedo();
+}
+
+function undo() {
+  if (historyIdx <= 0) return;
+  historyIdx--;
+  _saving = true;
+  restoreState(JSON.parse(history[historyIdx]));
+  _saving = false;
+  updateUndoRedo();
+}
+
+function redo() {
+  if (historyIdx >= history.length - 1) return;
+  historyIdx++;
+  _saving = true;
+  restoreState(JSON.parse(history[historyIdx]));
+  _saving = false;
+  updateUndoRedo();
+}
+
+function updateUndoRedo() {
+  document.getElementById('btn-undo').disabled = historyIdx <= 0;
+  document.getElementById('btn-redo').disabled = historyIdx >= history.length - 1;
+}
+
+// ============================================================
+// THEME
+// ============================================================
+let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  document.getElementById('theme-btn').textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+}
+
+// ============================================================
+// TABS & PROJETS
+// ============================================================
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  if (id === 'roi') { updateROIProjetSelect(); calcROI(); }
+  if (id === 'revente') { updateRevProjetSelect(); calcRevente(); }
+}
+
+function addProjet(data) {
+  projetCount++;
+  const pid = 'projet_' + Date.now();
+  const name = (data && data.name) ? data.name : 'Projet ' + projetCount;
+
+  // Create tab
+  const tabsWrap = document.getElementById('tabs-wrap');
+  const addBtn = tabsWrap.querySelector('.tab-add');
+  const tab = document.createElement('div');
+  tab.className = 'tab';
+  tab.dataset.panel = pid;
+  tab.innerHTML = `<span class="tab-name">${name}</span>
+    <button class="pencil-btn" style="opacity:.5" onclick="event.stopPropagation();editTabName('${pid}',this.closest('.tab'))">✏️</button>
+    <button class="tab-close" onclick="event.stopPropagation();removeProjet('${pid}')">✕</button>`;
+  tab.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON') return;
+    switchTab(pid, tab);
+  });
+  tabsWrap.insertBefore(tab, addBtn);
+
+  // Create panel
+  const panel = document.createElement('div');
+  panel.className = 'tab-panel';
+  panel.id = 'panel-' + pid;
+  panel.innerHTML = buildProjetHTML(pid, data);
+  document.body.appendChild(panel);
+
+  projets.push({ id: pid, name, tabEl: tab, panelEl: panel });
+
+  // Switch
+  switchTab(pid, tab);
+  initProjetEvents(pid, data);
+  calcProjet(pid);
+  if (!data) snapshot();
+  return pid;
+}
+
+function removeProjet(pid) {
+  if (!confirm('Supprimer ce projet ?')) return;
+  const idx = projets.findIndex(p => p.id === pid);
+  if (idx === -1) return;
+  projets[idx].tabEl.remove();
+  projets[idx].panelEl.remove();
+  projets.splice(idx, 1);
+  // Switch to ressources
+  const resTab = document.querySelector('[data-panel="ressources"]');
+  switchTab('ressources', resTab);
+  snapshot();
+}
+
+function editTabName(pid, tabEl) {
+  const nameEl = tabEl.querySelector('.tab-name');
+  const old = nameEl.textContent;
+  const inp = document.createElement('input');
+  inp.value = old;
+  inp.style.cssText = 'border:1px solid var(--accent);border-radius:4px;padding:2px 6px;background:var(--surface);color:var(--text);font-size:13px;width:130px;font-family:Syne,sans-serif';
+  nameEl.replaceWith(inp);
+  inp.focus();
+  function done() {
+    const n = inp.value.trim() || old;
+    const s = document.createElement('span');
+    s.className = 'tab-name';
+    s.textContent = n;
+    inp.replaceWith(s);
+    const p = projets.find(x => x.id === pid);
+    if (p) p.name = n;
+    snapshot();
+  }
+  inp.addEventListener('blur', done);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+}
+
+// ============================================================
+// BUILD PROJET HTML
+// ============================================================
+function buildProjetHTML(pid, data) {
+  const d = data || {};
+  const v = (k, def) => d[k] !== undefined ? d[k] : def;
+  return `
+<div class="content" id="content-${pid}">
+
+  <!-- Paramètres achat -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--accent-bg);color:var(--accent)">🏠</div>
+      <div class="editable-wrap" id="title-achat-${pid}">
+        <span>${v('title_achat','Paramètres du projet')}</span>
+        <button class="pencil-btn" onclick="editTitle('title-achat-${pid}')">✏️</button>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Prix d'achat du bien</label>
+        <div class="field-inline"><input type="number" id="prix_${pid}" value="${v('prix',250000)}" oninput="calcProjet('${pid}')"><span class="unit">€</span></div>
+      </div>
+      <div class="field">
+        <label>Apport personnel</label>
+        <div class="field-inline"><input type="number" id="apport_${pid}" value="${v('apport',30000)}" oninput="calcProjet('${pid}')"><span class="unit">€</span></div>
+      </div>
+      <div class="field">
+        <label>Durée du crédit</label>
+        <div class="toggle-wrap" id="duree-toggle-${pid}">
+          <button class="toggle-opt ${v('duree',20)===15?'active':''}" onclick="setToggle('duree-toggle-${pid}',this,'duree_${pid}',15,()=>calcProjet('${pid}'))">15 ans</button>
+          <button class="toggle-opt ${v('duree',20)===20?'active':''}" onclick="setToggle('duree-toggle-${pid}',this,'duree_${pid}',20,()=>calcProjet('${pid}'))">20 ans</button>
+          <button class="toggle-opt ${v('duree',20)===25?'active':''}" onclick="setToggle('duree-toggle-${pid}',this,'duree_${pid}',25,()=>calcProjet('${pid}'))">25 ans</button>
+        </div>
+        <input type="hidden" id="duree_${pid}" value="${v('duree',20)}">
+      </div>
+      <div class="field">
+        <label>Taux d'intérêt annuel (%)</label>
+        <div class="field-inline"><input type="number" id="taux_${pid}" value="${v('taux',3.8)}" step="0.01" oninput="calcProjet('${pid}')"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <label>Taux assurance annuel (%)</label>
+        <div class="field-inline"><input type="number" id="taux_ass_${pid}" value="${v('taux_ass',0.3)}" step="0.01" oninput="calcProjet('${pid}')"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <label>Frais de dossier bancaire</label>
+        <div class="field-inline"><input type="number" id="frais_dossier_${pid}" value="${v('frais_dossier',1000)}" oninput="calcProjet('${pid}')"><span class="unit">€</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frais notaires & PTZ -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon" style="background:var(--blue-bg);color:var(--blue)">⚖️</div>
+        <span>Frais de notaire & PTZ</span>
+      </div>
+      <div class="field">
+        <label>Type de bien</label>
+        <div class="toggle-wrap" id="bien-toggle-${pid}">
+          <button class="toggle-opt ${v('type_bien','ancien')==='neuf'?'active':''}" onclick="setToggle('bien-toggle-${pid}',this,'type_bien_${pid}','neuf',()=>calcProjet('${pid}'))">Neuf</button>
+          <button class="toggle-opt ${v('type_bien','ancien')==='ancien'?'active':''}" onclick="setToggle('bien-toggle-${pid}',this,'type_bien_${pid}','ancien',()=>calcProjet('${pid}'))">Ancien</button>
+          <button class="toggle-opt ${v('type_bien','ancien')==='vefa'?'active':''}" onclick="setToggle('bien-toggle-${pid}',this,'type_bien_${pid}','vefa',()=>calcProjet('${pid}'))">VEFA</button>
+        </div>
+        <input type="hidden" id="type_bien_${pid}" value="${v('type_bien','ancien')}">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Taux frais notaire (%)</label>
+        <div class="field-inline"><input type="number" id="taux_notaire_${pid}" value="${v('taux_notaire',7.5)}" step="0.1" oninput="calcProjet('${pid}')"><span class="unit">%</span></div>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>PTZ (Prêt à Taux Zéro)</label>
+        <div class="toggle-wrap" id="ptz-toggle-${pid}">
+          <button class="toggle-opt ${v('ptz',0)===0?'active':''}" onclick="setToggle('ptz-toggle-${pid}',this,'ptz_${pid}',0,()=>calcProjet('${pid}'))">Non</button>
+          <button class="toggle-opt ${v('ptz',0)===1?'active':''}" onclick="setToggle('ptz-toggle-${pid}',this,'ptz_${pid}',1,()=>calcProjet('${pid}'))">Oui</button>
+        </div>
+        <input type="hidden" id="ptz_${pid}" value="${v('ptz',0)}">
+      </div>
+      <div id="ptz-fields-${pid}" style="${v('ptz',0)?'':'display:none'}">
+        <div class="field" style="margin-top:10px">
+          <label>Montant PTZ</label>
+          <div class="field-inline"><input type="number" id="ptz_montant_${pid}" value="${v('ptz_montant',40000)}" oninput="calcProjet('${pid}')"><span class="unit">€</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Durée PTZ (ans)</label>
+          <div class="field-inline"><input type="number" id="ptz_duree_${pid}" value="${v('ptz_duree',25)}" oninput="calcProjet('${pid}')"><span class="unit">ans</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="icon" style="background:var(--green-bg);color:var(--green)">🚗</div>
+        <span>Garage / parking</span>
+      </div>
+      <div class="field">
+        <label>Achat garage / parking ?</label>
+        <div class="toggle-wrap" id="garage-toggle-${pid}">
+          <button class="toggle-opt ${v('garage',0)===0?'active':''}" onclick="setToggle('garage-toggle-${pid}',this,'garage_${pid}',0,()=>calcProjet('${pid}'))">Non</button>
+          <button class="toggle-opt ${v('garage',0)===1?'active':''}" onclick="setToggle('garage-toggle-${pid}',this,'garage_${pid}',1,()=>calcProjet('${pid}'))">Oui</button>
+        </div>
+        <input type="hidden" id="garage_${pid}" value="${v('garage',0)}">
+      </div>
+      <div id="garage-fields-${pid}" style="${v('garage',0)?'':'display:none'}">
+        <div class="field" style="margin-top:10px">
+          <label>Prix du garage</label>
+          <div class="field-inline"><input type="number" id="garage_prix_${pid}" value="${v('garage_prix',15000)}" oninput="calcProjet('${pid}')"><span class="unit">€</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Frais notaire garage (%)</label>
+          <div class="field-inline"><input type="number" id="garage_notaire_${pid}" value="${v('garage_notaire',7.5)}" step="0.1" oninput="calcProjet('${pid}')"><span class="unit">%</span></div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Travaux prévisionnels</label>
+        <div class="field-inline"><input type="number" id="travaux_${pid}" value="${v('travaux',0)}" oninput="calcProjet('${pid}')"><span class="unit">€</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensualités spéciales / prêts complémentaires -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--blue-bg);color:var(--blue)">➕</div>
+      <span>Prêts complémentaires & mensualités additionnelles</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--text3);font-weight:400">Prêt primo-accédant, redevance BRS, éco-prêt, prêt employeur…</span>
+    </div>
+    <div id="mensup-list-${pid}"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn btn-sm" onclick="addMensup('${pid}','Redevance BRS',150,0)">＋ BRS</button>
+      <button class="btn btn-sm" onclick="addMensup('${pid}','Prêt primo-accédant',80,0)">＋ Primo-accédant</button>
+      <button class="btn btn-sm" onclick="addMensup('${pid}','Prêt employeur',60,0)">＋ Prêt employeur</button>
+      <button class="btn btn-sm" onclick="addMensup('${pid}','',0,0)">＋ Autre</button>
+    </div>
+    <div style="margin-top:10px;padding:8px 12px;background:var(--blue-bg);border-radius:var(--radius-sm);font-size:11px;color:var(--text2)">
+      Ces mensualités s'ajoutent au crédit principal dans le calcul du taux d'endettement et de la mensualité totale. La durée permet de les inclure dans l'analyse revente.
+    </div>
+  </div>
+
+  <!-- Charges mensuelles -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--red-bg);color:var(--red)">📋</div>
+      <span>Charges mensuelles détaillées</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">Charges de copropriété / logement</div>
+        <div id="charges-list-${pid}"></div>
+        <button class="btn btn-sm" style="margin-top:8px" onclick="addCharge('${pid}')">＋ Ajouter une charge</button>
+      </div>
+      <div>
+        <div class="field">
+          <label>Taxe foncière annuelle</label>
+          <div class="field-inline"><input type="number" id="tf_${pid}" value="${v('tf',1200)}" oninput="calcProjet('${pid}')"><span class="unit">€/an</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>TEOM (taxe enlèvement ordures) annuelle</label>
+          <div class="field-inline"><input type="number" id="teom_${pid}" value="${v('teom',300)}" oninput="calcProjet('${pid}')"><span class="unit">€/an</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Assurance habitation</label>
+          <div class="field-inline"><input type="number" id="ass_hab_${pid}" value="${v('ass_hab',30)}" oninput="calcProjet('${pid}')"><span class="unit">€/mois</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Internet / téléphone</label>
+          <div class="field-inline"><input type="number" id="internet_${pid}" value="${v('internet',40)}" oninput="calcProjet('${pid}')"><span class="unit">€/mois</span></div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Énergie (EDF/gaz)</label>
+          <div class="field-inline"><input type="number" id="energie_${pid}" value="${v('energie',120)}" oninput="calcProjet('${pid}')"><span class="unit">€/mois</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Synthèse -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--accent-bg);color:var(--accent)">🔢</div>
+      <span>Synthèse financière</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">Coût total du projet</div>
+        <div id="synthese-cout-${pid}"></div>
+      </div>
+      <div>
+        <div class="section-label">Budget mensuel</div>
+        <div id="synthese-mensuel-${pid}"></div>
+      </div>
+    </div>
+    <div style="margin-top:16px" id="synthese-alertes-${pid}"></div>
+  </div>
+
+  <!-- Tableau amortissement -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon" style="background:var(--blue-bg);color:var(--blue)">📅</div>
+      <span>Tableau d'amortissement mensuel</span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-sm" onclick="toggleAmort('${pid}')">Afficher / Masquer</button>
+        <button class="btn btn-sm" onclick="exportAmortCSV('${pid}')">⬇ CSV</button>
+      </div>
+    </div>
+    <div id="amort-wrap-${pid}" class="amort-wrap" style="display:none">
+      <table class="amort-table">
+        <thead>
+          <tr>
+            <th>Période</th>
+            <th>Mensualité</th>
+            <th>Capital</th>
+            <th>Intérêts</th>
+            <th>Assurance</th>
+            <th>Capital restant</th>
+            <th>Capital remboursé</th>
+          </tr>
+        </thead>
+        <tbody id="amort-body-${pid}"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>`;
+}
+
+function setToggle(wrapId, btn, hiddenId, val, cb) {
+  document.getElementById(wrapId).querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const h = document.getElementById(hiddenId);
+  if (h) h.value = val;
+  // Show/hide conditional fields
+  if (hiddenId.startsWith('ptz_')) {
+    const pid = hiddenId.replace('ptz_', '');
+    const el = document.getElementById('ptz-fields-' + pid);
+    if (el) el.style.display = val ? '' : 'none';
+  }
+  if (hiddenId.startsWith('garage_')) {
+    const pid = hiddenId.replace('garage_', '');
+    const el = document.getElementById('garage-fields-' + pid);
+    if (el) el.style.display = val ? '' : 'none';
+  }
+  if (cb) cb();
+  snapshot();
+}
+
+function initProjetEvents(pid, data) {
+  // Init charges
+  const defaultCharges = (data && data.charges) ? data.charges : [
+    {label:'Charges copropriété', val:150},
+    {label:'Eau', val:25}
+  ];
+  defaultCharges.forEach(c => addCharge(pid, c.label, c.val));
+  // Init mensup
+  const defaultMensup = (data && data.mensup) ? data.mensup : [];
+  defaultMensup.forEach(m => addMensup(pid, m.label, m.montant, m.duree, m));
+}
+
+let chargeCounters = {};
+function addCharge(pid, label='', val=0) {
+  if (!chargeCounters[pid]) chargeCounters[pid] = 0;
+  chargeCounters[pid]++;
+  const cid = `charge_${pid}_${chargeCounters[pid]}`;
+  const list = document.getElementById('charges-list-' + pid);
+  if (!list) return;
+  const div = document.createElement('div');
+  div.className = 'charge-item';
+  div.id = cid;
+  div.innerHTML = `
+    <input type="text" placeholder="Libellé" value="${label}" oninput="calcProjet('${pid}')">
+    <input type="number" placeholder="0" value="${val}" oninput="calcProjet('${pid}')">
+    <span class="unit">€/mois</span>
+    <button class="charge-remove" onclick="document.getElementById('${cid}').remove();calcProjet('${pid}')">✕</button>`;
+  list.appendChild(div);
+  calcProjet(pid);
+}
+
+let mensupCounters = {};
+function addMensup(pid, label='', montant=0, duree=0, data=null) {
+  if (!mensupCounters[pid]) mensupCounters[pid] = 0;
+  mensupCounters[pid]++;
+  const mid = `mensup_${pid}_${mensupCounters[pid]}`;
+  const list = document.getElementById('mensup-list-' + pid);
+  if (!list) return;
+  const lb = data ? data.label : label;
+  const mn = data ? data.montant : montant;
+  const du = data ? data.duree : duree;
+  const div = document.createElement('div');
+  div.className = 'mensup-item charge-item';
+  div.id = mid;
+  div.innerHTML = `
+    <input type="text" class="mensup-label" placeholder="Libellé prêt" value="${lb}" style="flex:1;border:1px solid var(--border);border-radius:4px;padding:5px 8px;background:var(--bg);color:var(--text);font-size:13px" oninput="calcProjet('${pid}')">
+    <input type="number" class="mensup-montant" placeholder="0" value="${mn}" style="width:80px;border:1px solid var(--border);border-radius:4px;padding:5px 8px;background:var(--bg);color:var(--text);font-size:13px;text-align:right" oninput="calcProjet('${pid}')">
+    <span class="unit">€/mois</span>
+    <input type="number" class="mensup-duree" placeholder="0=illimité" value="${du}" title="Durée en années (0 = durée du crédit)" style="width:60px;border:1px solid var(--border);border-radius:4px;padding:5px 8px;background:var(--bg);color:var(--text);font-size:12px;text-align:right" oninput="calcProjet('${pid}')">
+    <span class="unit" style="font-size:11px">ans</span>
+    <button class="charge-remove" onclick="document.getElementById('${mid}').remove();calcProjet('${pid}')">✕</button>`;
+  list.appendChild(div);
+  calcProjet(pid);
+}
+
+function toggleAmort(pid) {
+  const w = document.getElementById('amort-wrap-' + pid);
+  if (w) w.style.display = w.style.display === 'none' ? '' : 'none';
+}
+
+// ============================================================
+// CALCULATIONS
+// ============================================================
+function fmt(n) {
+  return new Intl.NumberFormat('fr-FR', {maximumFractionDigits:0}).format(Math.round(n)) + ' €';
+}
+function fmtN(n,d=2) {
+  return new Intl.NumberFormat('fr-FR', {maximumFractionDigits:d}).format(n);
+}
+
+function syncSal(who, from) {
+  // 'mens' → saisie mensuelle, on met à jour l'annuel
+  // 'an'   → saisie annuelle,   on met à jour le mensuel
+  const mens = document.getElementById('sal_' + who);
+  const an   = document.getElementById('sal_' + who + '_an');
+  if (!mens || !an) return;
+  if (from === 'mens') {
+    const m = parseFloat(mens.value) || 0;
+    an.value = Math.round(m * 12);
+  } else {
+    const a = parseFloat(an.value) || 0;
+    mens.value = (a / 12).toFixed(2);
+  }
+  calcAll();
+}
+
+function calcAll() {
+  calcRessources();
+  projets.forEach(p => calcProjet(p.id));
+  snapshot();
+}
+
+function calcRessources() {
+  const sal_m = +v('sal_m') || 0;
+  const sal_f = +v('sal_f') || 0;
+  const autre_m = +v('autre_m') || 0;
+  const autre_f = +v('autre_f') || 0;
+  const credits = +v('credits_cours') || 0;
+  const rev_total = sal_m + sal_f + autre_m + autre_f;
+  const mens_max_35 = rev_total * 0.35;
+  const mens_dispo = Math.max(0, mens_max_35 - credits);
+  const taux_endt = rev_total > 0 ? (credits / rev_total * 100) : 0;
+
+  const rfr_m = +v('rfr_m') || 0;
+  const rfr_f = +v('rfr_f') || 0;
+  setText('r_rfr_foyer', fmt(rfr_m + rfr_f));
+
+  setText('r_revenus_totaux', fmt(rev_total));
+  setText('r_mens_max_35', fmt(mens_max_35));
+  setText('r_mens_dispo', fmt(mens_dispo));
+  setText('r_taux_endt', fmtN(taux_endt,1) + ' %');
+  const bar = document.getElementById('taux-endt-bar');
+  if (bar) {
+    bar.style.width = Math.min(taux_endt, 100) + '%';
+    bar.className = 'progress-fill ' + (taux_endt > 35 ? 'red' : taux_endt > 25 ? '' : 'green');
+  }
+}
+
+function calcProjet(pid) {
+  const prix = +gv(pid,'prix') || 0;
+  const apport = +gv(pid,'apport') || 0;
+  const duree = +gv(pid,'duree') || 20;
+  const taux = +gv(pid,'taux') || 0;
+  const taux_ass = +gv(pid,'taux_ass') || 0;
+  const taux_notaire = +gv(pid,'taux_notaire') || 7.5;
+  const type_bien = gv(pid,'type_bien') || 'ancien';
+  const ptz = +gv(pid,'ptz') || 0;
+  const ptz_montant = ptz ? (+gv(pid,'ptz_montant') || 0) : 0;
+  const ptz_duree = +gv(pid,'ptz_duree') || 25;
+  const garage = +gv(pid,'garage') || 0;
+  const garage_prix = garage ? (+gv(pid,'garage_prix') || 0) : 0;
+  const garage_notaire = garage ? (+gv(pid,'garage_notaire') || 7.5) : 0;
+  const travaux = +gv(pid,'travaux') || 0;
+  const frais_dossier = +gv(pid,'frais_dossier') || 0;
+  const tf = +gv(pid,'tf') || 0;
+  const teom = +gv(pid,'teom') || 0;
+  const ass_hab = +gv(pid,'ass_hab') || 0;
+  const internet = +gv(pid,'internet') || 0;
+  const energie = +gv(pid,'energie') || 0;
+
+  // Charges dynamiques
+  let charges_copro = 0;
+  const chargesList = document.getElementById('charges-list-' + pid);
+  if (chargesList) {
+    chargesList.querySelectorAll('.charge-item').forEach(item => {
+      const inputs = item.querySelectorAll('input[type="number"]');
+      if (inputs[0]) charges_copro += +inputs[0].value || 0;
+    });
+  }
+
+  // Mensualités spéciales
+  let mensup_total = 0;
+  const mensupList = document.getElementById('mensup-list-' + pid);
+  if (mensupList) {
+    mensupList.querySelectorAll('.mensup-item').forEach(item => {
+      const mn = item.querySelector('.mensup-montant');
+      if (mn) mensup_total += +mn.value || 0;
+    });
+  }
+
+  // Calculs
+  const frais_notaire_bien = prix * taux_notaire / 100;
+  const frais_notaire_garage = garage_prix * garage_notaire / 100;
+  const total_achat = prix + frais_notaire_bien + garage_prix + frais_notaire_garage + travaux + frais_dossier;
+  const capital_emprunte = Math.max(0, total_achat - apport - ptz_montant);
+
+  // Mensualité crédit principal (annuité constante)
+  let mensualite_credit = 0;
+  if (capital_emprunte > 0 && taux > 0) {
+    const r = taux / 100 / 12;
+    const n = duree * 12;
+    mensualite_credit = capital_emprunte * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+  } else if (capital_emprunte > 0) {
+    mensualite_credit = capital_emprunte / (duree * 12);
+  }
+
+  // Assurance crédit
+  const mensualite_assurance = (capital_emprunte * taux_ass / 100) / 12;
+
+  // PTZ mensualité (taux 0)
+  const mensualite_ptz = ptz_montant > 0 ? ptz_montant / (ptz_duree * 12) : 0;
+
+  const mensualite_totale = mensualite_credit + mensualite_assurance + mensualite_ptz + mensup_total;
+
+  // Charges mensuelles
+  const tf_mens = tf / 12;
+  const teom_mens = teom / 12;
+  const total_charges_mens = charges_copro + tf_mens + teom_mens + ass_hab + internet + energie;
+
+  // Mensualité avec charges
+  const mensualite_avec_charges = mensualite_totale + total_charges_mens;
+
+  // Coût total crédit
+  const cout_total_credit = mensualite_credit * duree * 12 + mensualite_assurance * duree * 12;
+  const interets_totaux = cout_total_credit - capital_emprunte;
+
+  // Revenus (depuis ressources)
+  const sal_m = +v('sal_m') || 0;
+  const sal_f = +v('sal_f') || 0;
+  const autre_m = +v('autre_m') || 0;
+  const autre_f = +v('autre_f') || 0;
+  const credits_cours = +v('credits_cours') || 0;
+  const rev_total = sal_m + sal_f + autre_m + autre_f;
+  const taux_endt_projet = rev_total > 0 ? ((mensualite_totale + credits_cours) / rev_total * 100) : 0;
+
+  // SYNTHESE COUT
+  const coutEl = document.getElementById('synthese-cout-' + pid);
+  if (coutEl) {
+    coutEl.innerHTML = `
+      <div class="summary-row"><span>Prix du bien</span><strong>${fmt(prix)}</strong></div>
+      <div class="summary-row"><span>Frais de notaire (${fmtN(taux_notaire,1)}%)</span><strong>${fmt(frais_notaire_bien)}</strong></div>
+      ${garage ? `<div class="summary-row"><span>Garage + frais notaire</span><strong>${fmt(garage_prix + frais_notaire_garage)}</strong></div>` : ''}
+      ${travaux ? `<div class="summary-row"><span>Travaux prévisionnels</span><strong>${fmt(travaux)}</strong></div>` : ''}
+      <div class="summary-row"><span>Frais de dossier</span><strong>${fmt(frais_dossier)}</strong></div>
+      <div class="summary-row total"><span>Coût total projet</span><strong>${fmt(total_achat)}</strong></div>
+      <div class="summary-row"><span>Apport</span><strong style="color:var(--green)">− ${fmt(apport)}</strong></div>
+      ${ptz ? `<div class="summary-row"><span>PTZ</span><strong style="color:var(--blue)">− ${fmt(ptz_montant)}</strong></div>` : ''}
+      <div class="summary-row total"><span>Capital à emprunter</span><strong>${fmt(capital_emprunte)}</strong></div>
+      <div class="summary-row"><span>Intérêts totaux</span><strong style="color:var(--red)">${fmt(interets_totaux)}</strong></div>
+      <div class="summary-row"><span>Assurance crédit totale</span><strong style="color:var(--red)">${fmt(mensualite_assurance * duree * 12)}</strong></div>
+      <div class="summary-row total"><span>Coût total du crédit</span><strong>${fmt(cout_total_credit)}</strong></div>
+    `;
+  }
+
+  // SYNTHESE MENSUEL
+  const mensEl = document.getElementById('synthese-mensuel-' + pid);
+  if (mensEl) {
+    // Build mensup lines
+    let mensupLines = '';
+    if (mensupList) {
+      mensupList.querySelectorAll('.mensup-item').forEach(item => {
+        const mn = item.querySelector('.mensup-montant');
+        const lb = item.querySelector('.mensup-label');
+        const val = mn ? (+mn.value || 0) : 0;
+        const label = lb ? lb.value : '—';
+        if (val > 0) mensupLines += `<div class="summary-row"><span>${label}</span><strong>${fmt(val)}</strong></div>`;
+      });
+    }
+    mensEl.innerHTML = `
+      <div class="summary-row"><span>Mensualité crédit</span><strong>${fmt(mensualite_credit)}</strong></div>
+      <div class="summary-row"><span>Assurance crédit</span><strong>${fmt(mensualite_assurance)}</strong></div>
+      ${ptz ? `<div class="summary-row"><span>PTZ mensualité</span><strong>${fmt(mensualite_ptz)}</strong></div>` : ''}
+      ${mensupLines}
+      <div class="summary-row total"><span>Mensualité hors charges</span><strong>${fmt(mensualite_totale)}</strong></div>
+      <div class="summary-row"><span>Charges copro / logement</span><strong>${fmt(charges_copro)}</strong></div>
+      <div class="summary-row"><span>Taxe foncière (mensuel)</span><strong>${fmt(tf_mens)}</strong></div>
+      <div class="summary-row"><span>TEOM (mensuel)</span><strong>${fmt(teom_mens)}</strong></div>
+      <div class="summary-row"><span>Assurance habitation</span><strong>${fmt(ass_hab)}</strong></div>
+      <div class="summary-row"><span>Énergie</span><strong>${fmt(energie)}</strong></div>
+      <div class="summary-row"><span>Internet / téléphone</span><strong>${fmt(internet)}</strong></div>
+      <div class="summary-row total"><span>Mensualité avec charges</span><strong>${fmt(mensualite_avec_charges)}</strong></div>
+    `;
+  }
+
+  // ALERTES
+  const alertEl = document.getElementById('synthese-alertes-' + pid);
+  if (alertEl) {
+    const ok_endt = taux_endt_projet <= 35;
+    const ok_apport = apport >= prix * 0.1;
+    alertEl.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <div class="result-box ${ok_endt?'green':'red'}" style="flex:1;min-width:180px">
+          <div><div class="result-label">Taux d'endettement projet</div><div class="result-sub">Norme HCSF ≤ 35%</div></div>
+          <div><div class="result-value">${fmtN(taux_endt_projet,1)} %</div><span class="badge ${ok_endt?'badge-green':'badge-red'}">${ok_endt?'✓ OK':'⚠ Dépassé'}</span></div>
+        </div>
+        <div class="result-box ${ok_apport?'green':'red'}" style="flex:1;min-width:180px">
+          <div><div class="result-label">Apport / prix bien</div><div class="result-sub">Recommandé ≥ 10%</div></div>
+          <div><div class="result-value">${fmtN(apport/prix*100,1)} %</div><span class="badge ${ok_apport?'badge-green':'badge-red'}">${ok_apport?'✓ OK':'⚠ Faible'}</span></div>
+        </div>
+        <div class="result-box blue" style="flex:1;min-width:180px">
+          <div><div class="result-label">Reste à vivre mensuel</div><div class="result-sub">Après mensualité + charges</div></div>
+          <div><div class="result-value">${fmt(Math.max(0, rev_total - mensualite_avec_charges - credits_cours))}</div></div>
+        </div>
+      </div>`;
+  }
+
+  // Tableau amortissement
+  buildAmort(pid, capital_emprunte, taux, taux_ass, duree);
+}
+
+function buildAmort(pid, capital, taux_annuel, taux_ass, duree) {
+  const tbody = document.getElementById('amort-body-' + pid);
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (capital <= 0 || duree <= 0) return;
+  const r = taux_annuel / 100 / 12;
+  const n = duree * 12;
+  const mensualite = taux_annuel > 0
+    ? capital * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1)
+    : capital / n;
+  const ass_mens = (capital * taux_ass / 100) / 12;
+  let reste = capital;
+  let cap_rembourse = 0;
+
+  for (let i = 1; i <= n; i++) {
+    const interets = reste * r;
+    const cap = mensualite - interets;
+    reste -= cap;
+    cap_rembourse += cap;
+    if (reste < 0.01) reste = 0;
+
+    // Annual summary row every 12 months
+    if (i % 12 === 0) {
+      const annee = i / 12;
+      const tr = document.createElement('tr');
+      tr.className = 'year-row';
+      tr.innerHTML = `<td>Année ${annee}</td><td colspan="6" style="text-align:center;font-size:11px">Capital restant : ${fmt(reste)} — Capital remboursé : ${fmt(cap_rembourse)}</td>`;
+      tbody.appendChild(tr);
+    } else {
+      const tr = document.createElement('tr');
+      const y = Math.floor((i-1)/12)+1;
+      const m = ((i-1)%12)+1;
+      tr.innerHTML = `
+        <td>A${y} M${m < 10?'0'+m:m}</td>
+        <td>${fmtN(mensualite+ass_mens,2)} €</td>
+        <td>${fmtN(cap,2)} €</td>
+        <td>${fmtN(interets,2)} €</td>
+        <td>${fmtN(ass_mens,2)} €</td>
+        <td>${fmtN(Math.max(0,reste),2)} €</td>
+        <td>${fmtN(cap_rembourse,2)} €</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+}
+
+function exportAmortCSV(pid) {
+  const tbody = document.getElementById('amort-body-' + pid);
+  if (!tbody) return;
+  let csv = 'Période;Mensualité;Capital;Intérêts;Assurance;Capital restant;Capital remboursé\n';
+  tbody.querySelectorAll('tr:not(.year-row)').forEach(tr => {
+    const cells = tr.querySelectorAll('td');
+    csv += Array.from(cells).map(c => c.textContent.replace(/\s/g,' ')).join(';') + '\n';
+  });
+  downloadBlob(new Blob(['\uFEFF'+csv], {type:'text/csv'}), 'amortissement.csv');
+  showNotif('CSV téléchargé ✓', 'success');
+}
+
+// ============================================================
+// EDITABLE TITLES
+// ============================================================
+function editTitle(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const spanEl = wrap.querySelector('span');
+  if (!spanEl) return;
+  const old = spanEl.textContent;
+  const inp = document.createElement('input');
+  inp.className = 'edit-title-input';
+  inp.value = old;
+  spanEl.replaceWith(inp);
+  inp.focus();
+  function done() {
+    const n = inp.value.trim() || old;
+    const s = document.createElement('span');
+    s.textContent = n;
+    inp.replaceWith(s);
+    snapshot();
+  }
+  inp.addEventListener('blur', done);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function v(id) { const el = document.getElementById(id); return el ? el.value : 0; }
+function gv(pid, key) { const el = document.getElementById(key+'_'+pid); return el ? el.value : 0; }
+function setText(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt; }
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
+function getFullState() {
+  const state = { ressources: {}, projets: [] };
+  ['sal_m','sal_f','sal_m_an','sal_f_an','sal_m_brut','sal_f_brut','prime_m','prime_f','autre_m','autre_f',
+   'rfr_m','rfr_f',
+   'apport_res','epargne_mens','credits_cours','charges_fixes',
+   'statut_m','statut_f','anciennete_m','anciennete_f'].forEach(k => {
+    const el = document.getElementById(k);
+    if (el) state.ressources[k] = el.value;
+  });
+  projets.forEach(p => {
+    const pid = p.id;
+    const pdata = { id: pid, name: p.name };
+    ['prix','apport','duree','taux','taux_ass','frais_dossier','taux_notaire','type_bien',
+     'ptz','ptz_montant','ptz_duree','garage','garage_prix','garage_notaire',
+     'travaux','tf','teom','ass_hab','internet','energie'].forEach(k => {
+      const el = document.getElementById(k+'_'+pid);
+      if (el) pdata[k] = el.value;
+    });
+    // Charges
+    pdata.charges = [];
+    const cl = document.getElementById('charges-list-'+pid);
+    if (cl) cl.querySelectorAll('.charge-item').forEach(item => {
+      const ti = item.querySelector('input[type="text"]');
+      const ni = item.querySelector('input[type="number"]');
+      if (ti && ni) pdata.charges.push({label:ti.value, val:+ni.value});
+    });
+    // Mensup
+    pdata.mensup = [];
+    const ml = document.getElementById('mensup-list-'+pid);
+    if (ml) ml.querySelectorAll('.mensup-item').forEach(item => {
+      const lb = item.querySelector('.mensup-label');
+      const mn = item.querySelector('.mensup-montant');
+      const du = item.querySelector('.mensup-duree');
+      pdata.mensup.push({label: lb?lb.value:'', montant: mn?+mn.value:0, duree: du?+du.value:0});
+    });
+    // Titles
+    ['title-achat'].forEach(t => {
+      const el = document.getElementById(t+'-'+pid);
+      if (el) { const s = el.querySelector('span'); if (s) pdata['_'+t] = s.textContent; }
+    });
+    state.projets.push(pdata);
+  });
+  // Titles ressources panel
+  ['title-revenus','title-capacite'].forEach(t => {
+    const el = document.getElementById(t);
+    if (el) { const s = el.querySelector('span'); if (s) state['_'+t] = s.textContent; }
+  });
+  state.theme = currentTheme;
+  return state;
+}
+
+function restoreState(state) {
+  if (!state) return;
+  // Ressources
+  if (state.ressources) {
+    Object.entries(state.ressources).forEach(([k,val]) => {
+      const el = document.getElementById(k);
+      if (el) el.value = val;
+    });
+  }
+  // Titles
+  ['title-revenus','title-capacite'].forEach(t => {
+    if (state['_'+t]) {
+      const el = document.getElementById(t);
+      if (el) { const s = el.querySelector('span'); if (s) s.textContent = state['_'+t]; }
+    }
+  });
+  // Remove existing projets
+  [...projets].forEach(p => { p.tabEl.remove(); p.panelEl.remove(); });
+  projets = [];
+  projetCount = 0;
+  // Restore projets
+  if (state.projets) state.projets.forEach(pd => { addProjet(pd); });
+  // Theme
+  if (state.theme) { currentTheme = state.theme; applyTheme(); }
+  calcAll();
+}
+
+function saveData() {
+  const state = getFullState();
+  localStorage.setItem('immo_sim_v2', JSON.stringify(state));
+  showNotif('Sauvegarde effectuée ✓', 'success');
+  snapshot();
+}
+
+function loadSaved() {
+  const raw = localStorage.getItem('immo_sim_v2');
+  if (!raw) return false;
+  try { restoreState(JSON.parse(raw)); return true; } catch(e) { return false; }
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function showModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function exportAs(type) {
+  closeModal('export-modal');
+  const activePanel = document.querySelector('.tab-panel.active');
+  if (!activePanel) return;
+
+  if (type === 'json') {
+    const state = getFullState();
+    downloadBlob(new Blob([JSON.stringify(state,null,2)], {type:'application/json'}), 'immo_sim.json');
+    showNotif('Export JSON téléchargé ✓', 'success');
+    return;
+  }
+  if (type === 'csv') {
+    exportCSV();
+    return;
+  }
+  if (type === 'rtf') {
+    exportRTF();
+    return;
+  }
+  if (type === 'pdf') {
+    window.print();
+    return;
+  }
+  if (type === 'png' || type === 'jpeg') {
+    html2canvas(activePanel, {scale:2, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()}).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'immo_sim.' + type;
+      link.href = canvas.toDataURL('image/' + type, type==='jpeg'?0.92:undefined);
+      link.click();
+      showNotif('Image téléchargée ✓', 'success');
+    });
+  }
+}
+
+// ---- helpers export ----
+function _eur(val) { return (parseFloat(val)||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'; }
+function _pct(val) { return (parseFloat(val)||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' %'; }
+function _calcProjetData(pid) {
+  const prix        = parseFloat(gv(pid,'prix'))||0;
+  const apport      = parseFloat(gv(pid,'apport'))||0;
+  const duree       = parseFloat(gv(pid,'duree'))||20;
+  const taux        = parseFloat(gv(pid,'taux'))||0;
+  const taux_ass    = parseFloat(gv(pid,'taux_ass'))||0;
+  const taux_not    = parseFloat(gv(pid,'taux_notaire'))||7.5;
+  const ptz         = parseFloat(gv(pid,'ptz'))||0;
+  const ptz_m       = ptz ? (parseFloat(gv(pid,'ptz_montant'))||0) : 0;
+  const ptz_d       = parseFloat(gv(pid,'ptz_duree'))||25;
+  const garage      = parseFloat(gv(pid,'garage'))||0;
+  const gar_prix    = garage ? (parseFloat(gv(pid,'garage_prix'))||0) : 0;
+  const gar_not     = garage ? (parseFloat(gv(pid,'garage_notaire'))||7.5) : 0;
+  const travaux     = parseFloat(gv(pid,'travaux'))||0;
+  const frais_dos   = parseFloat(gv(pid,'frais_dossier'))||0;
+  const tf          = parseFloat(gv(pid,'tf'))||0;
+  const teom        = parseFloat(gv(pid,'teom'))||0;
+  const ass_hab     = parseFloat(gv(pid,'ass_hab'))||0;
+  const internet    = parseFloat(gv(pid,'internet'))||0;
+  const energie     = parseFloat(gv(pid,'energie'))||0;
+
+  let charges_copro = 0;
+  const chargesList = document.getElementById('charges-list-'+pid);
+  const chargeLines = [];
+  if (chargesList) {
+    chargesList.querySelectorAll('.charge-item').forEach(item => {
+      const ti = item.querySelector('input[type="text"]');
+      const ni = item.querySelector('input[type="number"]');
+      const lab = ti ? ti.value : '—';
+      const val = ni ? (parseFloat(ni.value)||0) : 0;
+      charges_copro += val;
+      chargeLines.push({label: lab, val});
+    });
+  }
+
+  let mensup_total = 0;
+  const mensupListD = document.getElementById('mensup-list-'+pid);
+  const mensupLines = [];
+  if (mensupListD) {
+    mensupListD.querySelectorAll('.mensup-item').forEach(item => {
+      const lb = item.querySelector('.mensup-label');
+      const mn = item.querySelector('.mensup-montant');
+      const du = item.querySelector('.mensup-duree');
+      const label = lb ? lb.value : '—';
+      const val = mn ? (parseFloat(mn.value)||0) : 0;
+      const dur = du ? (parseFloat(du.value)||0) : 0;
+      mensup_total += val;
+      mensupLines.push({label, montant: val, duree: dur});
+    });
+  }
+
+  const fn_bien    = prix * taux_not / 100;
+  const fn_garage  = gar_prix * gar_not / 100;
+  const total_achat = prix + fn_bien + gar_prix + fn_garage + travaux + frais_dos;
+  const capital    = Math.max(0, total_achat - apport - ptz_m);
+
+  let mens_credit = 0;
+  if (capital > 0 && taux > 0) {
+    const r = taux/100/12, n = duree*12;
+    mens_credit = capital * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+  } else if (capital > 0) {
+    mens_credit = capital / (duree*12);
+  }
+  const mens_ass   = (capital * taux_ass/100)/12;
+  const mens_ptz   = ptz_m > 0 ? ptz_m/(ptz_d*12) : 0;
+  const mens_total = mens_credit + mens_ass + mens_ptz + mensup_total;
+  const total_charges = charges_copro + tf/12 + teom/12 + ass_hab + internet + energie;
+  const mens_avec_ch = mens_total + total_charges;
+  const interets   = (mens_credit * duree*12) - capital;
+  const cout_total_credit = mens_credit*duree*12 + mens_ass*duree*12;
+
+  return {
+    prix, apport, duree, taux, taux_ass, taux_not,
+    ptz, ptz_m, ptz_d,
+    garage, gar_prix, gar_not,
+    travaux, frais_dos, fn_bien, fn_garage, total_achat, capital,
+    mens_credit, mens_ass, mens_ptz, mens_total, mensup_total, mensupLines,
+    tf, teom, ass_hab, internet, energie, charges_copro, chargeLines,
+    total_charges, mens_avec_ch, interets, cout_total_credit,
+    type_bien: gv(pid,'type_bien')
+  };
+}
+
+function _amortRows(pid, capital, taux, taux_ass, duree) {
+  const rows = [];
+  if (capital <= 0 || duree <= 0) return rows;
+  const r = taux/100/12, n = duree*12;
+  const mens = taux > 0
+    ? capital * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1)
+    : capital / n;
+  const ass = (capital * taux_ass/100)/12;
+  let reste = capital, cum = 0;
+  for (let i = 1; i <= n; i++) {
+    const int = reste * r;
+    const cap = mens - int;
+    reste -= cap; cum += cap;
+    if (reste < 0.01) reste = 0;
+    const y = Math.floor((i-1)/12)+1;
+    const m = ((i-1)%12)+1;
+    rows.push({ periode:`A${y} M${m<10?'0'+m:m}`, mens_tot: mens+ass, cap, int, ass, reste: Math.max(0,reste), cum });
+  }
+  return rows;
+}
+
+// ---- EXPORT CSV COMPLET ----
+function exportCSV() {
+  const sep = ';';
+  const nl  = '\n';
+  let csv = `SIMULATEUR ACHAT IMMOBILIER${nl}Exporté le;${new Date().toLocaleDateString('fr-FR')}${nl}${nl}`;
+
+  // ---- RESSOURCES ----
+  csv += `=== DÉCLARATION DES RESSOURCES ===${nl}${nl}`;
+  csv += `REVENUS${nl}`;
+  csv += `Libellé${sep}Monsieur${sep}Madame${nl}`;
+  csv += `Salaire net mensuel${sep}${v('sal_m')} €${sep}${v('sal_f')} €${nl}`;
+  csv += `Salaire net annuel${sep}${v('sal_m_an')} €${sep}${v('sal_f_an')} €${nl}`;
+  csv += `Salaire brut annuel${sep}${v('sal_m_brut')} €${sep}${v('sal_f_brut')} €${nl}`;
+  csv += `Primes annuelles${sep}${v('prime_m')} €${sep}${v('prime_f')} €${nl}`;
+  csv += `Autres revenus mensuels${sep}${v('autre_m')} €${sep}${v('autre_f')} €${nl}`;
+  csv += `Revenu fiscal de référence N-1${sep}${v('rfr_m')} €${sep}${v('rfr_f')} €${nl}`;
+  csv += `RFR foyer combiné${sep}${(parseFloat(v('rfr_m'))||0)+(parseFloat(v('rfr_f'))||0)} €${sep}${nl}`;
+  csv += `${nl}`;
+
+  csv += `SITUATION PROFESSIONNELLE${nl}`;
+  csv += `Libellé${sep}Monsieur${sep}Madame${nl}`;
+  csv += `Statut${sep}${v('statut_m')}${sep}${v('statut_f')}${nl}`;
+  csv += `Ancienneté (ans)${sep}${v('anciennete_m')}${sep}${v('anciennete_f')}${nl}`;
+  csv += `${nl}`;
+
+  csv += `CAPACITÉ D'EMPRUNT${nl}`;
+  const sal_m2=parseFloat(v('sal_m'))||0, sal_f2=parseFloat(v('sal_f'))||0;
+  const autre_m2=parseFloat(v('autre_m'))||0, autre_f2=parseFloat(v('autre_f'))||0;
+  const cred=parseFloat(v('credits_cours'))||0;
+  const rev_tot=sal_m2+sal_f2+autre_m2+autre_f2;
+  csv += `Apport personnel disponible${sep}${v('apport_res')} €${nl}`;
+  csv += `Épargne mensuelle possible${sep}${v('epargne_mens')} €${nl}`;
+  csv += `Crédits en cours (mensualités)${sep}${v('credits_cours')} €${nl}`;
+  csv += `Autres charges fixes mensuelles${sep}${v('charges_fixes')} €${nl}`;
+  csv += `Revenus nets mensuels combinés${sep}${rev_tot.toFixed(2)} €${nl}`;
+  csv += `Mensualité max 35% (HCSF)${sep}${(rev_tot*0.35).toFixed(2)} €${nl}`;
+  csv += `Mensualité dispo achat immo${sep}${Math.max(0,rev_tot*0.35-cred).toFixed(2)} €${nl}`;
+  csv += `Taux d'endettement actuel${sep}${rev_tot>0?(cred/rev_tot*100).toFixed(1):0} %${nl}`;
+  csv += `${nl}`;
+
+  // ---- PROJETS ----
+  projets.forEach(p => {
+    const pid = p.id;
+    const d = _calcProjetData(pid);
+    csv += `=== PROJET : ${p.name} ===${nl}${nl}`;
+
+    csv += `PARAMÈTRES DU PROJET${nl}`;
+    csv += `Prix d'achat du bien${sep}${d.prix} €${nl}`;
+    csv += `Apport personnel${sep}${d.apport} €${nl}`;
+    csv += `Durée du crédit${sep}${d.duree} ans${nl}`;
+    csv += `Taux d'intérêt annuel${sep}${d.taux} %${nl}`;
+    csv += `Taux assurance annuel${sep}${d.taux_ass} %${nl}`;
+    csv += `Frais de dossier bancaire${sep}${d.frais_dos} €${nl}`;
+    csv += `Type de bien${sep}${d.type_bien}${nl}`;
+    csv += `Taux frais notaire${sep}${d.taux_not} %${nl}`;
+    csv += `${nl}`;
+
+    csv += `PTZ${nl}`;
+    csv += `PTZ activé${sep}${d.ptz?'Oui':'Non'}${nl}`;
+    if (d.ptz) {
+      csv += `Montant PTZ${sep}${d.ptz_m} €${nl}`;
+      csv += `Durée PTZ${sep}${d.ptz_d} ans${nl}`;
+    }
+    csv += `${nl}`;
+
+    csv += `GARAGE / PARKING${nl}`;
+    csv += `Achat garage${sep}${d.garage?'Oui':'Non'}${nl}`;
+    if (d.garage) {
+      csv += `Prix du garage${sep}${d.gar_prix} €${nl}`;
+      csv += `Frais notaire garage${sep}${d.gar_not} %${nl}`;
+      csv += `Frais notaire garage montant${sep}${d.fn_garage.toFixed(2)} €${nl}`;
+    }
+    csv += `Travaux prévisionnels${sep}${d.travaux} €${nl}`;
+    csv += `${nl}`;
+
+    csv += `COÛT TOTAL DU PROJET${nl}`;
+    csv += `Prix du bien${sep}${d.prix.toFixed(2)} €${nl}`;
+    csv += `Frais de notaire (${d.taux_not}%)${sep}${d.fn_bien.toFixed(2)} €${nl}`;
+    if (d.garage) csv += `Garage + frais notaire${sep}${(d.gar_prix+d.fn_garage).toFixed(2)} €${nl}`;
+    if (d.travaux) csv += `Travaux${sep}${d.travaux.toFixed(2)} €${nl}`;
+    csv += `Frais de dossier${sep}${d.frais_dos.toFixed(2)} €${nl}`;
+    csv += `Total projet${sep}${d.total_achat.toFixed(2)} €${nl}`;
+    csv += `Apport déduit${sep}-${d.apport.toFixed(2)} €${nl}`;
+    if (d.ptz) csv += `PTZ déduit${sep}-${d.ptz_m.toFixed(2)} €${nl}`;
+    csv += `Capital à emprunter${sep}${d.capital.toFixed(2)} €${nl}`;
+    csv += `Intérêts totaux${sep}${d.interets.toFixed(2)} €${nl}`;
+    csv += `Assurance crédit totale${sep}${(d.mens_ass*d.duree*12).toFixed(2)} €${nl}`;
+    csv += `Coût total du crédit${sep}${d.cout_total_credit.toFixed(2)} €${nl}`;
+    csv += `${nl}`;
+
+    csv += `MENSUALITÉS${nl}`;
+    csv += `Mensualité crédit${sep}${d.mens_credit.toFixed(2)} €${nl}`;
+    csv += `Assurance crédit${sep}${d.mens_ass.toFixed(2)} €${nl}`;
+    if (d.ptz) csv += `Mensualité PTZ${sep}${d.mens_ptz.toFixed(2)} €${nl}`;
+    csv += `Mensualité hors charges${sep}${d.mens_total.toFixed(2)} €${nl}`;
+    csv += `${nl}`;
+
+    csv += `CHARGES MENSUELLES DÉTAILLÉES${nl}`;
+    csv += `Libellé${sep}Montant mensuel${nl}`;
+    d.chargeLines.forEach(c => { csv += `${c.label}${sep}${c.val.toFixed(2)} €${nl}`; });
+    csv += `Total charges copro/logement${sep}${d.charges_copro.toFixed(2)} €${nl}`;
+    csv += `Taxe foncière (mensuel)${sep}${(d.tf/12).toFixed(2)} €${nl}`;
+    csv += `TEOM (mensuel)${sep}${(d.teom/12).toFixed(2)} €${nl}`;
+    csv += `Assurance habitation${sep}${d.ass_hab.toFixed(2)} €${nl}`;
+    csv += `Énergie${sep}${d.energie.toFixed(2)} €${nl}`;
+    csv += `Internet / téléphone${sep}${d.internet.toFixed(2)} €${nl}`;
+    csv += `Total charges mensuelles${sep}${d.total_charges.toFixed(2)} €${nl}`;
+    csv += `Mensualité avec charges${sep}${d.mens_avec_ch.toFixed(2)} €${nl}`;
+    csv += `${nl}`;
+
+    csv += `TAXES ANNUELLES${nl}`;
+    csv += `Taxe foncière${sep}${d.tf.toFixed(2)} €/an${nl}`;
+    csv += `TEOM${sep}${d.teom.toFixed(2)} €/an${nl}`;
+    csv += `${nl}`;
+
+    // Tableau amortissement
+    const rows = _amortRows(pid, d.capital, d.taux, d.taux_ass, d.duree);
+    if (rows.length > 0) {
+      csv += `TABLEAU D'AMORTISSEMENT${nl}`;
+      csv += `Période${sep}Mensualité totale${sep}Capital${sep}Intérêts${sep}Assurance${sep}Capital restant${sep}Capital remboursé${nl}`;
+      rows.forEach(r => {
+        csv += `${r.periode}${sep}${r.mens_tot.toFixed(2)} €${sep}${r.cap.toFixed(2)} €${sep}${r.int.toFixed(2)} €${sep}${r.ass.toFixed(2)} €${sep}${r.reste.toFixed(2)} €${sep}${r.cum.toFixed(2)} €${nl}`;
+      });
+      csv += `${nl}`;
+    }
+  });
+
+  downloadBlob(new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'}), 'immo_sim_complet.csv');
+  showNotif('CSV complet téléchargé ✓', 'success');
+}
+
+// ---- EXPORT RTF COMPLET ----
+function exportRTF() {
+  const esc = s => String(s).replace(/\\/g,'\\\\').replace(/[{}]/g,'\\$&')
+    .replace(/é/g,"\\'e9").replace(/è/g,"\\'e8").replace(/ê/g,"\\'ea")
+    .replace(/à/g,"\\'e0").replace(/â/g,"\\'e2").replace(/î/g,"\\'ee")
+    .replace(/ô/g,"\\'f4").replace(/ù/g,"\\'f9").replace(/û/g,"\\'fb")
+    .replace(/ç/g,"\\'e7").replace(/É/g,"\\'c9").replace(/È/g,"\\'c8")
+    .replace(/Ê/g,"\\'ca").replace(/À/g,"\\'c0").replace(/€/g,'\\u8364?')
+    .replace(/°/g,"\\'b0").replace(/[^\x00-\x7F]/g,'?');
+  const b = s => `{\\b ${esc(s)}}`;
+  const h1 = s => `{\\b\\fs32\\cf1 ${esc(s)}}`;
+  const h2 = s => `{\\b\\fs26\\cf2 ${esc(s)}}`;
+  const h3 = s => `{\\b\\fs22 ${esc(s)}}`;
+  const row = (label, val) => `${b(esc(label)+'  ')}${esc(val)}\\par\n`;
+  const sep = () => `\\brdrb\\brdrs\\par\n`;
+  const nl = '\\par\n';
+
+  let r = `{\\rtf1\\ansi\\ansicpg1252\\deff0\n`;
+  r += `{\\fonttbl{\\f0\\fswiss\\fcharset0 Calibri;}{\\f1\\fswiss\\fcharset0 Arial;}}\n`;
+  r += `{\\colortbl;\\red200\\green115\\blue42;\\red42\\blue138\\green92;\\red42\\green122\\blue74;\\red168\\green50\\blue50;}\n`;
+  r += `{\\f0\\fs22\n`;
+
+  // Titre
+  r += `${h1('SIMULATEUR ACHAT IMMOBILIER')}${nl}`;
+  r += `${esc('Exporte le : ')}${esc(new Date().toLocaleDateString('fr-FR'))}${nl}${nl}`;
+
+  // RESSOURCES
+  r += `${h2('DECLARATION DES RESSOURCES')}${nl}`;
+  r += `${h3('Revenus du foyer')}${nl}`;
+  r += `{\\trowd\\cellx4500\\cellx7000\\cellx9000\n`;
+  r += `\\intbl ${b('Rubrique')}\\cell ${b('Monsieur')}\\cell ${b('Madame')}\\cell\\row\n`;
+  const revRows = [
+    ['Salaire net mensuel', v('sal_m')+' EUR/mois', v('sal_f')+' EUR/mois'],
+    ['Salaire net annuel', v('sal_m_an')+' EUR', v('sal_f_an')+' EUR'],
+    ['Salaire brut annuel', v('sal_m_brut')+' EUR', v('sal_f_brut')+' EUR'],
+    ['Primes annuelles', v('prime_m')+' EUR', v('prime_f')+' EUR'],
+    ['Autres revenus mensuels', v('autre_m')+' EUR/mois', v('autre_f')+' EUR/mois'],
+    ['RFR N-1', v('rfr_m')+' EUR', v('rfr_f')+' EUR'],
+  ];
+  revRows.forEach(([lab,vm,vf]) => {
+    r += `{\\trowd\\cellx4500\\cellx7000\\cellx9000\n`;
+    r += `\\intbl ${esc(lab)}\\cell ${esc(vm)}\\cell ${esc(vf)}\\cell\\row\n`;
+  });
+  r += nl;
+  r += row('RFR foyer combine (M+F)', ((parseFloat(v('rfr_m'))||0)+(parseFloat(v('rfr_f'))||0))+' EUR');
+  r += nl;
+
+  r += `${h3('Situation professionnelle')}${nl}`;
+  r += row('Statut M', v('statut_m')+' — anciennete : '+v('anciennete_m')+' ans');
+  r += row('Statut F', v('statut_f')+' — anciennete : '+v('anciennete_f')+' ans');
+  r += nl;
+
+  const sal_m2=parseFloat(v('sal_m'))||0, sal_f2=parseFloat(v('sal_f'))||0;
+  const autre_m2=parseFloat(v('autre_m'))||0, autre_f2=parseFloat(v('autre_f'))||0;
+  const cred2=parseFloat(v('credits_cours'))||0;
+  const rev_tot2=sal_m2+sal_f2+autre_m2+autre_f2;
+  r += `${h3("Capacite d'emprunt")}${nl}`;
+  r += row('Apport personnel disponible', v('apport_res')+' EUR');
+  r += row('Epargne mensuelle possible', v('epargne_mens')+' EUR/mois');
+  r += row('Credits en cours (total mensualites)', v('credits_cours')+' EUR/mois');
+  r += row('Autres charges fixes mensuelles', v('charges_fixes')+' EUR/mois');
+  r += row('Revenus nets mensuels combines', rev_tot2.toFixed(2)+' EUR');
+  r += row('Mensualite max 35% (HCSF)', (rev_tot2*0.35).toFixed(2)+' EUR');
+  r += row('Mensualite disponible achat immo', Math.max(0,rev_tot2*0.35-cred2).toFixed(2)+' EUR');
+  r += row("Taux d'endettement actuel", (rev_tot2>0?(cred2/rev_tot2*100):0).toFixed(1)+' %');
+  r += nl;
+
+  // PROJETS
+  projets.forEach(p => {
+    const pid = p.id;
+    const d = _calcProjetData(pid);
+
+    r += `${h2('PROJET : '+p.name)}${nl}`;
+
+    r += `${h3('Parametres du projet')}${nl}`;
+    r += row("Prix d'achat du bien", d.prix+' EUR');
+    r += row('Apport personnel', d.apport+' EUR');
+    r += row('Duree du credit', d.duree+' ans');
+    r += row("Taux d'interet annuel", d.taux+' %');
+    r += row('Taux assurance annuel', d.taux_ass+' %');
+    r += row('Frais de dossier bancaire', d.frais_dos+' EUR');
+    r += row('Type de bien', d.type_bien);
+    r += row('Taux frais notaire', d.taux_not+' %');
+    r += nl;
+
+    if (d.ptz) {
+      r += `${h3('PTZ (Pret a Taux Zero)')}${nl}`;
+      r += row('Montant PTZ', d.ptz_m+' EUR');
+      r += row('Duree PTZ', d.ptz_d+' ans');
+      r += nl;
+    }
+
+    if (d.garage) {
+      r += `${h3('Garage / Parking')}${nl}`;
+      r += row('Prix du garage', d.gar_prix+' EUR');
+      r += row('Frais notaire garage', d.gar_not+' %');
+      r += row('Frais notaire garage (montant)', d.fn_garage.toFixed(2)+' EUR');
+      r += nl;
+    }
+
+    r += `${h3('Cout total du projet')}${nl}`;
+    r += row("Prix du bien", d.prix.toFixed(2)+' EUR');
+    r += row('Frais de notaire ('+d.taux_not+'%)', d.fn_bien.toFixed(2)+' EUR');
+    if (d.garage) r += row('Garage + frais notaire', (d.gar_prix+d.fn_garage).toFixed(2)+' EUR');
+    if (d.travaux) r += row('Travaux previsionnels', d.travaux.toFixed(2)+' EUR');
+    r += row('Frais de dossier', d.frais_dos.toFixed(2)+' EUR');
+    r += row('TOTAL PROJET', d.total_achat.toFixed(2)+' EUR');
+    r += row('Apport deduit', '-'+d.apport.toFixed(2)+' EUR');
+    if (d.ptz) r += row('PTZ deduit', '-'+d.ptz_m.toFixed(2)+' EUR');
+    r += row('Capital a emprunter', d.capital.toFixed(2)+' EUR');
+    r += row('Interets totaux', d.interets.toFixed(2)+' EUR');
+    r += row('Assurance credit totale', (d.mens_ass*d.duree*12).toFixed(2)+' EUR');
+    r += row('COUT TOTAL DU CREDIT', d.cout_total_credit.toFixed(2)+' EUR');
+    r += nl;
+
+    r += `${h3('Mensualites')}${nl}`;
+    r += row('Mensualite credit', d.mens_credit.toFixed(2)+' EUR');
+    r += row('Assurance credit', d.mens_ass.toFixed(2)+' EUR');
+    if (d.ptz) r += row('Mensualite PTZ', d.mens_ptz.toFixed(2)+' EUR');
+    r += row('MENSUALITE HORS CHARGES', d.mens_total.toFixed(2)+' EUR');
+    r += nl;
+
+    r += `${h3('Charges mensuelles detaillees')}${nl}`;
+    d.chargeLines.forEach(c => { r += row(c.label, c.val.toFixed(2)+' EUR/mois'); });
+    r += row('Sous-total charges copro/logement', d.charges_copro.toFixed(2)+' EUR/mois');
+    r += row('Taxe fonciere annuelle', d.tf.toFixed(2)+' EUR/an  (soit '+( d.tf/12).toFixed(2)+' EUR/mois)');
+    r += row('TEOM annuelle', d.teom.toFixed(2)+' EUR/an  (soit '+(d.teom/12).toFixed(2)+' EUR/mois)');
+    r += row('Assurance habitation', d.ass_hab.toFixed(2)+' EUR/mois');
+    r += row('Energie (EDF/gaz)', d.energie.toFixed(2)+' EUR/mois');
+    r += row('Internet / telephone', d.internet.toFixed(2)+' EUR/mois');
+    r += row('TOTAL CHARGES MENSUELLES', d.total_charges.toFixed(2)+' EUR/mois');
+    r += row('MENSUALITE AVEC CHARGES', d.mens_avec_ch.toFixed(2)+' EUR/mois');
+    r += nl;
+
+    // Tableau amortissement (résumé annuel seulement dans le RTF pour lisibilité)
+    const rows = _amortRows(pid, d.capital, d.taux, d.taux_ass, d.duree);
+    if (rows.length > 0) {
+      r += `${h3("Recapitulatif annuel d'amortissement")}${nl}`;
+      r += `{\\trowd\\cellx1400\\cellx2800\\cellx4200\\cellx5600\\cellx7000\\cellx8400\\cellx9800\n`;
+      r += `\\intbl ${b('Annee')}\\cell ${b('Mens.')}\\cell ${b('Capital')}\\cell ${b('Interets')}\\cell ${b('Assur.')}\\cell ${b('Cap.restant')}\\cell ${b('Cap.rembourse')}\\cell\\row\n`;
+      for (let i=11; i < rows.length; i+=12) {
+        const rr = rows[i];
+        const ann = Math.floor(i/12)+1;
+        r += `{\\trowd\\cellx1400\\cellx2800\\cellx4200\\cellx5600\\cellx7000\\cellx8400\\cellx9800\n`;
+        r += `\\intbl ${esc('Annee '+ann)}\\cell ${esc(rr.mens_tot.toFixed(0)+' E')}\\cell ${esc(rr.cap.toFixed(0)+' E')}\\cell ${esc(rr.int.toFixed(0)+' E')}\\cell ${esc(rr.ass.toFixed(0)+' E')}\\cell ${esc(rr.reste.toFixed(0)+' E')}\\cell ${esc(rr.cum.toFixed(0)+' E')}\\cell\\row\n`;
+      }
+      r += nl;
+    }
+  });
+
+  r += `}}`;
+  downloadBlob(new Blob([r], {type:'application/rtf;charset=ansi'}), 'immo_sim_complet.rtf');
+  showNotif('RTF complet telecharge !', 'success');
+}
+
+// ============================================================
+// ROI — MODÈLE PATRIMONIAL (méthode marché)
+// ============================================================
+let roiChartMain = null;
+let roiChartPatrimoine = null;
+let roiChartRevente = null;
+let roiYearsData = null;   // stocké après calcROI pour renderROISynthese
+let roiParams = {};        // paramètres projet/ROI stockés
+
+// État des cases à cocher de la synthèse
+let roiChk = {
+  commission:    true,   // frais agence à la revente
+  frais_rev:     true,   // frais fixes revente (diagnostics)
+  apport:        true,   // apport initial
+  fn_achat:      true,   // frais de notaire achat
+  frais_dos:     true,   // frais de dossier
+  travaux_achat: true,   // travaux à l'achat
+  int_cum:       false,  // intérêts cumulés payés (non inclus par défaut)
+  ass_cum:       false,  // assurance crédit cumulée
+  mensup_cum:    false   // mensualités complémentaires cumulées
+};
+
+function resetROIChk() {
+  roiChk = { commission:true, frais_rev:true, apport:true, fn_achat:true,
+              frais_dos:true, travaux_achat:true, int_cum:false, ass_cum:false, mensup_cum:false };
+  renderROISynthese();
+  if (roiYearsData) {
+    renderROIChartRevente(roiYearsData, roiParams._beRevente);
+    renderROITable(roiYearsData);
+  }
+}
+
+function gainNetForYear(yr) {
+  if (!yr || !roiParams) return 0;
+  const p = roiParams;
+  const frais_rev = (roiChk.commission ? yr.valeur_bien * p.commission : 0)
+                  + (roiChk.frais_rev  ? p.frais_rev_fixes : 0);
+  const produit   = yr.valeur_bien - yr.cap_restant - frais_rev;
+  const deductions =
+    (roiChk.apport        ? p.apport        : 0) +
+    (roiChk.fn_achat      ? p.fn_achat      : 0) +
+    (roiChk.frais_dos     ? p.frais_dos     : 0) +
+    (roiChk.travaux_achat ? p.travaux       : 0) +
+    (roiChk.int_cum       ? yr.int_cum      : 0) +
+    (roiChk.ass_cum       ? yr.ass_cum      : 0) +
+    (roiChk.mensup_cum    ? yr.mensup_cum   : 0);
+  return produit - deductions;
+}
+
+function updateROIProjetSelect() {
+  const sel = document.getElementById('roi_projet');
+  if (!sel) return;
+  const oldVal = sel.value;
+  sel.innerHTML = '';
+  if (projets.length === 0) {
+    sel.innerHTML = '<option value="">— Aucun projet —</option>';
+    return;
+  }
+  projets.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    sel.appendChild(opt);
+  });
+  if (projets.find(p => p.id === oldVal)) sel.value = oldVal;
+  else sel.value = projets[0].id;
+}
+
+function toggleROITable() {
+  const w = document.getElementById('roi-table-wrap');
+  const btn = document.getElementById('roi-table-btn');
+  if (!w) return;
+  const visible = w.style.display !== 'none';
+  w.style.display = visible ? 'none' : 'block';
+  if (btn) btn.textContent = visible ? '▼ Afficher le tableau' : '▲ Masquer le tableau';
+}
+
+function calcROI() {
+  updateROIProjetSelect();
+  const sel = document.getElementById('roi_projet');
+  if (!sel || !sel.value) { clearROI(); return; }
+  const pid = sel.value;
+
+  // ── Paramètres du projet ──────────────────────────────────────────────
+  const prix           = parseFloat(gv(pid,'prix'))          || 0;
+  const apport         = parseFloat(gv(pid,'apport'))        || 0;
+  const duree          = Math.round(parseFloat(gv(pid,'duree')) || 20);
+  const taux           = parseFloat(gv(pid,'taux'))          || 0;
+  const taux_ass       = parseFloat(gv(pid,'taux_ass'))      || 0;
+  const taux_notaire   = parseFloat(gv(pid,'taux_notaire'))  || 7.5;
+  const ptz            = parseFloat(gv(pid,'ptz'))           || 0;
+  const ptz_montant    = ptz ? (parseFloat(gv(pid,'ptz_montant')) || 0) : 0;
+  const ptz_duree      = Math.round(parseFloat(gv(pid,'ptz_duree')) || 25);
+  const garage         = parseFloat(gv(pid,'garage'))        || 0;
+  const garage_prix    = garage ? (parseFloat(gv(pid,'garage_prix'))    || 0) : 0;
+  const garage_notaire = garage ? (parseFloat(gv(pid,'garage_notaire')) || 7.5) : 0;
+  const travaux        = parseFloat(gv(pid,'travaux'))       || 0;
+  const frais_dos      = parseFloat(gv(pid,'frais_dossier')) || 0;
+  const tf             = parseFloat(gv(pid,'tf'))            || 0;
+
+  // Frais d'acquisition
+  const fn_bien     = prix * taux_notaire / 100;
+  const fn_garage   = garage_prix * garage_notaire / 100;
+  const total_achat = prix + fn_bien + garage_prix + fn_garage + travaux + frais_dos;
+  const capital     = Math.max(0, total_achat - apport - ptz_montant);
+
+  // Mensualité crédit (annuité constante)
+  let mens_credit = 0;
+  if (capital > 0 && taux > 0) {
+    const rm = taux / 100 / 12, nm = duree * 12;
+    mens_credit = capital * rm * Math.pow(1+rm,nm) / (Math.pow(1+rm,nm)-1);
+  } else if (capital > 0) {
+    mens_credit = capital / (duree * 12);
+  }
+  const mens_ass = (capital * taux_ass / 100) / 12;
+
+  // PTZ
+  const mens_ptz = ptz_montant > 0 ? ptz_montant / (ptz_duree * 12) : 0;
+
+  // ── Paramètres ROI (interface) ────────────────────────────────────────
+  const loyer_init      = parseFloat(document.getElementById('roi_loyer').value)               || 900;
+  const revalor_loyer   = (parseFloat(document.getElementById('roi_revalorisation').value)     || 1.5) / 100;
+  const charges_forfait = parseFloat(document.getElementById('roi_charges_forfait').value)     || 150;
+  const inflation       = (parseFloat(document.getElementById('roi_inflation').value)          || 2.0) / 100;
+  const revalor_bien    = (parseFloat(document.getElementById('roi_revalorisation_bien').value)|| 2.5) / 100;
+  const commission      = (parseFloat(document.getElementById('roi_commission').value)         || 4.5) / 100;
+  const frais_rev_fixes = parseFloat(document.getElementById('roi_frais_revente').value)       || 1500;
+
+  // Horizon = durée du crédit (la comparaison n'a de sens que pendant le crédit)
+  const horizon = duree;
+
+  // ── Mise initiale (sortie de capital an 0) ────────────────────────────
+  // Ce que le propriétaire immobilise et doit récupérer à la revente
+  const frais_initiaux = fn_bien + fn_garage + frais_dos;
+  const mise_initiale  = apport + frais_initiaux + travaux;
+
+  // ── Mensualités complémentaires (mensup) du projet ────────────────────
+  const mensupListROI = document.getElementById('mensup-list-' + pid);
+  const mensupItemsROI = [];
+  if (mensupListROI) {
+    mensupListROI.querySelectorAll('.mensup-item').forEach(item => {
+      const mn = item.querySelector('.mensup-montant');
+      const du = item.querySelector('.mensup-duree');
+      mensupItemsROI.push({ montant: mn ? (parseFloat(mn.value)||0) : 0, duree: du ? (parseFloat(du.value)||0) : 0 });
+    });
+  }
+  function mensupCumROI(ann) {
+    return mensupItemsROI.reduce((s, ms) => {
+      const dur = ms.duree > 0 ? Math.min(ms.duree, ann) : ann;
+      return s + ms.montant * dur * 12;
+    }, 0);
+  }
+
+  // ── Stockage paramètres pour renderROISynthese ───────────────────────
+  roiParams = {
+    prix, apport, duree, taux, taux_ass,
+    fn_achat: fn_bien + fn_garage,
+    frais_dos, travaux,
+    mise_initiale, capital,
+    mens_credit, mens_ass, mens_ptz,
+    loyer_init, commission, frais_rev_fixes,
+    _beRevente: null  // sera mis à jour
+  };
+
+  // ── Tableau amortissement mensuel → données annuelles ─────────────────
+  // On calcule pour chaque année : intérêts cumulés sur l'année, capital restant
+  const amort_by_year = (function() {
+    const result = [];
+    const rm = taux > 0 ? taux / 100 / 12 : 0;
+    const nm = duree * 12;
+    let reste = capital, cum_cap = 0;
+    for (let ann = 1; ann <= duree; ann++) {
+      let int_an = 0, cap_an = 0;
+      for (let m = 0; m < 12; m++) {
+        const mois = (ann - 1) * 12 + m + 1;
+        if (mois > nm || reste <= 0) break;
+        const int_m = reste * rm;
+        const cap_m = Math.min(Math.max(0, mens_credit - int_m), reste);
+        reste   = Math.max(0, reste - cap_m);
+        cum_cap += cap_m;
+        int_an  += int_m;
+        cap_an  += cap_m;
+      }
+      // PTZ : on ajoute les intérêts PTZ (= 0, taux 0) et capital
+      result.push({
+        reste:   Math.max(0, reste),
+        cum_cap,
+        int_an,   // intérêts du crédit principal sur cette année
+        cap_an    // capital remboursé cette année
+      });
+    }
+    return result;
+  })();
+
+  // ── Simulation annuelle ───────────────────────────────────────────────
+  //
+  // MODÈLE PATRIMONIAL :
+  //
+  // Coût réel propriétaire / an =
+  //   Intérêts annuels (décroissants)
+  //   + Assurance crédit annuelle (fixe pendant duree ans)
+  //   + PTZ assurance si applicable (on considère 0 pour le PTZ taux 0)
+  //   + Taxe foncière (indexée inflation)
+  //   + Charges copro + entretien forfaitaire (indexées inflation)
+  //
+  // Le capital remboursé = épargne forcée, non comptabilisé comme coût
+  //
+  // Coût locataire / an = loyers indexés revalor_loyer
+  //
+  const years = [];
+  let cum_proprio  = 0;
+  let cum_location = 0;
+  let breakEvenAchatLoc = null;
+  let breakEvenRevente  = null;
+  let int_cum_total = 0, ass_cum_total = 0;
+
+  for (let ann = 1; ann <= horizon; ann++) {
+    const yr = amort_by_year[ann - 1] || { reste: 0, cum_cap: capital, int_an: 0, cap_an: 0 };
+
+    const credit_actif = ann <= duree;
+    const ptz_actif    = ptz_montant > 0 && ann <= ptz_duree;
+
+    const int_an     = yr.int_an;
+    const ass_an     = credit_actif ? mens_ass * 12 : 0;
+    const tf_an      = tf            * Math.pow(1 + inflation, ann - 1);
+    const chg_an     = charges_forfait * 12 * Math.pow(1 + inflation, ann - 1);
+
+    const cout_reel_an = int_an + ass_an + tf_an + chg_an;
+    cum_proprio += cout_reel_an;
+
+    const loyer_an    = loyer_init * 12 * Math.pow(1 + revalor_loyer, ann - 1);
+    cum_location += loyer_an;
+
+    const cap_restant   = credit_actif ? Math.max(0, yr.reste) : 0;
+    const cap_rembourse = yr.cum_cap;
+
+    const valeur_bien  = (prix + garage_prix) * Math.pow(1 + revalor_bien, ann);
+    const valeur_nette = valeur_bien - cap_restant;
+
+    // Cumulatifs pour la synthèse
+    int_cum_total += int_an;
+    ass_cum_total += ass_an;
+    const mensup_cum_ann = mensupCumROI(ann);
+
+    const yearObj = {
+      ann,
+      int_an, ass_an, tf_an, chg_an,
+      cout_reel_an,
+      loyer_an,
+      cum_proprio,
+      cum_location,
+      ecart: cum_proprio - cum_location,
+      cap_rembourse,
+      cap_restant,
+      epargne_proprio_an: yr.cap_an,
+      epargne_loc_an: Math.max(0, credit_actif ? (mens_credit + mens_ass) * 12 - loyer_an : 0),
+      valeur_bien,
+      valeur_nette,
+      int_cum:    int_cum_total,
+      ass_cum:    ass_cum_total,
+      mensup_cum: mensup_cum_ann,
+      gain_net: 0  // calculé dynamiquement via gainNetForYear
+    };
+    // Gain net = selon sélection des checkboxes (première passe avec état courant)
+    yearObj.gain_net = gainNetForYear(yearObj);
+
+    if (breakEvenAchatLoc === null && cum_proprio < cum_location) breakEvenAchatLoc = ann;
+    if (breakEvenRevente  === null && yearObj.gain_net > 0)       breakEvenRevente  = ann;
+
+    years.push(yearObj);
+  }
+
+  roiYearsData = years;
+  roiParams._beRevente = breakEvenRevente;
+
+  // ── Render ────────────────────────────────────────────────────────────
+  renderROIKPIs(breakEvenAchatLoc, breakEvenRevente, years, mise_initiale, duree,
+                capital, taux, mens_credit, mens_ass, tf, charges_forfait, loyer_init);
+
+  const badge = document.getElementById('roi-break-badge');
+  if (badge) {
+    badge.innerHTML = breakEvenAchatLoc
+      ? `<span class="badge badge-green">✓ Seuil de rentabilité flux : année ${breakEvenAchatLoc}</span>`
+      : `<span class="badge badge-red">⚠ Seuil non atteint sur ${duree} ans</span>`;
+  }
+
+  renderROISynthese();
+  renderROIChartMain(years, breakEvenAchatLoc, breakEvenRevente, duree);
+  renderROIChartPatrimoine(years, breakEvenRevente);
+  renderROIChartRevente(years, breakEvenRevente);
+  renderROITable(years);
+}
+
+function clearROI() {
+  const kpis = document.getElementById('roi-kpis');
+  if (kpis) kpis.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px">Aucun projet disponible. Créez d\'abord un projet.</div>';
+}
+
+function renderROISynthese() {
+  if (!roiYearsData || !roiParams) return;
+  const p = roiParams;
+  const annInput = document.getElementById('roi_syn_ann');
+  let ann = annInput ? (parseInt(annInput.value) || p.duree) : p.duree;
+  ann = Math.max(1, Math.min(ann, p.duree));
+  if (annInput && parseInt(annInput.value) !== ann) annInput.value = ann;
+  const yr = roiYearsData[ann - 1];
+  if (!yr) return;
+
+  const p_commission = roiChk.commission ? yr.valeur_bien * p.commission : 0;
+  const p_frais_rev  = roiChk.frais_rev  ? p.frais_rev_fixes : 0;
+  const frais_rev_total = p_commission + p_frais_rev;
+  const produit_net  = yr.valeur_bien - yr.cap_restant - frais_rev_total;
+  const gain_net     = gainNetForYear(yr);
+
+  function chkRow(id, label, val, sign='-', fixed=false, checked=true) {
+    const absVal = Math.abs(val);
+    const sigColor = sign==='+' ? 'pos' : 'neg';
+    const dispVal = sign === '+' ? `+${fmt(absVal)}` : `− ${fmt(absVal)}`;
+    if (fixed) {
+      return `<div class="chk-row chk-fixed">
+        <input type="checkbox" checked disabled style="opacity:.4">
+        <span class="chk-label" style="color:var(--text3)">${label} <em style="font-size:11px">(toujours)</em></span>
+        <span class="chk-val ${sigColor}">${dispVal}</span>
+      </div>`;
+    }
+    return `<div class="chk-row" onclick="roiChkToggle('${id}',this)">
+      <input type="checkbox" id="chk_${id}" ${roiChk[id]?'checked':''} onclick="event.stopPropagation();roiChkToggle('${id}',this.closest('.chk-row'))">
+      <span class="chk-label">${label}</span>
+      <span class="chk-val ${roiChk[id] ? sigColor : 'neutral'}" id="chkval_${id}">${roiChk[id] ? dispVal : `(${fmt(absVal)})`}</span>
+    </div>`;
+  }
+
+  const leftHTML = `
+    <div class="chk-group-title">Recettes de la revente</div>
+    ${chkRow('__vbien', `Valeur estimée du bien (an ${ann})`, yr.valeur_bien, '+', true)}
+    ${chkRow('commission', `Commission agence (${fmtN(p.commission*100,1)}%)`, p_commission || yr.valeur_bien*p.commission)}
+    ${chkRow('frais_rev', 'Frais fixes revente (diagnostics…)', p.frais_rev_fixes)}
+    <div class="chk-row chk-fixed">
+      <input type="checkbox" checked disabled style="opacity:.4">
+      <span class="chk-label" style="color:var(--text3)">Capital restant dû (remboursement) <em style="font-size:11px">(toujours)</em></span>
+      <span class="chk-val neg">− ${fmt(yr.cap_restant)}</span>
+    </div>
+    <div class="chk-subtotal" style="background:var(--surface2)">
+      <span>= Produit net revente</span>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;color:${produit_net>=0?'var(--green)':'var(--red)'}">${produit_net>=0?'+':''}${fmt(produit_net)}</span>
+    </div>`;
+
+  const rightHTML = `
+    <div class="chk-group-title">Coûts initiaux (versés à l'achat)</div>
+    ${chkRow('apport', 'Apport personnel', p.apport)}
+    ${chkRow('fn_achat', 'Frais de notaire + garage', p.fn_achat)}
+    ${chkRow('frais_dos', 'Frais de dossier bancaire', p.frais_dos)}
+    ${chkRow('travaux_achat', "Travaux à l'achat", p.travaux)}
+    <div class="chk-group-title" style="margin-top:4px">Coûts de détention sur ${ann} an${ann>1?'s':''} <span style="font-weight:400;color:var(--accent);font-size:10px">non inclus par défaut</span></div>
+    ${chkRow('int_cum', `Intérêts payés cumulés (an 1→${ann})`, yr.int_cum)}
+    ${chkRow('ass_cum', `Assurance crédit cumulée (an 1→${ann})`, yr.ass_cum)}
+    ${yr.mensup_cum > 0 ? chkRow('mensup_cum', `Mensualités complémentaires cumulées`, yr.mensup_cum) : ''}`;
+
+  const gainColor = gain_net >= 0 ? 'var(--green)' : 'var(--red)';
+  const totalHTML = `
+    <div class="chk-total-box" style="${gain_net<0?'border-color:var(--red);background:var(--red-bg)':''}">
+      <div>
+        <div class="chk-total-label">Gain net si revente — An ${ann}</div>
+        <div style="font-size:11px;color:var(--text3)">Produit net revente − déductions cochées</div>
+      </div>
+      <div class="chk-total-val" style="color:${gainColor}">${gain_net>=0?'+':''}${fmt(gain_net)}</div>
+    </div>`;
+
+  const leftEl  = document.getElementById('roi-syn-left');
+  const rightEl = document.getElementById('roi-syn-right');
+  const totEl   = document.getElementById('roi-syn-total');
+  if (leftEl)  leftEl.innerHTML  = leftHTML;
+  if (rightEl) rightEl.innerHTML = rightHTML;
+  if (totEl)   totEl.innerHTML   = totalHTML;
+}
+
+function roiChkToggle(id, rowEl) {
+  if (id === '__vbien') return;
+  roiChk[id] = !roiChk[id];
+  // Sync checkbox input
+  const cb = document.getElementById('chk_' + id);
+  if (cb) cb.checked = roiChk[id];
+  // Rerender synthese + table + chart revente
+  renderROISynthese();
+  // Recompute gain_net for all years and redraw
+  if (roiYearsData) {
+    let beRevente = null;
+    roiYearsData.forEach(yr => {
+      yr.gain_net = gainNetForYear(yr);
+      if (beRevente === null && yr.gain_net > 0) beRevente = yr.ann;
+    });
+    roiParams._beRevente = beRevente;
+    renderROIChartRevente(roiYearsData, beRevente);
+    renderROITable(roiYearsData);
+  }
+}
+
+function renderROIKPIs(beAchat, beRevente, years, mise_initiale, duree,
+                       capital, taux, mens_credit, mens_ass, tf, charges_forfait, loyer_init) {
+  const kpis = document.getElementById('roi-kpis');
+  if (!kpis) return;
+  const last   = years[years.length - 1];
+  const gain   = last ? last.gain_net      : 0;
+  const vbien  = last ? last.valeur_bien   : 0;
+  const vnette = last ? last.valeur_nette  : 0;
+
+  // Coût réel an 1 pour info (intérêts an 1 = capital × taux)
+  const int_an1 = capital * taux / 100;
+  const cout_reel_an1 = int_an1 + mens_ass * 12 + tf + charges_forfait * 12;
+
+  const kpiData = [
+    {
+      color: beAchat ? 'green' : 'red', icon: '🏁',
+      label: 'Seuil de rentabilité flux',
+      value: beAchat ? `Année ${beAchat}` : `> ${duree} ans`,
+      sub: beAchat
+        ? 'Coûts réels propriétaire < loyers cumulés'
+        : 'Non atteint sur la durée du crédit'
+    },
+    {
+      color: beRevente ? 'green' : 'red', icon: '🔑',
+      label: 'Revente couvre la mise initiale',
+      value: beRevente ? `Année ${beRevente}` : `> ${duree} ans`,
+      sub: `Mise initiale : ${fmt(mise_initiale)}`
+    },
+    {
+      color: gain > 0 ? 'green' : 'red', icon: '💰',
+      label: `Gain net si revente an ${duree}`,
+      value: fmt(gain),
+      sub: 'Prix vente − dette − frais revente − mise initiale'
+    },
+    {
+      color: 'blue', icon: '🏠',
+      label: `Valeur nette patrimoine an ${duree}`,
+      value: fmt(vnette),
+      sub: `Valeur bien ${fmt(vbien)} − capital restant dû`
+    },
+    {
+      color: '', icon: '📐',
+      label: 'Coût réel proprio an 1',
+      value: fmt(cout_reel_an1),
+      sub: `Intérêts ${fmt(int_an1)} + Ass ${fmt(mens_ass*12)} + TF ${fmt(tf)} + Chg ${fmt(charges_forfait*12)}`
+    }
+  ];
+
+  kpis.innerHTML = kpiData.map(k => `
+    <div class="result-box ${k.color}" style="flex:1;min-width:180px">
+      <div>
+        <div class="result-label">${k.icon} ${k.label}</div>
+        <div class="result-sub">${k.sub}</div>
+      </div>
+      <div class="result-value">${k.value}</div>
+    </div>`).join('');
+}
+
+function roiChartDefaults() {
+  return {
+    plugins: {
+      legend: { labels: { color: getCSSVar('--text'), font: { family: 'DM Sans', size: 12 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' ' + new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(ctx.raw) + ' €'
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: getCSSVar('--text2') }, grid: { color: getCSSVar('--border') } },
+      y: {
+        ticks: {
+          color: getCSSVar('--text2'),
+          callback: v => new Intl.NumberFormat('fr-FR', { notation: 'compact' }).format(v) + ' €'
+        },
+        grid: { color: getCSSVar('--border') }
+      }
+    },
+    responsive: true, maintainAspectRatio: false
+  };
+}
+
+function getCSSVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function renderROIChartMain(years, beAchat, beRevente, duree) {
+  const ctx = document.getElementById('roi-chart-main');
+  if (!ctx) return;
+  if (roiChartMain) roiChartMain.destroy();
+
+  const labels     = years.map(y => 'An ' + y.ann);
+  const cumProprio = years.map(y => Math.round(y.cum_proprio));
+  const cumLoc     = years.map(y => Math.round(y.cum_location));
+
+  const annotations = {};
+  if (beAchat) {
+    annotations.beAchat = {
+      type: 'line', xMin: beAchat - 1, xMax: beAchat - 1, scaleID: 'x',
+      borderColor: getCSSVar('--green'), borderWidth: 2, borderDash: [6, 3],
+      label: {
+        content: `Seuil rentabilité — An ${beAchat}`,
+        display: true, position: 'start',
+        color: getCSSVar('--green'), backgroundColor: 'transparent',
+        font: { size: 11, weight: 'bold' }
+      }
+    };
+  }
+  if (beRevente) {
+    annotations.beRevente = {
+      type: 'line', xMin: beRevente - 1, xMax: beRevente - 1, scaleID: 'x',
+      borderColor: getCSSVar('--accent'), borderWidth: 2, borderDash: [4, 4],
+      label: {
+        content: `Revente rentable — An ${beRevente}`,
+        display: true, position: 'end',
+        color: getCSSVar('--accent'), backgroundColor: 'transparent',
+        font: { size: 11, weight: 'bold' }
+      }
+    };
+  }
+
+  roiChartMain = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: `Propriétaire — coût réel cumulé (intérêts + ass + TF + charges) sur ${duree} ans`,
+          data: cumProprio,
+          borderColor: getCSSVar('--accent'),
+          backgroundColor: 'rgba(200,115,42,0.10)',
+          fill: true, tension: 0.3, pointRadius: 2
+        },
+        {
+          label: 'Locataire — loyers cumulés',
+          data: cumLoc,
+          borderColor: getCSSVar('--blue'),
+          backgroundColor: 'rgba(42,92,138,0.10)',
+          fill: true, tension: 0.3, pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      ...roiChartDefaults(),
+      plugins: {
+        ...roiChartDefaults().plugins,
+        annotation: Object.keys(annotations).length ? { annotations } : undefined
+      }
+    }
+  });
+}
+
+function renderROIChartPatrimoine(years, beRevente) {
+  const ctx = document.getElementById('roi-chart-patrimoine');
+  if (!ctx) return;
+  if (roiChartPatrimoine) roiChartPatrimoine.destroy();
+
+  const labels  = years.map(y => 'An ' + y.ann);
+  const vbien   = years.map(y => Math.round(y.valeur_bien));
+  const vnette  = years.map(y => Math.round(y.valeur_nette));
+  const capRem  = years.map(y => Math.round(y.cap_rembourse));
+
+  roiChartPatrimoine = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Valeur du bien (revalorisation)',
+          data: vbien,
+          borderColor: getCSSVar('--blue'),
+          backgroundColor: 'rgba(42,92,138,0.07)',
+          fill: true, tension: 0.3, pointRadius: 2
+        },
+        {
+          label: 'Valeur nette (bien − dette)',
+          data: vnette,
+          borderColor: getCSSVar('--green'),
+          backgroundColor: 'rgba(42,122,74,0.10)',
+          fill: true, tension: 0.3, pointRadius: 2
+        },
+        {
+          label: 'Capital remboursé cumulé (épargne)',
+          data: capRem,
+          borderColor: getCSSVar('--text3'),
+          backgroundColor: 'transparent',
+          fill: false, tension: 0.3, pointRadius: 2,
+          borderDash: [4, 3]
+        }
+      ]
+    },
+    options: roiChartDefaults()
+  });
+}
+
+function renderROIChartRevente(years, beRevente) {
+  const ctx = document.getElementById('roi-chart-revente');
+  if (!ctx) return;
+  if (roiChartRevente) roiChartRevente.destroy();
+
+  const labels = years.map(y => 'An ' + y.ann);
+  const gains  = years.map(y => Math.round(gainNetForYear(y)));
+  const colors = gains.map(g => g >= 0 ? getCSSVar('--green') : getCSSVar('--red'));
+
+  const annotations = {
+    zero: { type: 'line', yMin: 0, yMax: 0, borderColor: getCSSVar('--text3'), borderWidth: 1 }
+  };
+  if (beRevente) {
+    annotations.beRev = {
+      type: 'line', xMin: beRevente - 1, xMax: beRevente - 1, scaleID: 'x',
+      borderColor: getCSSVar('--green'), borderWidth: 2, borderDash: [6, 3],
+      label: {
+        content: `Rentable — An ${beRevente}`,
+        display: true, position: 'start',
+        color: getCSSVar('--green'), backgroundColor: 'transparent',
+        font: { size: 11, weight: 'bold' }
+      }
+    };
+  }
+
+  roiChartRevente = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Gain net si revente',
+        data: gains,
+        backgroundColor: colors,
+        borderRadius: 3,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...roiChartDefaults(),
+      plugins: {
+        ...roiChartDefaults().plugins,
+        annotation: { annotations }
+      }
+    }
+  });
+}
+
+function renderROITable(years) {
+  const tbody = document.getElementById('roi-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  years.forEach(y => {
+    const tr = document.createElement('tr');
+    const gain_net = gainNetForYear(y);
+    const ecartColor = y.ecart <= 0 ? 'color:var(--green)' : 'color:var(--red)';
+    const gainColor  = gain_net >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+    const epLocColor = y.epargne_loc_an > 0 ? 'font-weight:600' : 'color:var(--text3)';
+    const epLocTxt   = y.epargne_loc_an > 0 ? fmtN(y.epargne_loc_an, 0) + ' €' : '—';
+    tr.innerHTML = `
+      <td style="font-weight:600">${y.ann}</td>
+      <td style="text-align:right">${fmtN(y.int_an, 0)} €</td>
+      <td style="text-align:right">${fmtN(y.ass_an + y.tf_an + y.chg_an, 0)} €</td>
+      <td style="text-align:right;font-weight:600">${fmtN(y.cout_reel_an, 0)} €</td>
+      <td style="text-align:right">${fmtN(y.loyer_an, 0)} €</td>
+      <td style="text-align:right">${fmtN(y.cum_proprio, 0)} €</td>
+      <td style="text-align:right">${fmtN(y.cum_location, 0)} €</td>
+      <td style="text-align:right;font-weight:600;${ecartColor}">${y.ecart > 0 ? '+' : ''}${fmtN(y.ecart, 0)} €</td>
+      <td style="text-align:right;color:var(--text2)">${fmtN(y.cap_rembourse, 0)} €</td>
+      <td style="text-align:right;color:var(--green);font-weight:600;background:var(--green-bg)">${fmtN(y.epargne_proprio_an, 0)} €</td>
+      <td style="text-align:right;background:var(--blue-bg);${epLocColor}">${epLocTxt}</td>
+      <td style="text-align:right">${fmtN(y.valeur_nette, 0)} €</td>
+      <td style="text-align:right;${gainColor}">${gain_net >= 0 ? '+' : ''}${fmtN(gain_net, 0)} €</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// IMPORT
+function importData() {
+  const file = document.getElementById('import-file').files[0];
+  if (!file) { showNotif('Aucun fichier sélectionné', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      if (file.name.endsWith('.json')) {
+        restoreState(JSON.parse(e.target.result));
+        showNotif('Import réussi ✓', 'success');
+        closeModal('import-modal');
+      } else {
+        showNotif('Format JSON requis pour import complet', 'error');
+      }
+    } catch(err) {
+      showNotif('Erreur lors de l\'import', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
+// ANALYSE REVENTE
+// ============================================================
+let revChart = null;
+
+function setRevToggle(wrapId, btn, hiddenId, val, cb) {
+  document.getElementById(wrapId).querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const h = document.getElementById(hiddenId);
+  if (h) h.value = val;
+  if (cb) cb();
+}
+
+function updateRevProjetSelect() {
+  const sel = document.getElementById('rev_projet');
+  if (!sel) return;
+  const oldVal = sel.value;
+  sel.innerHTML = '';
+  if (projets.length === 0) {
+    sel.innerHTML = '<option value="">— Aucun projet —</option>';
+    return;
+  }
+  projets.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    sel.appendChild(opt);
+  });
+  if (projets.find(p => p.id === oldVal)) sel.value = oldVal;
+  else sel.value = projets[0].id;
+}
+
+function toggleRevTable() {
+  const w = document.getElementById('rev-table-wrap');
+  const btn = w ? w.previousElementSibling.querySelector('button') : null;
+  if (!w) return;
+  const vis = w.style.display !== 'none';
+  w.style.display = vis ? 'none' : 'block';
+  if (btn) btn.textContent = vis ? '▼ Afficher' : '▲ Masquer';
+}
+
+// ── État des cases à cocher Revente ──────────────────────────────────
+let revChk = {
+  commission: true, diag: true, ira: true, travaux_rev: true, autres_rev: true,
+  apport: true, fn_achat: true, frais_dos: true, travaux_achat: true,
+  int_cum: true, ass_cum: true, ms_cum: true, ptz_cum: true, impot_pv: true
+};
+let revData = null;  // données pré-calculées pour renderRevSynthese
+
+function resetRevChk() {
+  Object.keys(revChk).forEach(k => revChk[k] = true);
+  renderRevSynthese();
+  renderRevTableFromData();
+  renderRevChartFromData();
+}
+
+function revChkToggle(id) {
+  revChk[id] = !revChk[id];
+  const cb = document.getElementById('revchk_' + id);
+  if (cb) cb.checked = revChk[id];
+  renderRevSynthese();
+  renderRevTableFromData();
+  renderRevChartFromData();
+}
+
+function pvForEntry(entry, fixed) {
+  const frais_rev =
+    (revChk.commission  ? entry.frais_agence : 0) +
+    (revChk.diag        ? fixed.rev_diag     : 0) +
+    (revChk.ira         ? fixed.rev_ira      : 0) +
+    (revChk.travaux_rev ? fixed.rev_travaux  : 0) +
+    (revChk.autres_rev  ? fixed.rev_autres   : 0);
+  const produit_net = entry.prix_ann - entry.cap_restant - frais_rev;
+  const deductions =
+    (revChk.apport        ? fixed.apport_initial : 0) +
+    (revChk.fn_achat      ? fixed.fn_achat       : 0) +
+    (revChk.frais_dos     ? fixed.frais_dos      : 0) +
+    (revChk.travaux_achat ? fixed.travaux_achat  : 0) +
+    (revChk.int_cum       ? entry.int_cum        : 0) +
+    (revChk.ass_cum       ? entry.ass_cum        : 0) +
+    (revChk.ms_cum        ? entry.ms_cum         : 0) +
+    (revChk.ptz_cum       ? entry.ptz_cum        : 0) +
+    (revChk.impot_pv      ? entry.impot_pv       : 0);
+  return { produit_net, pv: produit_net - deductions, frais_rev };
+}
+
+function calcRevente() {
+  updateRevProjetSelect();
+  const sel = document.getElementById('rev_projet');
+  if (!sel || !sel.value) return;
+  const pid = sel.value;
+  const d = _calcProjetData(pid);
+  const projet = projets.find(p => p.id === pid);
+
+  const rev_duree    = Math.max(1, Math.min(parseInt(document.getElementById('rev_duree').value)||7, d.duree));
+  const rev_prix     = parseFloat(document.getElementById('rev_prix').value) || d.prix;
+  const rev_comm_pct = (parseFloat(document.getElementById('rev_commission').value) || 4.5) / 100;
+  const rev_diag     = parseFloat(document.getElementById('rev_diag').value)    || 0;
+  const rev_ira      = parseFloat(document.getElementById('rev_ira').value)     || 0;
+  const rev_travaux  = parseFloat(document.getElementById('rev_travaux').value) || 0;
+  const rev_tpv      = parseInt(document.getElementById('rev_tpv').value)       || 0;
+  const rev_autres   = parseFloat(document.getElementById('rev_autres').value)  || 0;
+  const revalor_ratio = d.prix > 0 ? (rev_prix - d.prix) / (d.prix * rev_duree) : 0;
+
+  // ── Helpers amort ─────────────────────────────────────────────────────
+  function amortForAnn(ann) {
+    if (d.capital <= 0) return { int_cum:0, ass_cum:0, cap_rem_cum:0, cap_restant:0 };
+    const r = d.taux / 100 / 12, n = d.duree * 12;
+    const mens = d.taux > 0 ? d.capital*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1) : d.capital/n;
+    const ass_m = (d.capital * d.taux_ass / 100) / 12;
+    let reste = d.capital, int_cum = 0, cap_rem_cum = 0;
+    const mois = Math.min(ann * 12, n);
+    for (let i = 0; i < mois; i++) {
+      const int_m = reste * r;
+      const cap_m = Math.min(Math.max(0, mens - int_m), reste);
+      int_cum += int_m; cap_rem_cum += cap_m;
+      reste = Math.max(0, reste - cap_m);
+    }
+    return { int_cum, ass_cum: ass_m * mois, cap_rem_cum, cap_restant: reste };
+  }
+  function mensupCumFn(ann) {
+    return d.mensupLines.reduce((s, ms) => {
+      return s + ms.montant * Math.min(ms.duree > 0 ? ms.duree : ann, ann) * 12;
+    }, 0);
+  }
+  function ptzCumFn(ann) {
+    if (!d.ptz_m) return 0;
+    return (d.ptz_m / (d.ptz_d * 12)) * Math.min(ann, d.ptz_d) * 12;
+  }
+  function impotPvFn(prix_ann, ann) {
+    if (!rev_tpv) return { impot: 0, abat_ir: 0 };
+    const pv_brute = prix_ann - d.prix;
+    if (pv_brute <= 0 || ann < 6) return { impot: 0, abat_ir: 0 };
+    const s5 = ann - 5;
+    const abat_ir = Math.min(100, s5 <= 16 ? s5*6 : 96+(s5-16)*4);
+    const abat_ps = Math.min(100, s5 <= 22 ? s5*1.65 : s5<=30 ? 9+(s5-22)*9 : 100);
+    return {
+      impot: pv_brute*(1-abat_ir/100)*0.19 + pv_brute*(1-abat_ps/100)*0.172,
+      abat_ir
+    };
+  }
+
+  // ── Infos acheteur (panneau gauche, statiques) ────────────────────────
+  const infoEl = document.getElementById('rev-acheteur-infos');
+  if (infoEl) {
+    infoEl.innerHTML = `
+      <div class="summary-row"><span>Projet</span><strong>${projet?projet.name:pid}</strong></div>
+      <div class="summary-row"><span>Prix d'achat</span><strong>${fmt(d.prix)}</strong></div>
+      <div class="summary-row"><span>Apport initial</span><strong>${fmt(d.apport)}</strong></div>
+      <div class="summary-row"><span>Capital emprunté</span><strong>${fmt(d.capital)}</strong></div>
+      <div class="summary-row"><span>Durée crédit</span><strong>${d.duree} ans</strong></div>
+      <div class="summary-row"><span>Taux</span><strong>${fmtN(d.taux,2)} %</strong></div>
+      <div class="summary-row"><span>Mensualité crédit + assurance</span><strong>${fmt(d.mens_credit+d.mens_ass)}</strong></div>
+      ${d.ptz_m?`<div class="summary-row"><span>PTZ</span><strong>${fmt(d.ptz_m)} sur ${d.ptz_d} ans</strong></div>`:''}
+      ${d.mensupLines.map(ms=>`<div class="summary-row"><span>${ms.label||'Prêt complémentaire'}</span><strong>${fmt(ms.montant)}/mois${ms.duree?` (${ms.duree} ans)`:''}</strong></div>`).join('')}`;
+  }
+  const coutsEl = document.getElementById('rev-couts-achat');
+  if (coutsEl) {
+    const fa = d.fn_bien + d.fn_garage + d.frais_dos + d.travaux;
+    coutsEl.innerHTML = `
+      <div class="summary-row"><span>Apport immobilisé</span><strong>${fmt(d.apport)}</strong></div>
+      <div class="summary-row"><span>Frais de notaire (${fmtN(d.taux_not,1)}%)</span><strong>${fmt(d.fn_bien+d.fn_garage)}</strong></div>
+      ${d.frais_dos?`<div class="summary-row"><span>Frais de dossier</span><strong>${fmt(d.frais_dos)}</strong></div>`:''}
+      ${d.travaux?`<div class="summary-row"><span>Travaux à l'achat</span><strong>${fmt(d.travaux)}</strong></div>`:''}
+      <div class="summary-row total"><span>Total irrécupérables achat</span><strong>${fmt(fa)}</strong></div>`;
+  }
+
+  // ── Pré-calcul série annuelle ─────────────────────────────────────────
+  const fixed = {
+    rev_diag, rev_ira, rev_travaux, rev_autres,
+    apport_initial: d.apport,
+    fn_achat: d.fn_bien + d.fn_garage,
+    frais_dos: d.frais_dos,
+    travaux_achat: d.travaux,
+    rev_comm_pct, d, rev_duree, rev_prix
+  };
+  const series = [];
+  for (let ann = 1; ann <= d.duree; ann++) {
+    const am = amortForAnn(ann);
+    const prix_ann = d.prix * (1 + revalor_ratio * ann);
+    const { impot, abat_ir } = impotPvFn(prix_ann, ann);
+    series.push({
+      ann,
+      cap_restant:  am.cap_restant,
+      cap_rem_cum:  am.cap_rem_cum,
+      int_cum:      am.int_cum,
+      ass_cum:      am.ass_cum,
+      ms_cum:       mensupCumFn(ann),
+      ptz_cum:      ptzCumFn(ann),
+      prix_ann,
+      frais_agence: prix_ann * rev_comm_pct,
+      impot_pv:     impot,
+      abat_ir
+    });
+  }
+
+  // ── Frais crédit (panneau droit, statiques pour rev_duree) ────────────
+  const entry = series[rev_duree - 1] || series[series.length - 1];
+  const fcEl = document.getElementById('rev-frais-credit');
+  if (fcEl && entry) {
+    fcEl.innerHTML = `
+      <div class="summary-row"><span>Intérêts payés (${rev_duree} an${rev_duree>1?'s':''})</span><strong style="color:var(--red)">${fmt(entry.int_cum)}</strong></div>
+      <div class="summary-row"><span>Assurance crédit (${rev_duree} an${rev_duree>1?'s':''})</span><strong style="color:var(--red)">${fmt(entry.ass_cum)}</strong></div>
+      ${entry.ptz_cum?`<div class="summary-row"><span>PTZ remboursé</span><strong>${fmt(entry.ptz_cum)}</strong></div>`:''}
+      ${entry.ms_cum?`<div class="summary-row"><span>Mensualités complémentaires</span><strong style="color:var(--red)">${fmt(entry.ms_cum)}</strong></div>`:''}
+      <div class="summary-row"><span>Capital remboursé (épargne)</span><strong style="color:var(--green)">${fmt(entry.cap_rem_cum)}</strong></div>
+      <div class="summary-row"><span>Capital restant dû</span><strong>${fmt(entry.cap_restant)}</strong></div>`;
+  }
+
+  // ── Stocker globalement et rendre ─────────────────────────────────────
+  revData = { fixed, series, rev_duree };
+  renderRevSynthese();
+  renderRevTableFromData();
+  renderRevChartFromData();
+}
+
+function renderRevSynthese() {
+  if (!revData) return;
+  const { fixed, series, rev_duree } = revData;
+  const entry = series[rev_duree - 1] || series[series.length - 1];
+  if (!entry) return;
+
+  const { produit_net, pv: plusvalue_nette, frais_rev } = pvForEntry(entry, fixed);
+
+  function cRow(id, label, val, always=false) {
+    const disp = revChk[id] ? `− ${fmt(Math.abs(val))}` : `(${fmt(Math.abs(val))})`;
+    const col   = revChk[id] ? 'neg' : 'neutral';
+    if (always) return `
+      <div class="chk-row chk-fixed">
+        <input type="checkbox" checked disabled style="opacity:.4">
+        <span class="chk-label" style="color:var(--text3)">${label} <em style="font-size:11px">(toujours)</em></span>
+        <span class="chk-val neg">− ${fmt(Math.abs(val))}</span>
+      </div>`;
+    return `
+      <div class="chk-row" onclick="revChkToggle('${id}')">
+        <input type="checkbox" id="revchk_${id}" ${revChk[id]?'checked':''} onclick="event.stopPropagation();revChkToggle('${id}')">
+        <span class="chk-label">${label}</span>
+        <span class="chk-val ${col}" id="revchkval_${id}">${disp}</span>
+      </div>`;
+  }
+
+  const d = fixed.d;
+  const synEl = document.getElementById('rev-synthese-table');
+  if (synEl) {
+    synEl.innerHTML = `
+      <div style="margin-bottom:8px;padding:7px 10px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:var(--radius-sm);font-size:12px;color:var(--text2)">
+        Cochez/décochez chaque ligne pour voir sa contribution. Le <strong>capital restant dû</strong> est toujours déduit (remboursement obligatoire). <button class="btn btn-sm" style="float:right;margin-top:-2px" onclick="resetRevChk()">↺ Tout cocher</button>
+      </div>
+
+      <div class="chk-group-title">Recettes — Prix de revente an ${rev_duree}</div>
+      <div class="chk-row chk-fixed">
+        <input type="checkbox" checked disabled style="opacity:.4">
+        <span class="chk-label" style="color:var(--text)"><strong>Prix de revente</strong></span>
+        <span class="chk-val pos">+ ${fmt(entry.prix_ann)}</span>
+      </div>
+      ${cRow('commission', `Commission agence (${fmtN(fixed.rev_comm_pct*100,1)}%)`, entry.frais_agence)}
+      ${fixed.rev_diag    ? cRow('diag',       'Frais diagnostics / DPE',       fixed.rev_diag)    : ''}
+      ${fixed.rev_ira     ? cRow('ira',        'Mainlevée hypothèque / IRA',     fixed.rev_ira)     : ''}
+      ${fixed.rev_travaux ? cRow('travaux_rev',"Travaux avant revente",          fixed.rev_travaux) : ''}
+      ${fixed.rev_autres  ? cRow('autres_rev', 'Autres frais revente',           fixed.rev_autres)  : ''}
+      <div class="chk-row chk-fixed">
+        <input type="checkbox" checked disabled style="opacity:.4">
+        <span class="chk-label" style="color:var(--text3)">Capital restant dû <em style="font-size:11px">(toujours)</em></span>
+        <span class="chk-val neg">− ${fmt(entry.cap_restant)}</span>
+      </div>
+      <div class="chk-subtotal" style="background:var(--surface2)">
+        <span>= Produit net revente</span>
+        <strong style="color:${produit_net>=0?'var(--green)':'var(--red)'}">${produit_net>=0?'+':''}${fmt(produit_net)}</strong>
+      </div>
+
+      <div class="chk-group-title" style="margin-top:6px">Coûts initiaux (versés à l'achat)</div>
+      ${cRow('apport',        'Apport personnel',                  d.apport)}
+      ${cRow('fn_achat',      'Frais de notaire à l\'achat',       fixed.fn_achat)}
+      ${fixed.frais_dos     ? cRow('frais_dos',     'Frais de dossier bancaire',      fixed.frais_dos)     : ''}
+      ${fixed.travaux_achat ? cRow('travaux_achat', "Travaux à l'achat",              fixed.travaux_achat) : ''}
+
+      <div class="chk-group-title" style="margin-top:6px">Coûts de détention — ${rev_duree} an${rev_duree>1?'s':''}</div>
+      ${cRow('int_cum',  `Intérêts payés cumulés`,                   entry.int_cum)}
+      ${cRow('ass_cum',  `Assurance crédit cumulée`,                  entry.ass_cum)}
+      ${entry.ms_cum  ? cRow('ms_cum',  'Mensualités complémentaires', entry.ms_cum)  : ''}
+      ${entry.ptz_cum ? cRow('ptz_cum', 'PTZ remboursé',               entry.ptz_cum) : ''}
+      ${entry.impot_pv? cRow('impot_pv',`Impôt sur plus-value (abat. ${fmtN(entry.abat_ir,0)}% IR)`, entry.impot_pv) : ''}`;
+  }
+
+  // Total box
+  const totEl = document.getElementById('rev-syn-total');
+  const gain_color = plusvalue_nette >= 0 ? 'var(--green)' : 'var(--red)';
+  const gain_border = plusvalue_nette >= 0 ? 'var(--green)' : 'var(--red)';
+  if (totEl) totEl.innerHTML = `
+    <div class="chk-total-box" style="border-color:${gain_border};${plusvalue_nette<0?'background:var(--red-bg)':''}">
+      <div>
+        <div class="chk-total-label">= PLUS-VALUE NETTE — An ${rev_duree}</div>
+        <div style="font-size:11px;color:var(--text3)">Produit net revente − déductions cochées</div>
+      </div>
+      <div class="chk-total-val" style="color:${gain_color}">${plusvalue_nette>=0?'+':''}${fmt(plusvalue_nette)}</div>
+    </div>`;
+
+  // KPIs
+  const pvBox = document.getElementById('rev-kpi-plusvalue');
+  const pvEl  = document.getElementById('rev-r-plusvalue');
+  if (pvBox) pvBox.className = 'result-box ' + (plusvalue_nette>=0?'green':'red');
+  if (pvEl)  pvEl.textContent = (plusvalue_nette>=0?'+':'') + fmt(plusvalue_nette);
+
+  const mise = (revChk.apport ? fixed.apport_initial : 0) + (revChk.fn_achat ? fixed.fn_achat : 0);
+  const renta = mise > 0 && rev_duree > 0 ? (plusvalue_nette / mise / rev_duree * 100) : 0;
+  const rEl = document.getElementById('rev-r-rentabilite');
+  if (rEl) rEl.textContent = (renta>=0?'+':'') + fmtN(renta,1) + ' %/an';
+
+  const badge = document.getElementById('rev-badge-result');
+  if (badge) badge.innerHTML = plusvalue_nette >= 0
+    ? `<span class="badge badge-green">✓ Plus-value — An ${rev_duree}</span>`
+    : `<span class="badge badge-red">⚠ Moins-value — An ${rev_duree}</span>`;
+
+  // Seuil
+  let seuil = null;
+  for (const e of series) {
+    if (pvForEntry(e, fixed).pv >= 0) { seuil = e.ann; break; }
+  }
+  const seuilEl  = document.getElementById('rev-r-seuil');
+  const seuilBox = document.getElementById('rev-kpi-seuil');
+  if (seuilEl)  seuilEl.textContent  = seuil ? `Année ${seuil}` : `> ${fixed.d.duree} ans`;
+  if (seuilBox) seuilBox.className   = 'result-box ' + (seuil ? 'green' : 'red');
+}
+
+function renderRevTableFromData() {
+  if (!revData) return;
+  const { fixed, series, rev_duree } = revData;
+  const tbody = document.getElementById('rev-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  series.forEach(entry => {
+    const { produit_net, pv, frais_rev } = pvForEntry(entry, fixed);
+    const pvColor = pv>=0 ? 'color:var(--green);font-weight:700;background:var(--green-bg)' : 'color:var(--red);font-weight:700;background:var(--red-bg)';
+    const isCur = entry.ann === rev_duree;
+    const tr = document.createElement('tr');
+    if (isCur) tr.style.cssText = 'background:var(--accent-bg);font-weight:700';
+    // Compute total_irrec for display (what's actually deducted in current state)
+    const total_irrec =
+      (revChk.apport        ? fixed.apport_initial : 0) +
+      (revChk.fn_achat      ? fixed.fn_achat       : 0) +
+      (revChk.frais_dos     ? fixed.frais_dos      : 0) +
+      (revChk.travaux_achat ? fixed.travaux_achat  : 0) +
+      (revChk.int_cum       ? entry.int_cum        : 0) +
+      (revChk.ass_cum       ? entry.ass_cum        : 0) +
+      (revChk.ms_cum        ? entry.ms_cum         : 0) +
+      (revChk.ptz_cum       ? entry.ptz_cum        : 0) +
+      (revChk.impot_pv      ? entry.impot_pv       : 0);
+    tr.innerHTML = `
+      <td style="font-weight:600">${entry.ann}${isCur?' ★':''}</td>
+      <td style="text-align:right">${fmt(entry.cap_restant)}</td>
+      <td style="text-align:right;color:${revChk.int_cum?'var(--red)':'var(--text3)'}">${revChk.int_cum?fmt(entry.int_cum):'('+fmt(entry.int_cum)+')'}</td>
+      <td style="text-align:right;color:${revChk.ass_cum?'var(--red)':'var(--text3)'}">${revChk.ass_cum?fmt(entry.ass_cum):'('+fmt(entry.ass_cum)+')'}</td>
+      <td style="text-align:right;color:${entry.ms_cum&&revChk.ms_cum?'var(--red)':'var(--text3)'}">${entry.ms_cum?(revChk.ms_cum?fmt(entry.ms_cum):'('+fmt(entry.ms_cum)+')'):'—'}</td>
+      <td style="text-align:right;font-weight:600">${fmt(total_irrec)}</td>
+      <td style="text-align:right;color:var(--blue)">${fmt(entry.prix_ann)}</td>
+      <td style="text-align:right;color:var(--red)">${fmt(frais_rev)}</td>
+      <td style="text-align:right">${fmt(produit_net)}</td>
+      <td style="text-align:right;${pvColor}">${pv>=0?'+':''}${fmt(pv)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderRevChartFromData() {
+  if (!revData) return;
+  const { fixed, series, rev_duree } = revData;
+  const ctx = document.getElementById('rev-chart');
+  if (!ctx) return;
+  if (revChart) revChart.destroy();
+
+  let seuil = null;
+  const labels = [], pvData = [], colors = [];
+  for (const entry of series) {
+    const { pv } = pvForEntry(entry, fixed);
+    labels.push('An ' + entry.ann);
+    pvData.push(Math.round(pv));
+    colors.push(pv >= 0 ? getCSSVar('--green') : getCSSVar('--red'));
+    if (seuil === null && pv >= 0) seuil = entry.ann;
+  }
+
+  const annotations = {
+    zero: { type:'line', yMin:0, yMax:0, borderColor:getCSSVar('--text3'), borderWidth:1, borderDash:[4,3] }
+  };
+  if (seuil) annotations.seuil = {
+    type:'line', xMin:seuil-1, xMax:seuil-1, scaleID:'x',
+    borderColor:getCSSVar('--green'), borderWidth:2, borderDash:[6,3],
+    label:{ content:`Seuil — An ${seuil}`, display:true, position:'start',
+            color:getCSSVar('--green'), backgroundColor:'transparent', font:{size:11,weight:'bold'} }
+  };
+  if (rev_duree <= fixed.d.duree) annotations.cursor = {
+    type:'line', xMin:rev_duree-1, xMax:rev_duree-1, scaleID:'x',
+    borderColor:getCSSVar('--accent'), borderWidth:2,
+    label:{ content:`Votre scénario — An ${rev_duree}`, display:true, position:'end',
+            color:getCSSVar('--accent'), backgroundColor:'transparent', font:{size:11,weight:'bold'} }
+  };
+
+  revChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'Plus-value nette si revente', data:pvData,
+           backgroundColor:colors, borderRadius:3, borderSkipped:false }] },
+    options:{ ...roiChartDefaults(), plugins:{ ...roiChartDefaults().plugins, annotation:{annotations} } }
+  });
+}
+
+// NOTIFICATIONS
+// ============================================================
+let notifTimer;
+function showNotif(msg, type='') {
+  const n = document.getElementById('notif');
+  n.textContent = (type==='success'?'✓ ':type==='error'?'✗ ':'') + msg;
+  n.className = 'notif show ' + type;
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => n.classList.remove('show'), 3000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  if (!loadSaved()) {
+    addProjet();
+  }
+  calcAll();
+  snapshot();
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+  });
+});
+</script>
+</body>
+</html>
