@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Transfert d'appels</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --panel: #1a1a1a;
+    --border: #2e2e2e;
+    --text: #e8e8e0;
+    --muted: #666;
+    --on: #00e676;
+    --on-glow: rgba(0,230,118,0.18);
+    --off: #ff3d3d;
+    --off-glow: rgba(255,61,61,0.15);
+    --accent: #f0e040;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 40px;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%;
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .label-top {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  /* ── Main card ── */
+  main {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── Status pill ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+  .status-bar.active {
+    border-color: var(--on);
+    background: var(--on-glow);
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+  }
+  .status-bar.active .dot {
+    background: var(--on);
+    box-shadow: 0 0 10px var(--on);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 6px var(--on); }
+    50% { box-shadow: 0 0 14px var(--on); }
+  }
+  .status-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .status-bar.active .status-text { color: var(--on); }
+  .status-dest {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .status-bar.active .status-dest { color: var(--text); }
+
+  /* ── Input group ── */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .input-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+  input[type="tel"] {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="tel"]:focus { border-color: var(--accent); }
+  input[type="tel"]::placeholder { color: #3a3a3a; }
+
+  .btn-clear {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 18px;
+    width: 50px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-clear:active { background: #222; color: var(--text); }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Main buttons ── */
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.12s, filter 0.15s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .btn:active::after { opacity: 0.07; }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-on {
+    background: var(--on);
+    color: #0a1a0f;
+    box-shadow: 0 4px 24px rgba(0,230,118,0.25);
+  }
+  .btn-on:active { box-shadow: 0 2px 12px rgba(0,230,118,0.15); }
+
+  .btn-off {
+    background: #1e0a0a;
+    color: var(--off);
+    border: 1px solid var(--off);
+    box-shadow: 0 4px 20px rgba(255,61,61,0.1);
+  }
+  .btn-off:active { box-shadow: 0 2px 10px rgba(255,61,61,0.08); }
+
+  .btn-check {
+    background: var(--panel);
+    color: var(--accent);
+    border: 1px solid #3a3820;
+    font-size: 15px;
+    padding: 15px 24px;
+  }
+
+  .btn-icon { font-size: 22px; line-height: 1; }
+
+  /* ── Info block ── */
+  .info-block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .info-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-key {
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .info-val {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    text-align: right;
+    word-break: break-all;
+  }
+  .info-sep {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e1e1e;
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 12px 22px;
+    font-size: 13px;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="label-top">DST · Meyzieu</span>
+  <h1>Transfert<br>d'appels</h1>
+</header>
+
+<main>
+
+  <!-- Statut courant -->
+  <div class="status-bar" id="statusBar">
+    <div class="dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Inactif</span>
+    <span class="status-dest" id="statusDest">—</span>
+  </div>
+
+  <!-- Numéro de destination -->
+  <div class="input-group">
+    <span class="input-label">Numéro de destination</span>
+    <div class="input-row">
+      <input type="tel" id="numInput" placeholder="06 12 34 56 78" autocomplete="tel">
+      <button class="btn-clear" onclick="clearNum()" title="Effacer">×</button>
+    </div>
+  </div>
+
+  <div class="divider">Action</div>
+
+  <!-- Boutons principaux -->
+  <div class="btn-group">
+    <a class="btn btn-on" id="btnOn" href="#" onclick="activateForward(event)">
+      <span class="btn-icon">📲</span>
+      Activer le transfert
+    </a>
+    <a class="btn btn-off" id="btnOff" href="#" onclick="deactivateForward(event)">
+      <span class="btn-icon">🔕</span>
+      Désactiver le transfert
+    </a>
+    <a class="btn btn-check" href="#" onclick="checkForward(event)">
+      <span class="btn-icon">🔍</span>
+      Vérifier l'état
+    </a>
+  </div>
+
+  <!-- Codes USSD -->
+  <div class="info-block">
+    <span class="info-title">Codes USSD utilisés</span>
+    <div class="info-row">
+      <span class="info-key">Activation</span>
+      <span class="info-val" id="codeOn">*21*[numéro]#</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-row">
+      <span class="info-key">Désactivation</span>
+      <span class="info-val">#21#</span>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-row">
+      <span class="info-key">Vérification</span>
+      <span class="info-val">*#21#</span>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const numInput = document.getElementById('numInput');
+  const statusBar = document.getElementById('statusBar');
+  const statusText = document.getElementById('statusText');
+  const statusDest = document.getElementById('statusDest');
+  const codeOn = document.getElementById('codeOn');
+  const toast = document.getElementById('toast');
+
+  // Met à jour l'affichage du code USSD selon le numéro saisi
+  numInput.addEventListener('input', () => {
+    const num = cleanNum();
+    codeOn.textContent = num ? `*21*${num}#` : '*21*[numéro]#';
+  });
+
+  function cleanNum() {
+    // Retire espaces, tirets, points
+    return numInput.value.replace(/[\s\-\.]/g, '');
+  }
+
+  function showToast(msg, duration = 2800) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), duration);
+  }
+
+  function activateForward(e) {
+    e.preventDefault();
+    const num = cleanNum();
+    if (!num) {
+      showToast('⚠️ Saisissez un numéro de destination');
+      numInput.focus();
+      return;
+    }
+    // Encode le # en %23 pour l'URI tel:
+    const ussd = `*21*${num}%23`;
+    window.location.href = `tel:${ussd}`;
+    // Mise à jour UI optimiste
+    setTimeout(() => {
+      statusBar.classList.add('active');
+      statusText.textContent = 'Actif';
+      statusDest.textContent = formatNum(num);
+    }, 400);
+  }
+
+  function deactivateForward(e) {
+    e.preventDefault();
+    window.location.href = `tel:%2321%23`;
+    setTimeout(() => {
+      statusBar.classList.remove('active');
+      statusText.textContent = 'Inactif';
+      statusDest.textContent = '—';
+    }, 400);
+  }
+
+  function checkForward(e) {
+    e.preventDefault();
+    window.location.href = `tel:*%2321%23`;
+  }
+
+  function clearNum() {
+    numInput.value = '';
+    codeOn.textContent = '*21*[numéro]#';
+    numInput.focus();
+  }
+
+  function formatNum(n) {
+    // Format FR : 06 12 34 56 78
+    return n.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+  }
+</script>
+</body>
+</html>
