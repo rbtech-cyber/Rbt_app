@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💰 Budget Familial</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg:#f0f4f8; --bg2:#ffffff; --bg3:#e8edf3; --bg4:#d4dce6;
+  --text:#1a2332; --text2:#4a5568; --text3:#94a3b8;
+  --accent:#2563eb; --accent2:#1d4ed8;
+  --green:#10b981; --red:#ef4444; --orange:#f59e0b; --purple:#8b5cf6; --teal:#06b6d4;
+  --border:#d1d9e0; --shadow:0 2px 12px rgba(0,0,0,0.08); --radius:12px;
+}
+[data-theme="dark"] {
+  --bg:#0d1520; --bg2:#1a2332; --bg3:#243047; --bg4:#2d3f5a;
+  --text:#e8edf3; --text2:#94a3b8; --text3:#64748b;
+  --accent:#3b82f6; --accent2:#60a5fa;
+  --border:#2d3f5a; --shadow:0 2px 16px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;font-size:14px}
+/* HEADER */
+.app-header{position:sticky;top:0;z-index:200;background:var(--bg2);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;gap:8px;flex-wrap:wrap}
+.app-title{font-size:1.05rem;font-weight:800;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.app-title small{color:var(--text2);font-weight:500;font-size:0.78rem}
+.header-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;color:var(--text);transition:all .2s;display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:600;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent2)}
+.btn.success{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.danger{color:var(--red)}
+.btn.danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.btn.sm{padding:3px 7px;font-size:0.72rem}
+/* TABS */
+.tabs{display:flex;overflow-x:auto;padding:0 12px;scrollbar-width:none;border-top:1px solid var(--border)}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{padding:10px 14px;border:none;background:transparent;color:var(--text2);font-family:inherit;font-size:0.82rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover{color:var(--text)}
+/* CONTENT */
+.tab-content{display:none;padding:14px;max-width:1400px;margin:0 auto}
+.tab-content.active{display:block}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+.card-title{font-size:0.78rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.kpi-icon{font-size:1.4rem;margin-bottom:4px}
+.kpi-label{font-size:0.7rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.kpi-value{font-size:1.25rem;font-weight:800;margin:4px 0}
+.kpi-sub{font-size:0.7rem;color:var(--text2)}
+.c-green{color:var(--green)} .c-red{color:var(--red)} .c-blue{color:var(--accent)} .c-orange{color:var(--orange)}
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:14px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+.chart-card canvas{max-height:230px}
+/* TABLES */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{background:var(--bg3);color:var(--text2);font-weight:700;padding:7px 9px;text-align:left;border-bottom:2px solid var(--border);font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:var(--bg3)}
+.amount{font-weight:700;font-variant-numeric:tabular-nums}
+/* EDIT SYSTEM */
+.ew{display:inline-flex;align-items:center;gap:3px}
+.btn-pen{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px 3px;border-radius:4px;font-size:0.72rem;opacity:0;transition:opacity .2s;line-height:1}
+tr:hover .btn-pen,.card:hover .btn-pen,.livret-card:hover .btn-pen{opacity:.7}
+.btn-pen:hover{opacity:1!important;background:var(--bg4)}
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.sh-title{font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:6px}
+/* POSTE */
+.poste{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.poste-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);cursor:pointer;font-weight:700;font-size:0.88rem;user-select:none}
+.poste-head .chevron{transition:transform .2s;font-size:0.8rem;margin-right:2px}
+.poste.collapsed .chevron{transform:rotate(-90deg)}
+.poste.collapsed .poste-body{display:none}
+.poste-body{border-top:1px solid var(--border)}
+.poste-foot{padding:8px 12px;background:var(--bg3)}
+/* PROGRESS */
+.prog-bar{background:var(--bg3);border-radius:4px;height:5px;overflow:hidden;margin-top:3px}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s}
+/* LIVRETS */
+.livret-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.livret-card{background:var(--bg3);border-radius:10px;padding:12px;border:1px solid var(--border)}
+.livret-label{font-weight:700;font-size:0.85rem;margin-bottom:8px}
+.lf{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:0.78rem;color:var(--text2)}
+.lf strong{color:var(--text)}
+.taux-badge{background:rgba(37,99,235,.12);color:var(--accent);font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:10px}
+/* SIMULATION */
+.sim-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+.sim-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.risque{font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:3px;display:inline-block}
+.r-faible{background:rgba(16,185,129,.15);color:var(--green)}
+.r-moyen{background:rgba(245,158,11,.15);color:var(--orange)}
+.r-eleve{background:rgba(239,68,68,.15);color:var(--red)}
+.sim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px}
+.sim-item{background:var(--bg3);border-radius:7px;padding:8px}
+.sim-item .sl{font-size:0.68rem;color:var(--text2);margin-bottom:2px}
+.sim-item .sv{font-size:0.88rem;font-weight:700}
+/* TOTAUX ANNUELS BANNER */
+.totaux-banner{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:var(--radius);padding:16px;margin-top:12px}
+.totaux-banner h3{font-size:0.82rem;margin-bottom:10px;opacity:.8;text-transform:uppercase;letter-spacing:.06em}
+.totaux-bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.tb-item{text-align:center}
+.tb-val{font-size:1.15rem;font-weight:800}
+.tb-lbl{font-size:0.68rem;opacity:.8;margin-top:1px}
+/* SYNTH */
+.synth-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.synth-item{background:var(--bg3);border-radius:8px;padding:12px;text-align:center}
+.synth-val{font-size:1.2rem;font-weight:800}
+.synth-lbl{font-size:0.7rem;color:var(--text2);margin-top:2px}
+/* FICHE DE PAIE */
+.fiche-row{display:flex;justify-content:space-between;align-items:center;padding:5px 6px;border-bottom:1px dashed var(--border);font-size:0.8rem;gap:8px}
+.fiche-row:last-child{border:none}
+.fiche-row.fiche-hd{font-weight:700;color:var(--text2);font-size:0.7rem;text-transform:uppercase;border-bottom:2px solid var(--border)}
+.fiche-row.fiche-total{font-weight:800;background:var(--bg3);border-radius:6px;padding:7px 8px;border:none;margin-top:4px}
+.fiche-row.fiche-sub{color:var(--text2);font-size:0.76rem}
+/* EXPORT BAR */
+.export-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.modal-ov.hidden{display:none}
+.modal{background:var(--bg2);border-radius:var(--radius);padding:20px;max-width:420px;width:100%;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{margin-bottom:12px;font-size:0.95rem;font-weight:700}
+.modal label{display:block;font-size:0.75rem;color:var(--text2);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.modal input,.modal select,.modal textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-family:inherit;font-size:0.88rem;margin-bottom:10px}
+.modal input:focus,.modal select:focus{outline:none;border-color:var(--accent)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+/* TOAST */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--text);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:0.82rem;font-weight:600;z-index:3000;transform:translateY(60px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+/* SEP */
+.sep{height:1px;background:var(--border);margin:12px 0}
+/* INPUT NUM */
+.fi{font-size:0.8rem;padding:4px 8px;border-radius:6px;border:1px solid var(--accent);background:var(--bg3);color:var(--text);font-family:inherit;width:100%}
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;margin-bottom:14px}
+/* ANNO OVERRIDE */
+.override-badge{background:rgba(245,158,11,.15);color:var(--orange);font-size:0.68rem;padding:2px 6px;border-radius:6px;font-weight:700}
+/* RESPONSIVE */
+@media(max-width:600px){
+  .header-top{padding:6px 10px}
+  .btn span{display:none}
+  .tab-btn{padding:8px 10px;font-size:0.75rem}
+  .tab-content{padding:10px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+/* COLOR ACCENT BARS */
+.acc-blue{border-left:3px solid var(--accent)}
+.acc-green{border-left:3px solid var(--green)}
+.acc-red{border-left:3px solid var(--red)}
+.acc-orange{border-left:3px solid var(--orange)}
+.acc-purple{border-left:3px solid var(--purple)}
+.acc-teal{border-left:3px solid var(--teal)}
+</style>
+</head>
+<body>
+
+<!-- ====== HEADER ====== -->
+<header class="app-header">
+  <div class="header-top">
+    <div class="app-title" onclick="editMeta('title')">
+      💰 <span id="appTitle">Budget Familial</span>
+      <small id="appYear">2026</small>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="undo()" title="Annuler Ctrl+Z">↩ <span>Annuler</span></button>
+      <button class="btn" onclick="redo()" title="Rétablir Ctrl+Y">↪ <span>Rétablir</span></button>
+      <button class="btn primary" onclick="saveToStorage()" title="Sauvegarder Ctrl+S">💾 <span>Sauvegarder</span></button>
+      <button class="btn" onclick="exportJSON()">📤 <span>Export JSON</span></button>
+      <button class="btn" onclick="triggerImport()">📥 <span>Import JSON</span></button>
+      <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙 <span>Thème</span></button>
+      <input type="file" id="importFile" style="display:none" accept=".json" onchange="importJSON(event)">
+    </div>
+  </div>
+  <nav>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('dashboard',this)">📊 Tableau de bord</button>
+      <button class="tab-btn" onclick="switchTab('recettes',this)">💰 Recettes</button>
+      <button class="tab-btn" onclick="switchTab('depenses',this)">💸 Dépenses</button>
+      <button class="tab-btn" onclick="switchTab('epargne',this)">🏦 Épargnes & Placements</button>
+    </div>
+  </nav>
+</header>
+
+<!-- ====== TAB DASHBOARD ====== -->
+<div id="tab-dashboard" class="tab-content active">
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="card-title">📊 Recettes vs Dépenses</div><canvas id="chartBar"></canvas></div>
+    <div class="chart-card"><div class="card-title">🍩 Répartition des dépenses</div><canvas id="chartDoughnut"></canvas></div>
+    <div class="chart-card"><div class="card-title">📈 Projection solde cumulé (12 mois)</div><canvas id="chartLine"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="sh">
+      <div class="card-title">📋 Synthèse mensuelle & annuelle</div>
+      <div class="export-bar">
+        <button class="btn sm" onclick="exportTableCSV('synthTbl','synthese')">📊 CSV</button>
+        <button class="btn sm" onclick="exportTableJPEG('synthSection')">🖼 JPEG</button>
+        <button class="btn sm" onclick="exportTablePNG('synthSection')">🖼 PNG</button>
+        <button class="btn sm" onclick="exportTablePDF('synthSection','synthese')">📄 PDF</button>
+      </div>
+    </div>
+    <div id="synthSection">
+      <div class="tbl-wrap">
+        <table id="synthTbl">
+          <thead><tr><th>Poste</th><th>Mensuel</th><th>Annuel</th><th>% budget</th></tr></thead>
+          <tbody id="synthBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📐 Taux budgétaires du foyer</div>
+    <div class="synth-grid" id="tauxGrid"></div>
+  </div>
+</div>
+
+<!-- ====== TAB RECETTES ====== -->
+<div id="tab-recettes" class="tab-content">
+  <div class="export-bar">
+    <button class="btn sm" onclick="exportRecettesCSV()">📊 CSV</button>
+    <button class="btn sm" onclick="exportTableJPEG('recettesSection')">🖼 JPEG</button>
+    <button class="btn sm" onclick="exportTablePNG('recettesSection')">🖼 PNG</button>
+    <button class="btn sm" onclick="exportTablePDF('recettesSection','recettes')">📄 PDF</button>
+    <button class="btn sm" onclick="generateReportRecettes()">📝 Rapport RTF</button>
+  </div>
+  <div id="recettesSection">
+    <div class="two-col">
+      <!-- Monsieur -->
+      <div class="card acc-blue">
+        <div class="sh">
+          <div class="sh-title">👔 <span class="ew"><span id="nomM">Monsieur</span><button class="btn-pen" onclick="editMeta('monsieur')">✏️</button></span></div>
+          <button class="btn success sm" onclick="addLigneRecette('monsieur')">+ Ligne</button>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Libellé</th><th>Montant</th><th>Fréquence</th><th></th></tr></thead>
+          <tbody id="bodyM"></tbody></table>
+        </div>
+        <div id="totM" style="margin-top:8px"></div>
+      </div>
+      <!-- Madame -->
+      <div class="card acc-purple">
+        <div class="sh">
+          <div class="sh-title">👗 <span class="ew"><span id="nomF">Madame</span><button class="btn-pen" onclick="editMeta('madame')">✏️</button></span></div>
+          <button class="btn success sm" onclick="addLigneRecette('madame')">+ Ligne</button>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Libellé</th><th>Montant</th><th>Fréquence</th><th></th></tr></thead>
+          <tbody id="bodyF"></tbody></table>
+        </div>
+        <div id="totF" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <!-- Autres recettes -->
+    <div class="card acc-green">
+      <div class="sh">
+        <div class="sh-title">➕ Autres recettes du foyer</div>
+        <button class="btn success sm" onclick="addAutreRecette()">+ Ajouter</button>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Libellé</th><th>Montant</th><th>Fréquence</th><th>Équiv. mensuel</th><th></th></tr></thead>
+        <tbody id="bodyAutres"></tbody></table>
+      </div>
+    </div>
+    <!-- Totaux annuels -->
+    <div class="totaux-banner" id="totauxBanner">
+      <h3>💰 Cumuls annuels du foyer</h3>
+      <div class="totaux-bgrid" id="totauxBGrid"></div>
+    </div>
+    <!-- Fiches de salaire -->
+    <div class="sep"></div>
+    <div class="two-col" style="margin-top:14px">
+      <div class="card acc-blue">
+        <div class="sh">
+          <div class="sh-title">📋 Bulletin de salaire — <span id="ficheNomM">Monsieur</span></div>
+          <button class="btn success sm" onclick="addFicheLigne('monsieur')">+ Ligne</button>
+        </div>
+        <div id="ficheM"></div>
+      </div>
+      <div class="card acc-purple">
+        <div class="sh">
+          <div class="sh-title">📋 Bulletin de salaire — <span id="ficheNomF">Madame</span></div>
+          <button class="btn success sm" onclick="addFicheLigne('madame')">+ Ligne</button>
+        </div>
+        <div id="ficheF"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB DÉPENSES ====== -->
+<div id="tab-depenses" class="tab-content">
+  <div class="export-bar">
+    <button class="btn sm" onclick="exportDepensesCSV()">📊 CSV</button>
+    <button class="btn sm" onclick="exportTableJPEG('depensesSection')">🖼 JPEG</button>
+    <button class="btn sm" onclick="exportTablePNG('depensesSection')">🖼 PNG</button>
+    <button class="btn sm" onclick="exportTablePDF('depensesSection','depenses')">📄 PDF</button>
+    <button class="btn sm" onclick="generateReportDepenses()">📝 Rapport RTF</button>
+    <button class="btn success sm" onclick="addPoste()">+ Poste</button>
+  </div>
+  <div id="depensesSection">
+    <div id="depContainer"></div>
+    <div class="card acc-red">
+      <div class="card-title">💸 Total des dépenses</div>
+      <div class="synth-grid" id="depTotaux"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB ÉPARGNE ====== -->
+<div id="tab-epargne" class="tab-content">
+  <div class="export-bar">
+    <button class="btn sm" onclick="exportEpargneCSV()">📊 CSV</button>
+    <button class="btn sm" onclick="exportTableJPEG('epargneSection')">🖼 JPEG</button>
+    <button class="btn sm" onclick="exportTablePNG('epargneSection')">🖼 PNG</button>
+    <button class="btn sm" onclick="exportTablePDF('epargneSection','epargne')">📄 PDF</button>
+    <button class="btn sm" onclick="generateReportEpargne()">📝 Rapport RTF</button>
+  </div>
+  <div id="epargneSection">
+    <div class="card">
+      <div class="sh">
+        <div class="card-title">🏦 Livrets réglementés</div>
+        <button class="btn success sm" onclick="addLivret()">+ Livret</button>
+      </div>
+      <div class="livret-grid" id="livretsGrid"></div>
+      <div id="livretsTotaux" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <div class="sh">
+        <div class="card-title">📈 Simulations de placements</div>
+        <button class="btn success sm" onclick="addPlacement()">+ Placement</button>
+      </div>
+      <div id="placementsGrid"></div>
+      <div class="chart-card" style="margin-top:14px">
+        <div class="card-title">📊 Projection comparative des placements</div>
+        <canvas id="chartPlacements" style="max-height:280px"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL ====== -->
+<div class="modal-ov hidden" id="modalOv" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modalTitle">Éditer</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Annuler</button>
+      <button class="btn primary" onclick="confirmModal()">✓ Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================================================================
+//  STATE MODEL
+// ================================================================
+let S = {
+  meta:{ title:"Budget Familial", annee:new Date().getFullYear(), monsieur:"Monsieur", madame:"Madame" },
+  recettes:{
+    monsieur:{
+      lignes:[
+        {id:1,label:"Salaire net mensuel",montant:0,freq:"mensuel"},
+        {id:2,label:"Prime annuelle",montant:0,freq:"annuel"},
+        {id:3,label:"Avantages en nature",montant:0,freq:"mensuel"}
+      ],
+      annuel:{brut:0,imposable:0,net:0,override:false},
+      fiche:[
+        {id:1,label:"Salaire brut de base",montant:0,sens:"credit"},
+        {id:2,label:"Heures supplémentaires",montant:0,sens:"credit"},
+        {id:3,label:"Avantages en nature",montant:0,sens:"credit"},
+        {id:4,label:"Mutuelle / Prévoyance salarié",montant:0,sens:"debit"},
+        {id:5,label:"Retraite base (CNAV)",montant:0,sens:"debit"},
+        {id:6,label:"Retraite complémentaire (AGIRC-ARRCO)",montant:0,sens:"debit"},
+        {id:7,label:"Assurance chômage",montant:0,sens:"debit"},
+        {id:8,label:"CSG déductible",montant:0,sens:"debit"},
+        {id:9,label:"CSG / CRDS non déductible",montant:0,sens:"debit"},
+        {id:10,label:"Autres cotisations",montant:0,sens:"debit"},
+        {id:11,label:"Net imposable",montant:0,sens:"neutre"},
+        {id:12,label:"Prélèvement à la source (PAS)",montant:0,sens:"debit"},
+        {id:13,label:"Net à payer",montant:0,sens:"total"}
+      ]
+    },
+    madame:{
+      lignes:[
+        {id:1,label:"Salaire net mensuel",montant:0,freq:"mensuel"},
+        {id:2,label:"Prime annuelle",montant:0,freq:"annuel"},
+        {id:3,label:"Allocations",montant:0,freq:"mensuel"}
+      ],
+      annuel:{brut:0,imposable:0,net:0,override:false},
+      fiche:[
+        {id:1,label:"Salaire brut de base",montant:0,sens:"credit"},
+        {id:2,label:"Heures supplémentaires",montant:0,sens:"credit"},
+        {id:3,label:"Avantages en nature",montant:0,sens:"credit"},
+        {id:4,label:"Mutuelle / Prévoyance salarié",montant:0,sens:"debit"},
+        {id:5,label:"Retraite base (CNAV)",montant:0,sens:"debit"},
+        {id:6,label:"Retraite complémentaire (AGIRC-ARRCO)",montant:0,sens:"debit"},
+        {id:7,label:"Assurance chômage",montant:0,sens:"debit"},
+        {id:8,label:"CSG déductible",montant:0,sens:"debit"},
+        {id:9,label:"CSG / CRDS non déductible",montant:0,sens:"debit"},
+        {id:10,label:"Autres cotisations",montant:0,sens:"debit"},
+        {id:11,label:"Net imposable",montant:0,sens:"neutre"},
+        {id:12,label:"Prélèvement à la source (PAS)",montant:0,sens:"debit"},
+        {id:13,label:"Net à payer",montant:0,sens:"total"}
+      ]
+    },
+    autres:[]
+  },
+  depenses:{
+    postes:[
+      {id:1,label:"🏠 Logement",cat:"logement",lignes:[
+        {id:1,label:"Loyer mensuel",montant:0},
+        {id:2,label:"Crédit immobilier",montant:0},
+        {id:3,label:"Assurance habitation",montant:0},
+        {id:4,label:"Charges de copropriété",montant:0},
+        {id:5,label:"Taxe foncière (mensuel.)",montant:0},
+        {id:6,label:"TOEM (mensuel.)",montant:0},
+        {id:7,label:"Entretien courant",montant:0}
+      ]},
+      {id:2,label:"⚡ Énergie & Fluides",cat:"energie",lignes:[
+        {id:1,label:"Électricité (EDF / fournisseur)",montant:0},
+        {id:2,label:"Gaz / Fioul / Chauffage",montant:0},
+        {id:3,label:"Eau froide & chaude",montant:0}
+      ]},
+      {id:3,label:"🚗 Transport",cat:"transport",lignes:[
+        {id:1,label:"Carburant / Essence",montant:0},
+        {id:2,label:"Assurance auto",montant:0},
+        {id:3,label:"Entretien / Garage / CT",montant:0},
+        {id:4,label:"Crédit auto",montant:0},
+        {id:5,label:"Stationnement / Péage",montant:0},
+        {id:6,label:"Transports en commun",montant:0}
+      ]},
+      {id:4,label:"📱 Numérique & Télécom",cat:"telecom",lignes:[
+        {id:1,label:"Abonnement Internet / Box",montant:0},
+        {id:2,label:"Téléphone mobile (x2)",montant:0},
+        {id:3,label:"Streaming (Netflix, Spotify…)",montant:0},
+        {id:4,label:"Logiciels / Cloud",montant:0}
+      ]},
+      {id:5,label:"🛒 Alimentation",cat:"alimentation",lignes:[
+        {id:1,label:"Courses semaine 1",montant:0},
+        {id:2,label:"Courses semaine 2",montant:0},
+        {id:3,label:"Courses semaine 3",montant:0},
+        {id:4,label:"Courses semaine 4",montant:0},
+        {id:5,label:"Courses semaine 5",montant:0},
+        {id:6,label:"Restaurants / Sorties repas",montant:0},
+        {id:7,label:"Café / Cantine",montant:0}
+      ]},
+      {id:6,label:"🎭 Loisirs & Culture",cat:"loisirs",lignes:[
+        {id:1,label:"Loisirs créatifs",montant:0},
+        {id:2,label:"Cinéma / Spectacles / Concerts",montant:0},
+        {id:3,label:"Sport & Activités physiques",montant:0},
+        {id:4,label:"Livres / Presse / Jeux",montant:0},
+        {id:5,label:"Sorties / Activités enfants",montant:0}
+      ]},
+      {id:7,label:"✈️ Vacances & Voyages",cat:"vacances",lignes:[
+        {id:1,label:"Vacances (provision mensuelle)",montant:0},
+        {id:2,label:"Voyages ponctuels (provision)",montant:0}
+      ]},
+      {id:8,label:"🏥 Santé",cat:"sante",lignes:[
+        {id:1,label:"Mutuelle complémentaire",montant:0},
+        {id:2,label:"Médecin / Spécialistes",montant:0},
+        {id:3,label:"Médicaments / Pharmacie",montant:0},
+        {id:4,label:"Dentiste / Ophtalmo (provision)",montant:0},
+        {id:5,label:"Équipements santé",montant:0}
+      ]},
+      {id:9,label:"🛋 Maison & Mobilier",cat:"maison",lignes:[
+        {id:1,label:"Mobilier / Déco",montant:0},
+        {id:2,label:"Travaux / Bricolage",montant:0},
+        {id:3,label:"Électroménager",montant:0},
+        {id:4,label:"Entretien ménager / Produits",montant:0}
+      ]},
+      {id:10,label:"💝 Achats & Générosité",cat:"achats",lignes:[
+        {id:1,label:"Achats divers / Vêtements",montant:0},
+        {id:2,label:"Cadeaux",montant:0},
+        {id:3,label:"Dons / Associations",montant:0}
+      ]},
+      {id:11,label:"📚 Éducation & Enfants",cat:"education",lignes:[
+        {id:1,label:"Scolarité / Fournitures",montant:0},
+        {id:2,label:"Garde / Crèche / Cantine",montant:0},
+        {id:3,label:"Activités extrascolaires",montant:0}
+      ]},
+      {id:12,label:"💎 Épargne & Placements",cat:"epargne",lignes:[
+        {id:1,label:"Épargne mensuelle (virements)",montant:0}
+      ]}
+    ]
+  },
+  epargne:{
+    comptes:[
+      {id:1,label:"Livret A — Monsieur",taux:3.0,solde:0,mensuel:0},
+      {id:2,label:"Livret A — Madame",taux:3.0,solde:0,mensuel:0},
+      {id:3,label:"LDDS — Monsieur",taux:3.0,solde:0,mensuel:0},
+      {id:4,label:"LDDS — Madame",taux:3.0,solde:0,mensuel:0},
+      {id:5,label:"Livret Épargne Logement (LEL)",taux:2.5,solde:0,mensuel:0}
+    ],
+    placements:[
+      {id:1,label:"PER (Plan Épargne Retraite)",taux:4.5,risque:"faible",initial:0,mensuel:0,duree:20},
+      {id:2,label:"Assurance-Vie Fonds Euros",taux:3.0,risque:"faible",initial:0,mensuel:0,duree:10},
+      {id:3,label:"SCPI (Immobilier papier)",taux:5.5,risque:"moyen",initial:0,mensuel:0,duree:15},
+      {id:4,label:"ETF / Actions (ex. CW8)",taux:8.0,risque:"eleve",initial:0,mensuel:0,duree:10}
+    ]
+  }
+};
+
+// ================================================================
+//  UNDO / REDO
+// ================================================================
+let undoStack=[], redoStack=[];
+function snap(){ undoStack.push(JSON.stringify(S)); if(undoStack.length>50)undoStack.shift(); redoStack=[]; }
+function undo(){ if(!undoStack.length)return toast("Rien à annuler"); redoStack.push(JSON.stringify(S)); S=JSON.parse(undoStack.pop()); renderAll(); toast("↩ Annulé"); }
+function redo(){ if(!redoStack.length)return toast("Rien à rétablir"); undoStack.push(JSON.stringify(S)); S=JSON.parse(redoStack.pop()); renderAll(); toast("↪ Rétabli"); }
+
+// ================================================================
+//  STORAGE
+// ================================================================
+function saveToStorage(){ localStorage.setItem('budgetFamilial2',JSON.stringify(S)); toast("💾 Sauvegardé !"); }
+function loadFromStorage(){ const d=localStorage.getItem('budgetFamilial2'); if(d){try{S=JSON.parse(d);}catch(e){}} }
+
+// ================================================================
+//  JSON EXPORT / IMPORT
+// ================================================================
+function exportJSON(){
+  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  dl(URL.createObjectURL(b),`budget_${iso()}.json`); toast("📤 JSON exporté");
+}
+function triggerImport(){ document.getElementById('importFile').click(); }
+function importJSON(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{snap();S=JSON.parse(ev.target.result);renderAll();toast("📥 Données importées");}catch(x){toast("❌ Fichier invalide");}};
+  r.readAsText(f); e.target.value='';
+}
+
+// ================================================================
+//  THEME
+// ================================================================
+function toggleTheme(){
+  const d=document.documentElement, dark=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('themeBtn').innerHTML=dark?'🌙 <span>Thème</span>':'☀️ <span>Thème</span>';
+  setTimeout(updateCharts,80);
+}
+function initTheme(){
+  if(window.matchMedia('(prefers-color-scheme: dark)').matches){
+    document.documentElement.setAttribute('data-theme','dark');
+    document.getElementById('themeBtn').innerHTML='☀️ <span>Thème</span>';
+  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
+    document.documentElement.setAttribute('data-theme',e.matches?'dark':'light');
+    setTimeout(updateCharts,80);
+  });
+}
+
+// ================================================================
+//  TABS
+// ================================================================
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='dashboard')updateCharts();
+  if(name==='epargne')updatePlacementsChart();
+}
+
+// ================================================================
+//  FORMAT HELPERS
+// ================================================================
+function f(n){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0)+'\u00a0€';}
+function n(v){return parseFloat(v)||0;}
+function iso(){return new Date().toISOString().slice(0,10);}
+function dl(url,name){const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+
+// ================================================================
+//  CALCULATIONS
+// ================================================================
+const FREQ={mensuel:1,trimestriel:1/3,semestriel:1/6,annuel:1/12,unique:0};
+function totRecM(){
+  let t=0;
+  ['monsieur','madame'].forEach(p=>S.recettes[p].lignes.forEach(l=>{t+=n(l.montant)*(FREQ[l.freq]??1);}));
+  S.recettes.autres.forEach(a=>t+=n(a.montant)*(FREQ[a.freq]??1));
+  return t;
+}
+function totRecPersonne(p){
+  let t=0; S.recettes[p].lignes.forEach(l=>t+=n(l.montant)*(FREQ[l.freq]??1)); return t;
+}
+function totDepM(){ let t=0; S.depenses.postes.forEach(p=>p.lignes.forEach(l=>t+=n(l.montant))); return t; }
+function solde(){ return totRecM()-totDepM(); }
+function totEpargneM(){ return S.epargne.comptes.reduce((s,c)=>s+n(c.mensuel),0); }
+function depParPoste(){ return S.depenses.postes.map(p=>({label:p.label,tot:p.lignes.reduce((s,l)=>s+n(l.montant),0)})).filter(p=>p.tot>0); }
+
+function simPlacement(p){
+  const r=n(p.taux)/100/12, nm=n(p.duree)*12, C0=n(p.initial), m=n(p.mensuel);
+  const g=Math.pow(1+r,nm);
+  const fin=C0*g+(r>0?m*(g-1)/r:m*nm);
+  const verse=C0+m*nm;
+  return {fin,verse,interets:fin-verse};
+}
+
+// ================================================================
+//  RENDER ALL
+// ================================================================
+function renderAll(){
+  document.getElementById('appTitle').textContent=S.meta.title;
+  document.getElementById('appYear').textContent=S.meta.annee;
+  renderRecettes();
+  renderDepenses();
+  renderEpargne();
+  renderDashboard();
+}
+
+// ================================================================
+//  DASHBOARD
+// ================================================================
+function renderDashboard(){
+  const rec=totRecM(), dep=totDepM(), sol=solde(), ep=totEpargneM();
+  const pDep=rec>0?(dep/rec*100):0, pSol=rec>0?(sol/rec*100):0, pEp=rec>0?(ep/rec*100):0;
+
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Recettes mensuelles</div><div class="kpi-value c-green">${f(rec)}</div><div class="kpi-sub">Annuel : ${f(rec*12)}</div></div>
+    <div class="kpi-card"><div class="kpi-icon">💸</div><div class="kpi-label">Dépenses mensuelles</div><div class="kpi-value c-red">${f(dep)}</div><div class="kpi-sub">Annuel : ${f(dep*12)}</div></div>
+    <div class="kpi-card"><div class="kpi-icon">${sol>=0?'✅':'⚠️'}</div><div class="kpi-label">Solde mensuel</div><div class="kpi-value ${sol>=0?'c-blue':'c-red'}">${f(sol)}</div><div class="kpi-sub">Annuel : ${f(sol*12)}</div></div>
+    <div class="kpi-card"><div class="kpi-icon">🏦</div><div class="kpi-label">Épargne livrets</div><div class="kpi-value c-orange">${f(ep)}</div><div class="kpi-sub">Taux : ${pEp.toFixed(1)}\u00a0%</div></div>
+  `;
+
+  const rows=[
+    {lbl:'💰 Recettes totales',m:rec,a:rec*12,pct:100,cls:'c-green',bg:'var(--green)'},
+    {lbl:'💸 Dépenses totales',m:dep,a:dep*12,pct:pDep,cls:'c-red',bg:'var(--red)'},
+    {lbl:'✅ Solde disponible',m:sol,a:sol*12,pct:pSol,cls:sol>=0?'c-blue':'c-red',bg:sol>=0?'var(--accent)':'var(--red)'},
+    {lbl:'🏦 Épargne livrets',m:ep,a:ep*12,pct:pEp,cls:'c-orange',bg:'var(--orange)'}
+  ];
+  document.getElementById('synthBody').innerHTML=rows.map(r=>`
+    <tr><td><strong>${r.lbl}</strong></td>
+    <td class="amount ${r.cls}">${f(r.m)}</td>
+    <td class="amount ${r.cls}">${f(r.a)}</td>
+    <td style="min-width:100px"><span style="font-size:.82rem;font-weight:700">${r.pct.toFixed(1)}\u00a0%</span>
+    <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(Math.abs(r.pct),100)}%;background:${r.bg}"></div></div></td></tr>
+  `).join('');
+
+  document.getElementById('tauxGrid').innerHTML=`
+    <div class="synth-item"><div class="synth-val c-red">${pDep.toFixed(1)}\u00a0%</div><div class="synth-lbl">Taux de dépenses</div><div class="prog-bar" style="margin-top:8px"><div class="prog-fill" style="width:${Math.min(pDep,100)}%;background:var(--red)"></div></div></div>
+    <div class="synth-item"><div class="synth-val ${sol>=0?'c-blue':'c-red'}">${pSol.toFixed(1)}\u00a0%</div><div class="synth-lbl">Taux de reste à vivre</div><div class="prog-bar" style="margin-top:8px"><div class="prog-fill" style="width:${Math.min(Math.abs(pSol),100)}%;background:${sol>=0?'var(--accent)':'var(--red)'}"></div></div></div>
+    <div class="synth-item"><div class="synth-val c-orange">${pEp.toFixed(1)}\u00a0%</div><div class="synth-lbl">Taux d'épargne</div><div class="prog-bar" style="margin-top:8px"><div class="prog-fill" style="width:${Math.min(pEp,100)}%;background:var(--orange)"></div></div></div>
+  `;
+  updateCharts();
+}
+
+// ================================================================
+//  CHARTS
+// ================================================================
+let CH={};
+function cc(){ const d=document.documentElement.getAttribute('data-theme')==='dark'; return {g:d?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)',t:d?'#94a3b8':'#64748b'}; }
+
+function updateCharts(){
+  const rec=totRecM(), dep=totDepM(), sol=solde(), c=cc();
+  const COLORS=['#2563eb','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6','#6366f1','#78716c'];
+
+  // BAR
+  if(CH.bar)CH.bar.destroy();
+  const b=document.getElementById('chartBar');
+  if(b)CH.bar=new Chart(b,{type:'bar',data:{
+    labels:['Mensuel','Annuel (×12)'],
+    datasets:[
+      {label:'Recettes',data:[rec,rec*12],backgroundColor:'rgba(16,185,129,.7)',borderRadius:6},
+      {label:'Dépenses',data:[dep,dep*12],backgroundColor:'rgba(239,68,68,.7)',borderRadius:6},
+      {label:'Solde',data:[sol,sol*12],backgroundColor:'rgba(37,99,235,.7)',borderRadius:6}
+    ]
+  },options:{responsive:true,plugins:{legend:{labels:{color:c.t}}},scales:{x:{ticks:{color:c.t},grid:{color:c.g}},y:{ticks:{color:c.t},grid:{color:c.g}}}}});
+
+  // DOUGHNUT
+  if(CH.doughnut)CH.doughnut.destroy();
+  const d=document.getElementById('chartDoughnut');
+  if(d){const dp=depParPoste();
+    CH.doughnut=new Chart(d,{type:'doughnut',data:{labels:dp.map(p=>p.label),datasets:[{data:dp.map(p=>p.tot),backgroundColor:COLORS.slice(0,dp.length),borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:c.t,font:{size:10},padding:8}}}}}); }
+
+  // LINE
+  if(CH.line)CH.line.destroy();
+  const l=document.getElementById('chartLine');
+  if(l){const mois=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    CH.line=new Chart(l,{type:'line',data:{labels:mois,datasets:[{label:'Solde cumulé',data:mois.map((_,i)=>sol*(i+1)),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',fill:true,tension:.4,pointRadius:4}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:c.t}}},scales:{x:{ticks:{color:c.t},grid:{color:c.g}},y:{ticks:{color:c.t},grid:{color:c.g}}}}});}
+}
+
+function updatePlacementsChart(){
+  if(CH.placements)CH.placements.destroy();
+  const ctx=document.getElementById('chartPlacements'); if(!ctx)return;
+  const c=cc(), PCOL=['#10b981','#2563eb','#f59e0b','#ef4444','#8b5cf6'];
+  const maxD=Math.max(...S.epargne.placements.map(p=>n(p.duree)),10);
+  const labels=Array.from({length:maxD+1},(_,i)=>`An ${i}`);
+  const datasets=S.epargne.placements.map((p,i)=>({
+    label:p.label,
+    data:labels.map((_,yr)=>yr===0?n(p.initial):simPlacement({...p,duree:yr}).fin),
+    borderColor:PCOL[i%PCOL.length],backgroundColor:'transparent',tension:.4,pointRadius:2
+  }));
+  CH.placements=new Chart(ctx,{type:'line',data:{labels,datasets},options:{responsive:true,plugins:{legend:{labels:{color:c.t}}},scales:{x:{ticks:{color:c.t},grid:{color:c.g}},y:{ticks:{color:c.t},grid:{color:c.g}}}}});
+}
+
+// ================================================================
+//  RENDER RECETTES
+// ================================================================
+function renderRecettes(){
+  document.getElementById('nomM').textContent=S.meta.monsieur;
+  document.getElementById('nomF').textContent=S.meta.madame;
+  document.getElementById('ficheNomM').textContent=S.meta.monsieur;
+  document.getElementById('ficheNomF').textContent=S.meta.madame;
+  renderPersonne('monsieur');
+  renderPersonne('madame');
+  renderAutres();
+  renderFiche('monsieur');
+  renderFiche('madame');
+  renderTotauxAnnuels();
+}
+
+function renderPersonne(p){
+  const id=p==='monsieur'?'M':'F';
+  const tbody=document.getElementById('body'+id);
+  const lignes=S.recettes[p].lignes;
+  const freqOpts=['mensuel','trimestriel','semestriel','annuel','unique'].map(v=>`<option value="${v}">${v.charAt(0).toUpperCase()+v.slice(1)}</option>`).join('');
+  tbody.innerHTML=lignes.map((l,i)=>`<tr>
+    <td><div class="ew">${l.label}<button class="btn-pen" onclick="editRecetteLigne('${p}',${i},'label')">✏️</button></div></td>
+    <td><div class="ew"><span class="amount">${f(l.montant)}</span><button class="btn-pen" onclick="editRecetteLigne('${p}',${i},'montant')">✏️</button></div></td>
+    <td><select onchange="setRecetteFreq('${p}',${i},this.value)" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-family:inherit;font-size:.8rem">${freqOpts.replace(`"${l.freq}"`,'`'+`"${l.freq}" selected`+'`')}</select></td>
+    <td><button class="btn danger sm" onclick="delLigneRecette('${p}',${i})">✕</button></td>
+  </tr>`).join('');
+  // Fix select selected
+  tbody.querySelectorAll('select').forEach((sel,i)=>sel.value=lignes[i].freq);
+  const tot=totRecPersonne(p);
+  document.getElementById('tot'+id).innerHTML=`<div style="padding:8px 10px;background:var(--bg3);border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:.75rem;color:var(--text2)">Total mensuel équivalent</span><span class="amount c-green" style="font-size:1.05rem">${f(tot)}</span></div>`;
+}
+
+function renderAutres(){
+  const tbody=document.getElementById('bodyAutres');
+  const autres=S.recettes.autres;
+  if(!autres.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:14px;font-size:.8rem">Aucune autre recette — cliquez "+ Ajouter"</td></tr>';return;}
+  const freqOpts=['mensuel','trimestriel','semestriel','annuel'].map(v=>`<option value="${v}">${v.charAt(0).toUpperCase()+v.slice(1)}</option>`).join('');
+  tbody.innerHTML=autres.map((a,i)=>`<tr>
+    <td><div class="ew">${a.label}<button class="btn-pen" onclick="editAutre(${i},'label')">✏️</button></div></td>
+    <td><div class="ew"><span class="amount">${f(a.montant)}</span><button class="btn-pen" onclick="editAutre(${i},'montant')">✏️</button></div></td>
+    <td><select onchange="setAutreFreq(${i},this.value)" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-family:inherit;font-size:.8rem">${freqOpts}</select></td>
+    <td class="amount">${f(n(a.montant)*(FREQ[a.freq]??1))}</td>
+    <td><button class="btn danger sm" onclick="delAutre(${i})">✕</button></td>
+  </tr>`).join('');
+  tbody.querySelectorAll('select').forEach((sel,i)=>sel.value=autres[i].freq);
+}
+
+function renderFiche(p){
+  const id=p==='monsieur'?'ficheM':'ficheF';
+  const fiche=S.recettes[p].fiche;
+  document.getElementById(id).innerHTML=`
+    <div class="fiche-row fiche-hd"><span>Libellé</span><span>Montant</span></div>
+    ${fiche.map((l,i)=>{
+      const col=l.sens==='credit'?'var(--green)':l.sens==='debit'?'var(--red)':l.sens==='total'?'var(--accent)':'var(--text2)';
+      const signe=l.sens==='debit'?'−':'';
+      const cls=l.sens==='total'?'fiche-total':l.sens==='neutre'?'fiche-sub':'';
+      return `<div class="fiche-row ${cls}">
+        <div class="ew">${l.label}<button class="btn-pen" onclick="editFicheRow('${p}',${i},'label')">✏️</button></div>
+        <div class="ew" style="color:${col}"><span class="amount">${signe}${f(l.montant)}</span><button class="btn-pen" onclick="editFicheRow('${p}',${i},'montant')">✏️</button>${l.sens!=='total'&&l.sens!=='neutre'?`<button class="btn-pen" onclick="delFicheRow('${p}',${i})">✕</button>`:''}</div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function renderTotauxAnnuels(){
+  const getNet=p=>{
+    const ann=S.recettes[p].annuel;
+    return ann.override&&ann.net?n(ann.net):totRecPersonne(p)*12;
+  };
+  const getBrut=p=>{ const a=S.recettes[p].annuel; return a.override?n(a.brut):0; };
+  const getImp=p=>{ const a=S.recettes[p].annuel; return a.override?n(a.imposable):0; };
+  const nm=S.meta.monsieur, nf=S.meta.madame;
+  const mNet=getNet('monsieur'), fNet=getNet('madame');
+  const mBrut=getBrut('monsieur'), fBrut=getBrut('madame');
+  const mImp=getImp('monsieur'), fImp=getImp('madame');
+  document.getElementById('totauxBGrid').innerHTML=`
+    <div class="tb-item"><div class="tb-val">${f(mNet)}</div><div class="tb-lbl">${nm} — Net annuel ${S.recettes.monsieur.annuel.override?'<span style="background:rgba(245,158,11,.3);padding:1px 5px;border-radius:4px">✏</span>':''}</div>
+      <button class="btn sm" style="margin:4px auto;font-size:.68rem;color:#fff;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3)" onclick="editAnnuelOverride('monsieur')">Modifier manuellement</button></div>
+    <div class="tb-item"><div class="tb-val">${f(fNet)}</div><div class="tb-lbl">${nf} — Net annuel ${S.recettes.madame.annuel.override?'<span style="background:rgba(245,158,11,.3);padding:1px 5px;border-radius:4px">✏</span>':''}</div>
+      <button class="btn sm" style="margin:4px auto;font-size:.68rem;color:#fff;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3)" onclick="editAnnuelOverride('madame')">Modifier manuellement</button></div>
+    <div class="tb-item"><div class="tb-val">${f(mNet+fNet)}</div><div class="tb-lbl">Foyer — Net annuel total</div></div>
+    <div class="tb-item"><div class="tb-val">${f(mBrut+fBrut)}</div><div class="tb-lbl">Foyer — Brut annuel total</div></div>
+    <div class="tb-item"><div class="tb-val">${f(mImp+fImp)}</div><div class="tb-lbl">Foyer — Imposable annuel total</div></div>
+  `;
+}
+
+// ================================================================
+//  RENDER DÉPENSES
+// ================================================================
+const CAT_COLORS={logement:'acc-blue',energie:'acc-teal',transport:'acc-purple',telecom:'acc-orange',alimentation:'acc-green',loisirs:'acc-orange',vacances:'acc-teal',sante:'acc-red',maison:'acc-blue',achats:'acc-purple',education:'acc-green',epargne:'acc-teal'};
+
+function renderDepenses(){
+  const container=document.getElementById('depContainer');
+  container.innerHTML=S.depenses.postes.map((p,pi)=>{
+    const tot=p.lignes.reduce((s,l)=>s+n(l.montant),0);
+    const acc=CAT_COLORS[p.cat]||'acc-blue';
+    return `<div class="poste ${acc}" id="poste-${pi}">
+      <div class="poste-head" onclick="togglePoste(${pi})">
+        <span class="chevron">▾</span>
+        <div class="ew" onclick="event.stopPropagation()">${p.label}<button class="btn-pen" onclick="editPosteLabel(${pi})">✏️</button></div>
+        <span style="margin-left:auto;font-weight:800;color:var(--red)">${f(tot)}</span>
+        <button class="btn danger sm" onclick="event.stopPropagation();delPoste(${pi})" style="margin-left:6px">✕</button>
+      </div>
+      <div class="poste-body">
+        <table><thead><tr><th>Libellé</th><th>Mensuel</th><th>Annuel</th><th></th></tr></thead>
+        <tbody>${p.lignes.map((l,li)=>`<tr>
+          <td><div class="ew">${l.label}<button class="btn-pen" onclick="editDepLigne(${pi},${li},'label')">✏️</button></div></td>
+          <td><div class="ew"><span class="amount c-red">${f(l.montant)}</span><button class="btn-pen" onclick="editDepLigne(${pi},${li},'montant')">✏️</button></div></td>
+          <td class="amount">${f(n(l.montant)*12)}</td>
+          <td><button class="btn danger sm" onclick="delDepLigne(${pi},${li})">✕</button></td>
+        </tr>`).join('')}</tbody></table>
+        <div class="poste-foot"><button class="btn success sm" onclick="addDepLigne(${pi})">+ Ligne</button></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const dep=totDepM();
+  document.getElementById('depTotaux').innerHTML=`
+    <div class="synth-item"><div class="synth-val c-red">${f(dep)}</div><div class="synth-lbl">Total mensuel</div></div>
+    <div class="synth-item"><div class="synth-val c-red">${f(dep*12)}</div><div class="synth-lbl">Total annuel</div></div>
+    <div class="synth-item"><div class="synth-val">${f(dep/30)}</div><div class="synth-lbl">Moyenne journalière</div></div>
+  `;
+}
+function togglePoste(pi){ document.getElementById('poste-'+pi)?.classList.toggle('collapsed'); }
+
+// ================================================================
+//  RENDER ÉPARGNE
+// ================================================================
+function renderEpargne(){
+  // Livrets
+  const grid=document.getElementById('livretsGrid');
+  grid.innerHTML=S.epargne.comptes.map((c,i)=>{
+    const intAn=(n(c.solde)+n(c.mensuel)*6)*(n(c.taux)/100);
+    const solDan1=n(c.solde)+n(c.mensuel)*12+intAn;
+    return `<div class="livret-card">
+      <div class="livret-label"><div class="ew">${c.label}<button class="btn-pen" onclick="editLivret(${i},'label')">✏️</button></div></div>
+      <div class="lf"><span>Taux annuel</span><div class="ew"><span class="taux-badge">${n(c.taux)}\u00a0%</span><button class="btn-pen" onclick="editLivret(${i},'taux')">✏️</button></div></div>
+      <div class="lf"><span>Solde actuel</span><div class="ew"><strong>${f(c.solde)}</strong><button class="btn-pen" onclick="editLivret(${i},'solde')">✏️</button></div></div>
+      <div class="lf"><span>Versement mensuel</span><div class="ew"><strong>${f(c.mensuel)}</strong><button class="btn-pen" onclick="editLivret(${i},'mensuel')">✏️</button></div></div>
+      <div style="border-top:1px solid var(--border);margin:6px 0;padding-top:6px">
+        <div class="lf"><span>Intérêts annuels estimés</span><strong class="c-green">${f(intAn)}</strong></div>
+        <div class="lf"><span>Solde estimé dans 1 an</span><strong class="c-blue">${f(solDan1)}</strong></div>
+      </div>
+      <div style="text-align:right;margin-top:4px"><button class="btn danger sm" onclick="delLivret(${i})">Supprimer ✕</button></div>
+    </div>`;
+  }).join('');
+
+  const totM=S.epargne.comptes.reduce((s,c)=>s+n(c.mensuel),0);
+  const totInt=S.epargne.comptes.reduce((s,c)=>s+(n(c.solde)+n(c.mensuel)*6)*(n(c.taux)/100),0);
+  document.getElementById('livretsTotaux').innerHTML=`<div style="background:var(--bg3);border-radius:8px;padding:12px;display:flex;flex-wrap:wrap;justify-content:space-around;gap:10px">
+    <div style="text-align:center"><div style="font-size:.72rem;color:var(--text2)">VERSEMENTS MENSUELS</div><div class="synth-val c-blue">${f(totM)}</div></div>
+    <div style="text-align:center"><div style="font-size:.72rem;color:var(--text2)">VERSEMENTS ANNUELS</div><div class="synth-val c-blue">${f(totM*12)}</div></div>
+    <div style="text-align:center"><div style="font-size:.72rem;color:var(--text2)">INTÉRÊTS ANNUELS ESTIMÉS</div><div class="synth-val c-green">${f(totInt)}</div></div>
+  </div>`;
+
+  // Placements
+  const pgrid=document.getElementById('placementsGrid');
+  pgrid.innerHTML=S.epargne.placements.map((p,i)=>{
+    const sim=simPlacement(p);
+    const rLabel={faible:'🟢 Risque faible',moyen:'🟡 Risque moyen',eleve:'🔴 Risque élevé'};
+    const rCls={faible:'r-faible',moyen:'r-moyen',eleve:'r-eleve'};
+    return `<div class="sim-card">
+      <div class="sim-h">
+        <div>
+          <div class="ew" style="font-weight:700">${p.label}<button class="btn-pen" onclick="editPlacement(${i},'label')">✏️</button></div>
+          <span class="risque ${rCls[p.risque]||'r-moyen'}">${rLabel[p.risque]||'?'}</span>
+          <select onchange="setPlacementRisque(${i},this.value)" style="margin-left:8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 5px;color:var(--text);font-family:inherit;font-size:.72rem">
+            <option value="faible" ${p.risque==='faible'?'selected':''}>Faible</option>
+            <option value="moyen" ${p.risque==='moyen'?'selected':''}>Moyen</option>
+            <option value="eleve" ${p.risque==='eleve'?'selected':''}>Élevé</option>
+          </select>
+        </div>
+        <div style="text-align:right">
+          <div class="synth-val c-green">${f(sim.fin)}</div>
+          <div style="font-size:.72rem;color:var(--text2)">dans ${p.duree} ans</div>
+        </div>
+      </div>
+      <div class="sim-grid">
+        <div class="sim-item"><div class="sl">Capital initial</div><div class="ew sv">${f(p.initial)}<button class="btn-pen" onclick="editPlacement(${i},'initial')">✏️</button></div></div>
+        <div class="sim-item"><div class="sl">Versement mensuel</div><div class="ew sv">${f(p.mensuel)}<button class="btn-pen" onclick="editPlacement(${i},'mensuel')">✏️</button></div></div>
+        <div class="sim-item"><div class="sl">Taux annuel</div><div class="ew sv"><span class="taux-badge">${p.taux}\u00a0%</span><button class="btn-pen" onclick="editPlacement(${i},'taux')">✏️</button></div></div>
+        <div class="sim-item"><div class="sl">Durée</div><div class="ew sv">${p.duree} ans<button class="btn-pen" onclick="editPlacement(${i},'duree')">✏️</button></div></div>
+        <div class="sim-item"><div class="sl">Capital versé</div><div class="sv">${f(sim.verse)}</div></div>
+        <div class="sim-item"><div class="sl">Intérêts générés</div><div class="sv c-green">${f(sim.interets)}</div></div>
+      </div>
+      <div style="text-align:right"><button class="btn danger sm" onclick="delPlacement(${i})">Supprimer ✕</button></div>
+    </div>`;
+  }).join('');
+  updatePlacementsChart();
+}
+
+// ================================================================
+//  MODAL
+// ================================================================
+let MCB=null;
+function openModal(title,body,cb){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalOv').classList.remove('hidden');
+  MCB=cb;
+  setTimeout(()=>document.querySelector('#modalBody input,#modalBody select')?.focus(),80);
+}
+function closeModal(){ document.getElementById('modalOv').classList.add('hidden'); MCB=null; }
+function confirmModal(){ if(MCB)MCB(); closeModal(); }
+
+// ================================================================
+//  EDIT ACTIONS — META
+// ================================================================
+function editMeta(field){
+  const labels={title:'Titre de l\'application',monsieur:'Prénom / Nom Monsieur',madame:'Prénom / Nom Madame',annee:'Année'};
+  openModal('Modifier — '+labels[field],
+    `<label>${labels[field]}</label><input type="${field==='annee'?'number':'text'}" id="mi" value="${S.meta[field]}">`,
+    ()=>{ snap(); S.meta[field]=field==='annee'?parseInt(document.getElementById('mi').value)||S.meta.annee:document.getElementById('mi').value; renderAll(); saveToStorage(); }
+  );
+}
+
+// ================================================================
+//  EDIT ACTIONS — RECETTES
+// ================================================================
+function editRecetteLigne(p,i,field){
+  const l=S.recettes[p].lignes[i], isN=field==='montant';
+  openModal('Modifier la ligne',`<label>${isN?'Montant (€)':'Libellé'}</label><input type="${isN?'number':'text'}" id="mi" value="${l[field]}" step="${isN?'0.01':''}">`,
+    ()=>{ snap(); S.recettes[p].lignes[i][field]=isN?n(document.getElementById('mi').value):document.getElementById('mi').value; renderRecettes(); renderDashboard(); saveToStorage(); });
+}
+function setRecetteFreq(p,i,v){ snap(); S.recettes[p].lignes[i].freq=v; renderRecettes(); renderDashboard(); saveToStorage(); }
+function addLigneRecette(p){ snap(); S.recettes[p].lignes.push({id:Date.now(),label:'Nouvelle recette',montant:0,freq:'mensuel'}); renderRecettes(); saveToStorage(); }
+function delLigneRecette(p,i){ snap(); S.recettes[p].lignes.splice(i,1); renderRecettes(); renderDashboard(); saveToStorage(); }
+
+function editAutre(i,field){
+  const a=S.recettes.autres[i], isN=field==='montant';
+  openModal('Modifier',`<label>${isN?'Montant (€)':'Libellé'}</label><input type="${isN?'number':'text'}" id="mi" value="${a[field]}" step="${isN?'0.01':''}">`,
+    ()=>{ snap(); S.recettes.autres[i][field]=isN?n(document.getElementById('mi').value):document.getElementById('mi').value; renderRecettes(); renderDashboard(); saveToStorage(); });
+}
+function setAutreFreq(i,v){ snap(); S.recettes.autres[i].freq=v; renderRecettes(); renderDashboard(); saveToStorage(); }
+function addAutreRecette(){ snap(); S.recettes.autres.push({id:Date.now(),label:'Autre recette',montant:0,freq:'annuel'}); renderRecettes(); saveToStorage(); }
+function delAutre(i){ snap(); S.recettes.autres.splice(i,1); renderRecettes(); renderDashboard(); saveToStorage(); }
+
+function editFicheRow(p,i,field){
+  const l=S.recettes[p].fiche[i], isN=field==='montant';
+  openModal('Modifier ligne bulletin',`<label>${isN?'Montant (€)':'Libellé'}</label><input type="${isN?'number':'text'}" id="mi" value="${l[field]}" step="${isN?'0.01':''}">`,
+    ()=>{ snap(); S.recettes[p].fiche[i][field]=isN?n(document.getElementById('mi').value):document.getElementById('mi').value; renderFiche(p); saveToStorage(); });
+}
+function addFicheLigne(p){
+  snap();
+  const opts=`<label>Libellé</label><input type="text" id="ml" value="Nouvelle ligne">
+    <label>Sens</label><select id="ms"><option value="credit">Gain (+)</option><option value="debit" selected>Cotisation (−)</option><option value="neutre">Neutre</option></select>`;
+  openModal('Ajouter une ligne bulletin',opts,()=>{
+    S.recettes[p].fiche.splice(-1,0,{id:Date.now(),label:document.getElementById('ml').value,montant:0,sens:document.getElementById('ms').value});
+    renderFiche(p); saveToStorage();
+  });
+}
+function delFicheRow(p,i){ snap(); S.recettes[p].fiche.splice(i,1); renderFiche(p); saveToStorage(); }
+
+function editAnnuelOverride(p){
+  const a=S.recettes[p].annuel;
+  openModal('Totaux annuels (saisie manuelle)',
+    `<label>Brut annuel (€)</label><input type="number" id="mb" value="${a.brut}" step="0.01">
+     <label>Imposable annuel (€)</label><input type="number" id="mi" value="${a.imposable}" step="0.01">
+     <label>Net annuel (€)</label><input type="number" id="mn" value="${a.net}" step="0.01">`,
+    ()=>{ snap(); S.recettes[p].annuel={brut:n(document.getElementById('mb').value),imposable:n(document.getElementById('mi').value),net:n(document.getElementById('mn').value),override:true}; renderTotauxAnnuels(); saveToStorage(); }
+  );
+}
+
+// ================================================================
+//  EDIT ACTIONS — DÉPENSES
+// ================================================================
+function editDepLigne(pi,li,field){
+  const l=S.depenses.postes[pi].lignes[li], isN=field==='montant';
+  openModal('Modifier la dépense',`<label>${isN?'Montant mensuel (€)':'Libellé'}</label><input type="${isN?'number':'text'}" id="mi" value="${l[field]}" step="${isN?'0.01':''}">`,
+    ()=>{ snap(); S.depenses.postes[pi].lignes[li][field]=isN?n(document.getElementById('mi').value):document.getElementById('mi').value; renderDepenses(); renderDashboard(); saveToStorage(); });
+}
+function addDepLigne(pi){ snap(); S.depenses.postes[pi].lignes.push({id:Date.now(),label:'Nouvelle dépense',montant:0}); renderDepenses(); saveToStorage(); }
+function delDepLigne(pi,li){ snap(); S.depenses.postes[pi].lignes.splice(li,1); renderDepenses(); renderDashboard(); saveToStorage(); }
+function editPosteLabel(pi){
+  openModal('Modifier le poste',`<label>Libellé</label><input type="text" id="mi" value="${S.depenses.postes[pi].label}">`,
+    ()=>{ snap(); S.depenses.postes[pi].label=document.getElementById('mi').value; renderDepenses(); saveToStorage(); });
+}
+function addPoste(){
+  const cats=['logement','energie','transport','telecom','alimentation','loisirs','vacances','sante','maison','achats','education','epargne','autres'];
+  const catOpts=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  openModal('Nouveau poste de dépenses',`<label>Libellé du poste</label><input type="text" id="ml" value="📦 Nouveau poste"><label>Catégorie (couleur)</label><select id="mc">${catOpts}</select>`,
+    ()=>{ snap(); S.depenses.postes.push({id:Date.now(),label:document.getElementById('ml').value,cat:document.getElementById('mc').value,lignes:[{id:Date.now(),label:'Nouvelle dépense',montant:0}]}); renderDepenses(); saveToStorage(); });
+}
+function delPoste(pi){ if(!confirm('Supprimer ce poste et ses lignes ?'))return; snap(); S.depenses.postes.splice(pi,1); renderDepenses(); renderDashboard(); saveToStorage(); }
+
+// ================================================================
+//  EDIT ACTIONS — ÉPARGNE
+// ================================================================
+function editLivret(i,field){
+  const c=S.epargne.comptes[i], isN=['taux','solde','mensuel'].includes(field);
+  const labels={label:'Libellé',taux:'Taux annuel (%)',solde:'Solde actuel (€)',mensuel:'Versement mensuel (€)'};
+  openModal('Modifier — '+c.label,`<label>${labels[field]}</label><input type="${isN?'number':'text'}" id="mi" value="${c[field]}" step="${isN?'0.01':''}">`,
+    ()=>{ snap(); S.epargne.comptes[i][field]=isN?n(document.getElementById('mi').value):document.getElementById('mi').value; renderEpargne(); renderDashboard(); saveToStorage(); });
+}
+function addLivret(){ snap(); S.epargne.comptes.push({id:Date.now(),label:'Nouveau livret',taux:3.0,solde:0,mensuel:0}); renderEpargne(); saveToStorage(); }
+function delLivret(i){ snap(); S.epargne.comptes.splice(i,1); renderEpargne(); saveToStorage(); }
+
+function editPlacement(i,field){
+  const p=S.epargne.placements[i], isN=['taux','initial','mensuel','duree'].includes(field);
+  const labels={label:'Libellé',taux:'Taux annuel (%)',initial:'Capital initial (€)',mensuel:'Versement mensuel (€)',duree:'Durée (années)'};
+  openModal('Modifier placement',`<label>${labels[field]||field}</label><input type="${isN?'number':'text'}" id="mi" value="${p[field]}" step="${isN?'0.01':''}">`,
+    ()=>{ snap(); S.epargne.placements[i][field]=isN?n(document.getElementById('mi').value):document.getElementById('mi').value; renderEpargne(); saveToStorage(); });
+}
+function setPlacementRisque(i,v){ snap(); S.epargne.placements[i].risque=v; renderEpargne(); saveToStorage(); }
+function addPlacement(){ snap(); S.epargne.placements.push({id:Date.now(),label:'Nouveau placement',taux:4.0,risque:'moyen',initial:0,mensuel:0,duree:10}); renderEpargne(); saveToStorage(); }
+function delPlacement(i){ snap(); S.epargne.placements.splice(i,1); renderEpargne(); saveToStorage(); }
+
+// ================================================================
+//  CSV EXPORTS
+// ================================================================
+function buildCSV(rows){ return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""').replace(/\n/g,' ')+'"').join(';')).join('\n'); }
+function downloadCSV(content,name){ dl(URL.createObjectURL(new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'})),name+'_'+iso()+'.csv'); toast("📊 CSV exporté"); }
+
+function exportRecettesCSV(){
+  let rows=[['Personne','Libellé','Montant','Fréquence','Équiv. mensuel']];
+  ['monsieur','madame'].forEach(p=>S.recettes[p].lignes.forEach(l=>rows.push([S.meta[p],l.label,l.montant,l.freq,(n(l.montant)*(FREQ[l.freq]??1)).toFixed(2)])));
+  S.recettes.autres.forEach(a=>rows.push(['Autre',a.label,a.montant,a.freq,(n(a.montant)*(FREQ[a.freq]??1)).toFixed(2)]));
+  rows.push(['','TOTAL MENSUEL','','',totRecM().toFixed(2)]);
+  downloadCSV(buildCSV(rows),'recettes');
+}
+
+function exportDepensesCSV(){
+  let rows=[['Poste','Libellé','Mensuel (€)','Annuel (€)']];
+  S.depenses.postes.forEach(p=>p.lignes.forEach(l=>rows.push([p.label,l.label,n(l.montant).toFixed(2),(n(l.montant)*12).toFixed(2)])));
+  rows.push(['','TOTAL',totDepM().toFixed(2),(totDepM()*12).toFixed(2)]);
+  downloadCSV(buildCSV(rows),'depenses');
+}
+
+function exportEpargneCSV(){
+  let rows=[['Type','Libellé','Taux (%)','Solde (€)','Mensuel (€)','Intérêts annuels (€)','Capital dans 1 an (€)']];
+  S.epargne.comptes.forEach(c=>{
+    const i=(n(c.solde)+n(c.mensuel)*6)*(n(c.taux)/100);
+    rows.push(['Livret',c.label,c.taux,c.solde,c.mensuel,i.toFixed(2),(n(c.solde)+n(c.mensuel)*12+i).toFixed(2)]);
+  });
+  rows.push([]);
+  rows.push(['Placement','Libellé','Taux (%)','Capital initial','Mensuel','Durée (ans)','Capital final estimé','Intérêts estimés']);
+  S.epargne.placements.forEach(p=>{ const s=simPlacement(p); rows.push(['Placement',p.label,p.taux,p.initial,p.mensuel,p.duree,s.fin.toFixed(2),s.interets.toFixed(2)]); });
+  downloadCSV(buildCSV(rows),'epargne');
+}
+
+function exportTableCSV(tableId,name){
+  const tbl=document.getElementById(tableId); if(!tbl)return;
+  const rows=Array.from(tbl.querySelectorAll('tr')).map(r=>Array.from(r.querySelectorAll('th,td')).map(c=>c.innerText));
+  downloadCSV(buildCSV(rows),name);
+}
+
+// ================================================================
+//  IMAGE / PDF EXPORTS
+// ================================================================
+async function exportTableJPEG(id){ await exportImg(id,'jpeg',0.92); }
+async function exportTablePNG(id){ await exportImg(id,'png',1); }
+async function exportImg(id,fmt,q){
+  const el=document.getElementById(id); if(!el)return toast("❌ Élément introuvable");
+  try{
+    const c=await html2canvas(el,{scale:2,backgroundColor:fmt==='jpeg'?'#ffffff':null,useCORS:true});
+    dl(c.toDataURL('image/'+fmt,q),'export_'+id+'_'+iso()+(fmt==='jpeg'?'.jpg':'.png'));
+    toast(`🖼 ${fmt.toUpperCase()} exporté`);
+  }catch(e){toast("❌ Erreur export image");}
+}
+async function exportTablePDF(id,name){
+  const el=document.getElementById(id); if(!el)return toast("❌ Élément introuvable");
+  try{
+    const c=await html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    const w=pdf.internal.pageSize.getWidth(), h=pdf.internal.pageSize.getHeight();
+    const ratio=c.height/c.width;
+    const imgH=w*ratio;
+    if(imgH<=h){pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,w,imgH);}
+    else{
+      let yPos=0, pageH=h;
+      while(yPos<imgH){
+        if(yPos>0)pdf.addPage();
+        pdf.addImage(c.toDataURL('image/png'),'PNG',0,-yPos,w,imgH);
+        yPos+=pageH;
+      }
+    }
+    pdf.save(`${name}_${iso()}.pdf`);
+    toast("📄 PDF exporté");
+  }catch(e){console.error(e);toast("❌ Erreur export PDF");}
+}
+
+// ================================================================
+//  RTF REPORTS
+// ================================================================
+function rtfHead(title){
+  return `{\\rtf1\\ansi\\ansicpg1252\\deff0{\\fonttbl{\\f0\\froman Times New Roman;}{\\f1\\fswiss Arial;}}
+{\\colortbl;\\red37\\green99\\blue235;\\red16\\green185\\blue129;\\red239\\green68\\blue68;}
+\\paperw11906\\paperh16838\\margl1440\\margr1440\\margt1440\\margb1440
+\\pard\\qc\\f1\\fs36\\b\\cf1 ${esc(title)}\\par
+\\pard\\qr\\f0\\fs18\\cf0 Généré le ${new Date().toLocaleDateString('fr-FR')} — ${S.meta.title}\\par\\par
+`;
+}
+function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/[{}]/g,c=>'\\'+c).replace(/[^\x00-\x7E]/g,c=>`\\'${c.charCodeAt(0).toString(16).padStart(2,'0')}`); }
+function rtfSection(t){return `\\pard\\f1\\fs24\\b\\cf1 ${esc(t)}\\par\\b0\\fs20\\cf0\n`;}
+function rtfRow(label,val){return `\\pard\\li360\\f0\\fs18 ${esc(label)} : ${esc(val)}\\par\n`;}
+
+function generateReportRecettes(){
+  let r=rtfHead('Rapport Recettes');
+  ['monsieur','madame'].forEach(p=>{
+    r+=rtfSection(`Recettes — ${S.meta[p]}`);
+    S.recettes[p].lignes.forEach(l=>r+=rtfRow(l.label,`${l.montant} € (${l.freq})`));
+    r+=rtfRow('Total mensuel équivalent',f(totRecPersonne(p)));
+    r+='\\par\n';
+    r+=rtfSection(`Bulletin de salaire — ${S.meta[p]}`);
+    S.recettes[p].fiche.forEach(l=>r+=rtfRow(l.label,`${l.sens==='debit'?'−':''}${l.montant} €`));
+    r+='\\par\n';
+  });
+  r+=rtfSection('Autres recettes');
+  S.recettes.autres.forEach(a=>r+=rtfRow(a.label,`${a.montant} € (${a.freq})`));
+  r+=`\\par\\b Total mensuel foyer : ${esc(f(totRecM()))}\\par\\b0\n}`;
+  dlRTF(r,'rapport_recettes');
+}
+
+function generateReportDepenses(){
+  let r=rtfHead('Rapport Dépenses');
+  S.depenses.postes.forEach(p=>{
+    const tot=p.lignes.reduce((s,l)=>s+n(l.montant),0);
+    r+=rtfSection(`${p.label}  —  Total : ${f(tot)}`);
+    p.lignes.forEach(l=>r+=rtfRow(l.label,`${f(l.montant)}/mois  |  ${f(n(l.montant)*12)}/an`));
+    r+='\\par\n';
+  });
+  r+=`\\par\\b\\cf3 Total dépenses mensuel : ${esc(f(totDepM()))}  |  Annuel : ${esc(f(totDepM()*12))}\\par\\b0\n}`;
+  dlRTF(r,'rapport_depenses');
+}
+
+function generateReportEpargne(){
+  let r=rtfHead('Rapport Épargnes & Placements');
+  r+=rtfSection('Livrets réglementés');
+  S.epargne.comptes.forEach(c=>{
+    const i=(n(c.solde)+n(c.mensuel)*6)*(n(c.taux)/100);
+    r+=rtfRow(c.label,`Taux ${c.taux}% — Solde ${f(c.solde)} — Versement ${f(c.mensuel)}/mois — Intérêts estimés ${f(i)}/an`);
+  });
+  r+='\\par\n'+rtfSection('Simulations de placements');
+  S.epargne.placements.forEach(p=>{
+    const s=simPlacement(p);
+    r+=rtfRow(p.label,`Taux ${p.taux}% — Durée ${p.duree} ans — Capital versé ${f(s.verse)} — Capital final ${f(s.fin)} — Intérêts ${f(s.interets)}`);
+  });
+  r+='\n}';
+  dlRTF(r,'rapport_epargne');
+}
+
+function dlRTF(content,name){ dl(URL.createObjectURL(new Blob([content],{type:'application/rtf'})),name+'_'+iso()+'.rtf'); toast("📝 Rapport RTF généré"); }
+
+// ================================================================
+//  TOAST
+// ================================================================
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2500); }
+
+// ================================================================
+//  KEYBOARD SHORTCUTS
+// ================================================================
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key==='z'){e.preventDefault();undo();}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.shiftKey&&e.key==='Z'))){e.preventDefault();redo();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveToStorage();}
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Enter'&&!document.getElementById('modalOv').classList.contains('hidden'))confirmModal();
+});
+
+// ================================================================
+//  INIT
+// ================================================================
+function init(){
+  initTheme();
+  loadFromStorage();
+  renderAll();
+}
+init();
+</script>
+</body>
+</html>
