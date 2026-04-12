@@ -9,7 +9,7 @@ App test
 
 <https://rbtech-cyber.github.io/Rbt_app/simulateur_immo_v3_2.html>
 
-<https://rbtech-cyber.github.io/Rbt_app/chordsheet_v2-5b>
+<https://rbtech-cyber.github.io/Rbt_app/chordsheet_v3>
 
 <https://rbtech-cyber.github.io/Rbt_app/solfege_app_v1-3.html>
 
