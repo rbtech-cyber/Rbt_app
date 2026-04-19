@@ -1,0 +1,2905 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEAT LEON — Carnet de Bord</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --accent: #e5000f;
+  --accent2: #ff6b35;
+  --green: #22c55e;
+  --yellow: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #8b5cf6;
+  --font: 'Exo 2', sans-serif;
+  --font2: 'Rajdhani', sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.22s ease;
+  --header-h: 112px;
+}
+[data-theme="dark"] {
+  --bg: #0a0c12;
+  --surface: #12151f;
+  --card: #191d2c;
+  --card2: #1f2335;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(229,0,15,0.3);
+  --text: #e8eaf3;
+  --text2: #9aa0b8;
+  --text3: #5a6080;
+  --shadow: 0 8px 40px rgba(0,0,0,0.6);
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.4);
+  --glow: 0 0 20px rgba(229,0,15,0.2);
+  --row-alt: rgba(255,255,255,0.025);
+  --scrollbar-track: #12151f;
+  --scrollbar-thumb: #2a2d3e;
+  --chart-grid: rgba(255,255,255,0.05);
+}
+[data-theme="light"] {
+  --bg: #f0f2f7;
+  --surface: #ffffff;
+  --card: #f8f9fc;
+  --card2: #eef0f8;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(200,0,12,0.25);
+  --text: #1a1d2e;
+  --text2: #555870;
+  --text3: #9aa0b0;
+  --shadow: 0 8px 40px rgba(0,0,0,0.1);
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.07);
+  --glow: 0 0 20px rgba(229,0,15,0.1);
+  --row-alt: rgba(0,0,0,0.025);
+  --scrollbar-track: #f0f2f7;
+  --scrollbar-thumb: #c8cad8;
+  --chart-grid: rgba(0,0,0,0.06);
+}
+
+/* ===== RESET ===== */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius:3px; }
+
+/* ===== HEADER ===== */
+#app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.logo-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font2);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+.logo-badge svg { width:20px; height:20px; flex-shrink:0; }
+.header-vehicle-info {
+  display: flex;
+  flex-direction: column;
+}
+.header-vehicle-name {
+  font-family: var(--font2);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+.header-vehicle-sub {
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 0.3px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+.btn-icon.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-icon.primary:hover { background: #cc0010; }
+.btn-icon.success { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-icon svg { width:14px; height:14px; }
+.km-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font2);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+/* ===== TABS ===== */
+.tabs-bar {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-top: 1px solid var(--border);
+  overflow-x: auto;
+  gap: 2px;
+}
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-btn svg { width:16px; height:16px; }
+
+/* ===== MAIN CONTENT ===== */
+main { padding: 24px 20px; max-width: 1600px; margin: 0 auto; }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+/* ===== SECTION HEADER ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.section-title {
+  font-family: var(--font2);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 22px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.section-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  transition: border-color var(--transition);
+}
+.card:hover { border-color: rgba(229,0,15,0.2); }
+.card-title {
+  font-family: var(--font2);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-value {
+  font-family: var(--font2);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+.card-unit { font-size: 13px; font-weight: 500; color: var(--text2); margin-left: 4px; }
+.card-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.card-trend { font-size: 11px; margin-top: 6px; }
+.trend-up { color: var(--accent); }
+.trend-down { color: var(--green); }
+
+/* ===== GRID LAYOUTS ===== */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+@media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .header-vehicle-info { display: none; }
+}
+@media (max-width: 600px) {
+  .header-top { padding: 8px 12px; }
+  main { padding: 16px 12px; }
+  .tabs-bar { padding: 0 8px; }
+  .tab-btn { padding: 10px 12px; font-size: 12px; }
+}
+
+/* ===== KPI CARDS ===== */
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.kpi-card.alert { border-left: 4px solid var(--accent); }
+.kpi-card.warning { border-left: 4px solid var(--yellow); }
+.kpi-card.ok { border-left: 4px solid var(--green); }
+.kpi-card.info { border-left: 4px solid var(--blue); }
+.kpi-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+.kpi-icon.red { background: rgba(229,0,15,0.12); }
+.kpi-icon.green { background: rgba(34,197,94,0.12); }
+.kpi-icon.yellow { background: rgba(245,158,11,0.12); }
+.kpi-icon.blue { background: rgba(59,130,246,0.12); }
+.kpi-icon.purple { background: rgba(139,92,246,0.12); }
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.kpi-value {
+  font-family: var(--font2);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+.kpi-unit { font-size: 13px; font-weight: 500; color: var(--text2); }
+.kpi-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.kpi-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.badge-alert { background: rgba(229,0,15,0.15); color: var(--accent); }
+.badge-warning { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.badge-ok { background: rgba(34,197,94,0.15); color: var(--green); }
+
+/* ===== CHART CONTAINERS ===== */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chart-title {
+  font-family: var(--font2);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+.chart-period-btns { display: flex; gap: 4px; }
+.period-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card2);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.period-btn.active, .period-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(229,0,15,0.08); }
+.chart-wrap { position: relative; }
+
+/* ===== ALERT BANNER ===== */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.alert-banner.danger { background: rgba(229,0,15,0.12); border: 1px solid rgba(229,0,15,0.3); color: var(--accent); }
+.alert-banner.warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: var(--yellow); }
+.alert-banner.ok { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); color: var(--green); }
+.alert-banner.info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); color: var(--blue); }
+.alert-banner.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: var(--green); }
+
+/* ===== NEXT MAINTENANCE TIMELINE ===== */
+.maintenance-timeline { display: flex; flex-direction: column; gap: 10px; }
+.maint-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--card2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: border-color var(--transition);
+}
+.maint-item:hover { border-color: rgba(229,0,15,0.25); }
+.maint-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.maint-dot.red { background: var(--accent); box-shadow: 0 0 8px rgba(229,0,15,0.5); }
+.maint-dot.yellow { background: var(--yellow); }
+.maint-dot.green { background: var(--green); }
+.maint-dot.blue { background: var(--blue); }
+.maint-info { flex: 1; min-width: 0; }
+.maint-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.maint-sub { font-size: 11px; color: var(--text2); }
+.maint-km {
+  font-family: var(--font2);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  white-space: nowrap;
+}
+.maint-price {
+  font-family: var(--font2);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.maint-overdue {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(229,0,15,0.15);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.maint-soon {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(245,158,11,0.15);
+  color: var(--yellow);
+  white-space: nowrap;
+}
+
+/* ===== VEHICLE INFO TABLE ===== */
+.vehicle-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0;
+}
+.vi-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.vi-row:hover { background: var(--row-alt); }
+.vi-key {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+  width: 140px;
+  flex-shrink: 0;
+}
+.vi-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ===== PENCIL EDIT ===== */
+.editable-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.editable-wrap .pencil-btn {
+  opacity: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  cursor: pointer;
+  color: var(--text3);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.editable-wrap:hover .pencil-btn { opacity: 1; }
+.pencil-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(229,0,15,0.1); }
+.pencil-btn svg { width: 11px; height: 11px; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:none; } }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-family: var(--font2); font-size: 16px; font-weight: 700; }
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: all var(--transition);
+}
+.modal-close:hover { border-color: var(--accent); color: var(--accent); }
+.modal-body { padding: 20px; }
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; }
+.form-control {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  transition: border-color var(--transition);
+}
+.form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(229,0,15,0.1); }
+.form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+textarea.form-control { resize: vertical; min-height: 80px; }
+select.form-control { cursor: pointer; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn svg { width: 14px; height: 14px; }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: #cc0010; }
+.btn-secondary { background: var(--card); color: var(--text2); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: rgba(229,0,15,0.1); color: var(--accent); border-color: rgba(229,0,15,0.25); }
+.btn-danger:hover { background: var(--accent); color: #fff; }
+.btn-success { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-xs { padding: 3px 7px; font-size: 10px; border-radius: 5px; }
+
+/* ===== EXPORT TOOLBAR ===== */
+.export-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.export-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text3);
+  margin-right: 4px;
+}
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.export-btn:hover { border-color: var(--accent); color: var(--accent); }
+.export-btn svg { width: 12px; height: 12px; }
+
+/* ===== DATA TABLE ===== */
+.table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: var(--card2); position: sticky; top: 0; z-index: 2; }
+thead th {
+  padding: 11px 13px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+thead th:hover { color: var(--accent); }
+thead th.sorted { color: var(--accent); }
+thead th.sorted::after {
+  content: ' ▾';
+  font-size: 9px;
+}
+thead th.sorted.asc::after { content: ' ▴'; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background var(--transition); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:nth-child(even) { background: var(--row-alt); }
+tbody tr:hover { background: rgba(229,0,15,0.04); }
+tbody td { padding: 10px 13px; color: var(--text); vertical-align: middle; }
+.td-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.type-entretien { background: rgba(59,130,246,0.12); color: var(--blue); }
+.type-ct { background: rgba(245,158,11,0.12); color: var(--yellow); }
+.type-admin { background: rgba(139,92,246,0.12); color: var(--purple); }
+.type-carburant { background: rgba(34,197,94,0.12); color: var(--green); }
+.type-revision { background: rgba(59,130,246,0.12); color: var(--blue); }
+.type-equipement { background: rgba(255,107,53,0.12); color: var(--accent2); }
+.td-price { font-family: var(--font2); font-weight: 700; color: var(--accent); }
+.td-km { font-family: var(--font2); font-weight: 600; color: var(--text2); }
+.row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+
+/* ===== FILTER BAR ===== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+  flex-wrap: wrap;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px; height: 15px;
+  color: var(--text3);
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 9px 13px 9px 35px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  transition: border-color var(--transition);
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+.filter-select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.filter-select:focus { outline: none; border-color: var(--accent); }
+
+/* ===== CARNET D'ENTRETIEN ===== */
+.accordion-section { margin-bottom: 12px; }
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+}
+.accordion-header:hover { border-color: rgba(229,0,15,0.3); }
+.accordion-header.open {
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-color: rgba(229,0,15,0.35);
+  background: var(--card2);
+}
+.acc-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.acc-title-group { flex: 1; min-width: 0; }
+.acc-title {
+  font-family: var(--font2);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.acc-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.acc-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.acc-badge {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.badge-km { background: rgba(59,130,246,0.12); color: var(--blue); }
+.badge-time { background: rgba(139,92,246,0.12); color: var(--purple); }
+.badge-price { background: rgba(229,0,15,0.12); color: var(--accent); }
+.badge-critical { background: rgba(229,0,15,0.2); color: var(--accent); border: 1px solid rgba(229,0,15,0.35); }
+.acc-chevron {
+  width: 20px; height: 20px;
+  color: var(--text3);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.accordion-header.open .acc-chevron { transform: rotate(180deg); }
+.accordion-body {
+  display: none;
+  background: var(--card);
+  border: 1px solid rgba(229,0,15,0.3);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 20px;
+}
+.accordion-body.open { display: block; animation: fadeIn 0.2s ease; }
+.carnet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .carnet-grid { grid-template-columns: 1fr; } }
+.carnet-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text2);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.task-list { display: flex; flex-direction: column; gap: 5px; }
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.task-item:last-child { border-bottom: none; }
+.task-check { color: var(--green); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.parts-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.parts-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+}
+.parts-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: top;
+}
+.parts-table tr:last-child td { border-bottom: none; }
+.carnet-note {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(59,130,246,0.08);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 12px;
+  color: var(--text2);
+  font-style: italic;
+}
+.carnet-warning {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(229,0,15,0.07);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar-wrap {
+  background: var(--card2);
+  border-radius: 10px;
+  height: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+.pbar-green { background: var(--green); }
+.pbar-yellow { background: var(--yellow); }
+.pbar-red { background: var(--accent); }
+
+/* ===== MISC ===== */
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.spacer-12 { height: 12px; }
+.spacer-20 { height: 20px; }
+.text-red { color: var(--accent); }
+.text-green { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+.text-blue { color: var(--blue); }
+.font-mono { font-family: var(--font2); }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-gap { display: flex; align-items: center; gap: 8px; }
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: var(--shadow);
+  animation: toastIn 0.3s ease;
+  min-width: 240px;
+}
+@keyframes toastIn { from { opacity:0; transform:translateX(50px); } to { opacity:1; transform:none; } }
+.toast-success { background: #166534; }
+.toast-error { background: #991b1b; }
+.toast-info { background: #1e3a5f; }
+
+/* ===== VEHICLE PHOTO ===== */
+.vehicle-photo-wrap {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card2);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vehicle-photo-wrap img { width: 100%; height: auto; display: block; object-fit: cover; }
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text3);
+  font-size: 13px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+}
+.photo-placeholder span { font-size: 48px; }
+
+/* ===== MINI TABLE ===== */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.mini-table th { text-align: left; padding: 7px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); background: var(--card2); border-bottom: 1px solid var(--border); }
+.mini-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+.mini-table tr:last-child td { border-bottom: none; }
+.mini-table tr:hover td { background: var(--row-alt); }
+
+/* ===== DASHBOARD SECTIONS ===== */
+.dashboard-section { margin-bottom: 28px; }
+
+/* ===== PRINT ===== */
+@media print {
+  #app-header, .header-actions, .section-actions, .export-toolbar, .row-actions, .filter-bar { display: none !important; }
+  .tab-content { display: block !important; }
+  body { background: white; color: black; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header id="app-header">
+  <div class="header-top">
+    <div class="logo-area">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        SEAT
+      </div>
+      <div class="header-vehicle-info">
+        <div class="header-vehicle-name editable-wrap" id="ev-car-name">
+          LEON 5F III — 1.0 TSI 115 <span class="pencil-btn" onclick="openEditText('ev-car-name-val','Nom du véhicule','LEON 5F III — 1.0 TSI 115')" title="Modifier"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>
+        </div>
+        <div class="header-vehicle-sub">Essence SP98 · Manuelle 6V · 2019 · Start&amp;Stop</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="km-badge">
+        🛣️ <span id="hdr-km">58 686</span> km
+      </div>
+      <button class="btn-icon" onclick="undoAction()" title="Annuler (Ctrl+Z)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+        Annuler
+      </button>
+      <button class="btn-icon" onclick="redoAction()" title="Rétablir (Ctrl+Y)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+        Rétablir
+      </button>
+      <button class="btn-icon success" onclick="saveData()" title="Sauvegarder">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+        Sauvegarder
+      </button>
+      <button class="btn-icon" onclick="exportJSON()" title="Exporter JSON">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Export JSON
+      </button>
+      <button class="btn-icon" onclick="document.getElementById('import-json-inp').click()" title="Importer JSON">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+        Import JSON
+      </button>
+      <button class="btn-icon" onclick="toggleTheme()" id="theme-btn" title="Changer de thème">
+        <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.02 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-12.37l-1.06 1.06a.996.996 0 0 0 0 1.41c.39.39 1.02.39 1.41 0l1.06-1.06c.39-.39.39-1.02 0-1.41s-1.03-.39-1.41 0zM7.05 18.36l-1.06 1.06a.996.996 0 0 0 0 1.41c.39.39 1.02.39 1.41 0l1.06-1.06a.996.996 0 0 0 0-1.41c-.38-.39-1.02-.39-1.41 0z"/></svg>
+        <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+        Thème
+      </button>
+    </div>
+  </div>
+  <nav class="tabs-bar">
+    <button class="tab-btn active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Tableau de bord
+    </button>
+    <button class="tab-btn" data-tab="tab-carnet" onclick="switchTab('tab-carnet',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      Carnet d'entretien
+    </button>
+    <button class="tab-btn" data-tab="tab-database" onclick="switchTab('tab-database',this)">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4v10c0 2.21 3.58 4 8 4s8-1.79 8-4V3zm-8 13c-4.42 0-8-1.79-8-4v-2c1.6 1.26 4.58 2 8 2s6.4-.74 8-2v2c0 2.21-3.58 4-8 4zm0 4c-4.42 0-8-1.79-8-4v-2c1.6 1.26 4.58 2 8 2s6.4-.74 8-2v2c0 2.21-3.58 4-8 4z"/></svg>
+      Base de données
+    </button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ===== TAB 1: TABLEAU DE BORD ===== -->
+<div id="tab-dashboard" class="tab-content active">
+
+  <!-- Alerts -->
+  <div id="dashboard-alerts"></div>
+
+  <!-- KPI Row -->
+  <div class="dashboard-section">
+    <div class="grid-4" id="kpi-grid">
+      <div class="kpi-card alert">
+        <div class="kpi-icon red">🛣️</div>
+        <div class="kpi-label">Kilométrage actuel</div>
+        <div class="kpi-value"><span class="editable-wrap" id="ev-km-val"><span id="d-km">58 686</span><span class="pencil-btn" onclick="editKm()" title="Modifier"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span></span> <span class="kpi-unit">km</span></div>
+        <div class="kpi-hint">Mise en circulation : 12/09/2019</div>
+        <span class="kpi-badge badge-alert" id="kpi-age-badge"></span>
+      </div>
+      <div class="kpi-card info">
+        <div class="kpi-icon blue">📅</div>
+        <div class="kpi-label">Prochain entretien</div>
+        <div class="kpi-value" id="d-next-km"><span class="font-mono">75 000</span><span class="kpi-unit">km</span></div>
+        <div class="kpi-hint" id="d-next-hint">~16 314 km restants • ~22 mois</div>
+        <span class="kpi-badge badge-ok" id="d-next-badge">OK</span>
+      </div>
+      <div class="kpi-card ok">
+        <div class="kpi-icon green">💶</div>
+        <div class="kpi-label">Entretien (12 mois)</div>
+        <div class="kpi-value"><span id="d-cost-year" class="font-mono">—</span> <span class="kpi-unit">€</span></div>
+        <div class="kpi-hint" id="d-cost-hint">Hors carburant — 12 mois glissants</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-icon yellow">⛽</div>
+        <div class="kpi-label">Carburant/mois (moy.)</div>
+        <div class="kpi-value"><span id="d-fuel-month" class="font-mono">87</span> <span class="kpi-unit">€</span></div>
+        <div class="kpi-hint" id="d-fuel-hint">~48 L/mois · ~6,5 L/100km</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second KPI row -->
+  <div class="dashboard-section">
+    <div class="grid-4">
+      <div class="kpi-card">
+        <div class="kpi-icon purple">🚗</div>
+        <div class="kpi-label">Coût total véhicule</div>
+        <div class="kpi-value"><span id="d-total-cost" class="font-mono">15 304</span> <span class="kpi-unit">€</span></div>
+        <div class="kpi-hint">Achat + entretien + carburant</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon red">💰</div>
+        <div class="kpi-label">Coût mensuel (depuis achat)</div>
+        <div class="kpi-value"><span id="d-monthly-cost" class="font-mono">1 020</span> <span class="kpi-unit">€</span></div>
+        <div class="kpi-hint">Achat inclus (amorti sur 16 mois)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon blue">📋</div>
+        <div class="kpi-label">CT suivant</div>
+        <div class="kpi-value" style="font-size:18px;" id="d-ct-date">Nov. 2026</div>
+        <div class="kpi-hint">Dernier CT : 12/11/2024</div>
+        <span class="kpi-badge badge-warning" id="d-ct-badge">~7 mois</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon yellow">🔧</div>
+        <div class="kpi-label">Entretiens (depuis achat)</div>
+        <div class="kpi-value"><span id="d-nb-entretiens" class="font-mono">2</span></div>
+        <div class="kpi-hint">Roue secours + Révision 60 000km</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="dashboard-section">
+    <div class="grid-2">
+      <!-- Fuel chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">⛽ Consommation carburant mensuelle (€)</div>
+          <div class="chart-period-btns">
+            <button class="period-btn active" onclick="setFuelPeriod(12,this)">12M</button>
+            <button class="period-btn" onclick="setFuelPeriod(24,this)">24M</button>
+            <button class="period-btn" onclick="setFuelPeriod(36,this)">36M</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-fuel" height="200"></canvas></div>
+      </div>
+      <!-- Cost breakdown -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">📊 Répartition des coûts totaux</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
+          <div class="chart-wrap"><canvas id="chart-cost-pie" height="220"></canvas></div>
+          <div id="pie-legend" style="font-size:11px;line-height:2.2;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annual cost + Next maintenance -->
+  <div class="dashboard-section">
+    <div class="grid-2">
+      <!-- Annual costs bar -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">📈 Frais annuels (entretien + carburant)</div>
+          <div class="chart-period-btns">
+            <button class="period-btn active" onclick="setCostPeriod(1,this)">1 an</button>
+            <button class="period-btn" onclick="setCostPeriod(2,this)">2 ans</button>
+            <button class="period-btn" onclick="setCostPeriod(3,this)">3 ans</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-annual" height="200"></canvas></div>
+      </div>
+      <!-- Next maintenance -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">🔧 Prochains entretiens planifiés</div>
+        </div>
+        <div class="maintenance-timeline" id="next-maintenance-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle description -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <div class="section-title">Fiche Véhicule — Données Techniques RTA</div>
+      <div class="section-actions">
+        <div class="export-toolbar">
+          <span class="export-label">Export :</span>
+          <button class="export-btn" onclick="exportDashboardRTF()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            RTF
+          </button>
+          <button class="export-btn" onclick="exportSection('tab-dashboard','dashboard','pdf')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM13 9h1.5v3H13V9z"/></svg>
+            PDF
+          </button>
+          <button class="export-btn" onclick="exportSection('fiche-vehicule','fiche_vehicule','png')">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            PNG
+          </button>
+          <button class="export-btn" onclick="exportSection('fiche-vehicule','fiche_vehicule','jpeg')">JPEG</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="fiche-vehicule">
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;" id="fiche-grid">
+        <!-- Photo -->
+        <div>
+          <div class="vehicle-photo-wrap" id="photo-wrap">
+            <div class="photo-placeholder" onclick="document.getElementById('photo-input').click()">
+              <span>🚗</span>
+              <div>Cliquez pour ajouter<br>une photo du véhicule</div>
+            </div>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+          <div style="margin-top:10px;text-align:center;">
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('photo-input').click()">📷 Changer la photo</button>
+          </div>
+        </div>
+        <!-- Vehicle data -->
+        <div id="vehicle-data-container"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TAB 2: CARNET D'ENTRETIEN ===== -->
+<div id="tab-carnet" class="tab-content">
+  <div class="section-header">
+    <div class="section-title">Carnet d'Entretien — SEAT LEON 5F III 1.0 TSI 115</div>
+    <div class="section-actions">
+      <div class="export-toolbar">
+        <span class="export-label">Export :</span>
+        <button class="export-btn" onclick="exportCarnetRTF()">📄 RTF</button>
+        <button class="export-btn" onclick="exportSection('tab-carnet','carnet_entretien','pdf')">🔴 PDF</button>
+        <button class="export-btn" onclick="exportSection('tab-carnet','carnet_entretien','png')">🖼️ PNG</button>
+      </div>
+    </div>
+  </div>
+  <div id="carnet-container"><!-- Populated by JS --></div>
+</div>
+
+<!-- ===== TAB 3: BASE DE DONNÉES ===== -->
+<div id="tab-database" class="tab-content">
+  <div class="section-header">
+    <div class="section-title">Base de données — Historique &amp; Suivi</div>
+    <div class="section-actions">
+      <button class="btn btn-primary btn-sm" onclick="openRowModal(null)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        Ajouter
+      </button>
+    </div>
+  </div>
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="text" class="search-input" id="db-search" placeholder="Rechercher..." oninput="renderTable()">
+    </div>
+    <select class="filter-select" id="db-filter-type" onchange="renderTable()">
+      <option value="">Tous types</option>
+      <option value="ENTRETIEN">Entretien</option>
+      <option value="CT">Contrôle technique</option>
+      <option value="ADMIN">Administratif</option>
+      <option value="CARBURANT">Carburant</option>
+    </select>
+    <select class="filter-select" id="db-filter-intervenant" onchange="renderTable()">
+      <option value="">Tous intervenants</option>
+    </select>
+    <select class="filter-select" id="db-sort" onchange="renderTable()">
+      <option value="date-desc">Date ↓</option>
+      <option value="date-asc">Date ↑</option>
+      <option value="km-desc">Km ↓</option>
+      <option value="km-asc">Km ↑</option>
+      <option value="prix-desc">Prix ↓</option>
+      <option value="alpha-asc">A→Z</option>
+    </select>
+    <div style="margin-left:auto;" class="export-toolbar">
+      <span class="export-label">Export :</span>
+      <button class="export-btn" onclick="exportTableCSV()">📊 CSV</button>
+      <button class="export-btn" onclick="exportSection('table-container','suivi_entretien','pdf')">🔴 PDF</button>
+      <button class="export-btn" onclick="exportSection('table-container','suivi_entretien','png')">🖼️ PNG</button>
+      <button class="export-btn" onclick="document.getElementById('import-csv-inp').click()">📥 CSV</button>
+    </div>
+  </div>
+  <!-- Stats bar -->
+  <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;" id="db-stats-bar"></div>
+  <!-- Table -->
+  <div class="table-wrap" id="table-container">
+    <table id="db-table">
+      <thead>
+        <tr>
+          <th onclick="setSort('date-desc','date-asc')" class="sorted">Date</th>
+          <th onclick="setSort('alpha-asc','alpha-desc')">Type</th>
+          <th>Description</th>
+          <th onclick="setSort('km-desc','km-asc')">Km</th>
+          <th>Intervenant</th>
+          <th onclick="setSort('prix-desc','prix-asc')">Prix (€)</th>
+          <th>Remarques</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="db-tbody"></tbody>
+    </table>
+  </div>
+  <div id="db-count" style="font-size:11px;color:var(--text3);margin-top:8px;text-align:right;"></div>
+</div>
+
+</main>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Edit text modal -->
+<div class="modal-overlay" id="modal-edit-text">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" id="met-title">Modifier</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-text')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" id="met-label">Valeur</label>
+        <input class="form-control" id="met-input" type="text">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-text')">Annuler</button>
+      <button class="btn btn-primary" onclick="applyTextEdit()">Appliquer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit KM modal -->
+<div class="modal-overlay" id="modal-edit-km">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title">Mettre à jour le kilométrage</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-km')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Kilométrage actuel (km)</label>
+        <input class="form-control" id="km-inp" type="number" min="0" step="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-km')">Annuler</button>
+      <button class="btn btn-primary" onclick="applyKm()">Mettre à jour</button>
+    </div>
+  </div>
+</div>
+
+<!-- Row edit modal -->
+<div class="modal-overlay" id="modal-row">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="row-modal-title">Nouvelle entrée</div>
+      <button class="modal-close" onclick="closeModal('modal-row')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date *</label>
+          <input class="form-control" id="row-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kilométrage</label>
+          <input class="form-control" id="row-km" type="number" min="0" placeholder="km">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Type *</label>
+          <select class="form-control" id="row-type">
+            <option value="ENTRETIEN">Entretien</option>
+            <option value="CT">Contrôle technique</option>
+            <option value="ADMIN">Administratif</option>
+            <option value="CARBURANT">Carburant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie</label>
+          <select class="form-control" id="row-categorie">
+            <option value="Révision">Révision</option>
+            <option value="Réparation">Réparation</option>
+            <option value="Contrôle">Contrôle</option>
+            <option value="Administratif">Administratif</option>
+            <option value="Équipement">Équipement</option>
+            <option value="Carburant">Carburant</option>
+            <option value="Assurance">Assurance</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <input class="form-control" id="row-desc" type="text" placeholder="Ex: Révision 60 000km">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Intervenant</label>
+          <input class="form-control" id="row-intervenant" type="text" placeholder="Ex: Garage SEAT">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prix (€)</label>
+          <input class="form-control" id="row-prix" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Remarques</label>
+        <textarea class="form-control" id="row-remarques" rows="3" placeholder="Détails, références pièces..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-row')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRow()" id="row-save-btn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Hidden inputs -->
+<input type="file" id="import-json-inp" accept=".json" style="display:none" onchange="importJSON(this)">
+<input type="file" id="import-csv-inp" accept=".csv" style="display:none" onchange="importCSV(this)">
+
+<script>
+// =====================================================================
+// DATA MODEL
+// =====================================================================
+const DEFAULT_DATA = {
+  meta: { version: '1.0', lastSaved: null, theme: 'dark' },
+  vehicule: {
+    marque: 'SEAT', modele: 'LEON', generation: '5F III',
+    version: '1.0 TSI 115 12V Start & Stop',
+    annee: 2019, dateMEC: '2019-09-12',
+    immatriculation: 'À compléter', vin: 'À compléter',
+    couleur: 'Blanc Nevada',
+    kilometrageActuel: 59343,
+    // Moteur
+    typeMoteur: 'EA211 — 3 cylindres turbocompressé',
+    cylindree: 999, puissanceCh: 115, puissanceKw: 85,
+    puissanceFiscale: 6, coupleNm: 200, bvType: 'Manuelle 6 vitesses',
+    traction: 'Traction avant',
+    normeEmissions: 'Euro 6d-TEMP',
+    // Carburant
+    carburant: 'Essence SP98 (SP95 compatible)',
+    huileMoteur: 'Castrol Edge 5W-30 LL VW 504/507',
+    capaciteHuile: 3.8, intervalleVidange: '15 000 km ou 1 an',
+    capaciteReservoir: 50,
+    consOfficielle: 4.9, consBrut: 6.5, co2: 113,
+    // Dimensions
+    longueur: 4264, largeur: 1816, hauteur: 1459, empattement: 2636,
+    masseAVide: 1197,
+    // Pneumatiques
+    pneusAv: '205/55 R16 91H', pneusAr: '205/55 R16 91H',
+    pressionAv: 2.3, pressionAr: 2.2,
+    pressionCharge: 2.8,
+    // Distribution
+    typeDistribution: 'Courroie de distribution (crantée)',
+    intervalleDistribution: '90 000 km ou 5 ans',
+    // Freins
+    freinsAv: 'Disques ventilés Ø 288mm', freinsAr: 'Disques pleins Ø 232mm',
+    // Autres
+    batterie: '12V 59Ah / 540A CCA',
+    liquideFrein: 'DOT 4 — purge tous les 2 ans',
+    liquideRefroid: 'G13 (OAT rose) — 5 ans ou 90 000km',
+    photo: null,
+  },
+  entretiens: [
+    { id: 1, date: '2019-09-12', type: 'ADMIN', description: '1ère mise à la circulation', km: 0, intervenant: 'Garage SEAT', prix: 0, remarques: 'M Fabrice ALVAREZ - Véhicule en LLD', categorie: 'Administratif' },
+    { id: 2, date: '2020-10-15', type: 'ENTRETIEN', description: 'Révision 15 000 km', km: 15000, intervenant: 'Garage SEAT', prix: 100, remarques: 'Huile + filtre à huile + niveaux (présumé)', categorie: 'Révision' },
+    { id: 3, date: '2021-11-20', type: 'ENTRETIEN', description: 'Révision 30 000 km', km: 30000, intervenant: 'Garage SEAT', prix: 130, remarques: 'Huile + filtre à huile + niveaux + filtre habitacle (présumé)', categorie: 'Révision' },
+    { id: 4, date: '2023-07-24', type: 'ENTRETIEN', description: 'Révision 45 000 km — Service étendu', km: 44058, intervenant: 'Garage SEAT', prix: 150, remarques: 'Huile + filtre huile + niveaux + filtre antipoussière/pollen + liquide frein', categorie: 'Révision' },
+    { id: 5, date: '2023-10-04', type: 'CT', description: 'Contrôle technique — Sans défaillance majeure', km: 46221, intervenant: 'AUTOSECURITE', prix: 79, remarques: 'Avant vente post-LLD. RAS.', categorie: 'Contrôle' },
+    { id: 6, date: '2024-11-12', type: 'CT', description: 'Contrôle technique — Défaillance mineure', km: 48299, intervenant: 'DIAGNOSUR', prix: 79, remarques: 'Avant vente LBC — Défaillance mineure 8.2.12.E.1 : Émissions gazeuses — Connexion OBD impossible sans dysfonctionnement du témoin OBD', categorie: 'Contrôle' },
+    { id: 7, date: '2024-12-14', type: 'ADMIN', description: 'Achat du véhicule (particulier)', km: 48340, intervenant: 'M Fabrice ALVAREZ (LBC)', prix: 13500, remarques: 'Achat à Portes-lès-Valence (26). Fin de LLD. Payé par virement.', categorie: 'Administratif' },
+    { id: 8, date: '2025-02-15', type: 'ENTRETIEN', description: 'Achat roue de secours galette', km: 50000, intervenant: 'EBAY', prix: 170, remarques: 'Kit roue galette 125/80R17 99M — avec cric et clé de roue', categorie: 'Équipement' },
+    { id: 9, date: '2026-02-21', type: 'ENTRETIEN', description: 'Révision 60 000 km', km: 58686, intervenant: 'Alain (particulier)', prix: 60, remarques: 'Huile Castrol Edge 5W-30 LL (LongLife) + filtre huile + filtre air + filtre habitacle', categorie: 'Révision' },
+    { id:10, date:'2024-12-19', type:'CARBURANT', description:'Plein carburant — SP98', km:48561, intervenant:'', prix:72.89, litres:42.16, kmParcourus:null, prixLitre:1.73, remarques:'Premier plein enregistré | 42,16 l | 1,73 €/l', categorie:'Carburant' },
+    { id:11, date:'2025-01-03', type:'CARBURANT', description:'Plein carburant — SP98', km:49091, intervenant:'', prix:63.57, litres:35.20, kmParcourus:530, prixLitre:1.80, remarques:'530 km parcourus | 35,20 l | 1,80 €/l', categorie:'Carburant' },
+    { id:12, date:'2025-02-07', type:'CARBURANT', description:'Plein carburant — SP98', km:49675, intervenant:'', prix:75.71, litres:43.56, kmParcourus:583, prixLitre:1.74, remarques:'583 km parcourus | 43,56 l | 1,74 €/l', categorie:'Carburant' },
+    { id:13, date:'2025-03-01', type:'CARBURANT', description:'Plein carburant — SP98', km:50292, intervenant:'', prix:74.55, litres:43.88, kmParcourus:613, prixLitre:1.70, remarques:'613 km parcourus | 43,88 l | 1,70 €/l', categorie:'Carburant' },
+    { id:14, date:'2025-03-23', type:'CARBURANT', description:'Plein carburant — SP98', km:50838, intervenant:'', prix:62.54, litres:37.90, kmParcourus:539, prixLitre:1.65, remarques:'539 km parcourus | 37,90 l | 1,65 €/l', categorie:'Carburant' },
+    { id:15, date:'2025-04-11', type:'CARBURANT', description:'Plein carburant — SP98', km:51416, intervenant:'', prix:57.90, litres:36.76, kmParcourus:578, prixLitre:1.57, remarques:'578 km parcourus | 36,76 l | 1,57 €/l', categorie:'Carburant' },
+    { id:16, date:'2025-05-05', type:'CARBURANT', description:'Plein carburant — SP98', km:51948, intervenant:'', prix:57.41, litres:35.24, kmParcourus:532, prixLitre:1.63, remarques:'532 km parcourus | 35,24 l | 1,63 €/l', categorie:'Carburant' },
+    { id:17, date:'2025-05-17', type:'CARBURANT', description:'Plein partiel — SP98', km:52378, intervenant:'', prix:44.87, litres:27.03, kmParcourus:411, prixLitre:1.66, remarques:'411 km parcourus | 27,03 l (partiel) | 1,66 €/l', categorie:'Carburant' },
+    { id:18, date:'2025-06-05', type:'CARBURANT', description:'Plein carburant — SP98', km:52941, intervenant:'', prix:60.13, litres:37.14, kmParcourus:563, prixLitre:1.62, remarques:'563 km parcourus | 37,14 l | 1,62 €/l', categorie:'Carburant' },
+    { id:19, date:'2025-06-30', type:'CARBURANT', description:'Plein carburant — SP98', km:53485, intervenant:'', prix:69.00, litres:42.10, kmParcourus:544, prixLitre:1.64, remarques:'544 km parcourus | 42,10 l | 1,64 €/l', categorie:'Carburant' },
+    { id:20, date:'2025-08-05', type:'CARBURANT', description:'Plein carburant — SP98', km:54184, intervenant:'', prix:72.14, litres:42.84, kmParcourus:681, prixLitre:1.68, remarques:'681 km parcourus | 42,84 l | 1,68 €/l', categorie:'Carburant' },
+    { id:21, date:'2025-08-22', type:'CARBURANT', description:'Plein carburant — SP98', km:54786, intervenant:'', prix:55.73, litres:34.00, kmParcourus:602, prixLitre:1.64, remarques:'602 km parcourus | 34,00 l | 1,64 €/l', categorie:'Carburant' },
+    { id:22, date:'2025-09-22', type:'CARBURANT', description:'Plein carburant — SP98', km:55320, intervenant:'', prix:59.68, litres:36.00, kmParcourus:534, prixLitre:1.64, remarques:'534 km parcourus | 36,00 l | 1,64 €/l', categorie:'Carburant' },
+    { id:23, date:'2025-10-16', type:'CARBURANT', description:'Plein carburant — SP98', km:55841, intervenant:'', prix:60.29, litres:37.26, kmParcourus:520, prixLitre:1.62, remarques:'520 km parcourus | 37,26 l | 1,62 €/l', categorie:'Carburant' },
+    { id:24, date:'2025-11-17', type:'CARBURANT', description:'Plein carburant — SP98', km:56485, intervenant:'', prix:68.65, litres:41.85, kmParcourus:643, prixLitre:1.64, remarques:'643 km parcourus | 41,85 l | 1,64 €/l', categorie:'Carburant' },
+    { id:25, date:'2025-12-11', type:'CARBURANT', description:'Plein carburant — SP98', km:56990, intervenant:'', prix:57.50, litres:35.00, kmParcourus:503, prixLitre:1.64, remarques:'503 km parcourus | 35,00 l | 1,64 €/l', categorie:'Carburant' },
+    { id:26, date:'2025-12-25', type:'CARBURANT', description:'Plein carburant — SP98', km:57514, intervenant:'', prix:53.50, litres:33.25, kmParcourus:519, prixLitre:1.61, remarques:'519 km parcourus | 33,25 l | 1,61 €/l', categorie:'Carburant' },
+    { id:27, date:'2026-01-22', type:'CARBURANT', description:'Plein carburant — SP98', km:58041, intervenant:'', prix:62.00, litres:37.00, kmParcourus:528, prixLitre:1.67, remarques:'528 km parcourus | 37,00 l | 1,67 €/l', categorie:'Carburant' },
+    { id:28, date:'2026-02-18', type:'CARBURANT', description:'Plein carburant — SP98', km:58481, intervenant:'', prix:54.00, litres:32.00, kmParcourus:440, prixLitre:1.66, remarques:'440 km parcourus | 32,00 l | 1,66 €/l', categorie:'Carburant' },
+    { id:29, date:'2026-03-19', type:'CARBURANT', description:'Plein partiel — SP98', km:59173, intervenant:'', prix:30.00, litres:16.00, kmParcourus:490, prixLitre:1.89, remarques:'490 km parcourus | 16,00 l (partiel) | 1,89 €/l', categorie:'Carburant' },
+    { id:30, date:'2026-04-12', type:'CARBURANT', description:'Plein carburant — SP98', km:59343, intervenant:'', prix:80.42, litres:41.05, kmParcourus:168, prixLitre:1.96, remarques:'168 km parcourus | 41,05 l | 1,96 €/l', categorie:'Carburant' },
+  ],
+  carburant: [], // Données dérivées dynamiquement depuis appData.entretiens (type CARBURANT)
+    editOverrides: {}
+};
+
+const CARNET = [
+  {
+    id:'rev-15', emoji:'🔧', titre:'Révision intermédiaire (vidange)',
+    intervalle:'15 000 km ou 12 mois', ekm:15000, emois:12,
+    priorite:'normal', color:'#3b82f6',
+    matchKws:['révision','vidange','huile moteur'], intervalKm:15000, intervalMois:12, nextKmAbs:null, warnKmBefore:3000, warnMoisBefore:2, noEntryFallback:'ok',
+    cout_min:70, cout_max:120,
+    taches:[
+      'Vidange huile moteur — Castrol Edge 5W-30 LL (VW 504/507), 3,8 L',
+      'Remplacement filtre à huile (MANN HU 7006 z ou équivalent)',
+      'Vérification et appoint de tous les niveaux (refroidissement, direction, lave-glace, frein)',
+      'Contrôle pression et état des pneumatiques (usure, déformation)',
+      'Vérification de l\'éclairage complet (phares, feux stops, clignotants)',
+      'Contrôle freins : mesure épaisseur plaquettes avant/arrière et état disques',
+      'Test batterie 12V (tension repos ≥ 12,6V) et alternateur (13,5-14,5V)',
+      'Contrôle et réglage éclairage phares',
+      'Vérification courroies accessoires (courroie alternateur)',
+      'Rapport d\'entretien signé dans le carnet constructeur',
+    ],
+    materiels:[
+      { piece:'Huile moteur 5W-30 LongLife VW 504/507', qte:'4 L', ref:'Castrol Edge 5W-30 LL' },
+      { piece:'Filtre à huile', qte:'1', ref:'MANN HU 7006 z / SEAT 04E115561H' },
+      { piece:'Joint de bouchon de vidange', qte:'1', ref:'N 013 876 2' },
+    ],
+    notes:'La SEAT LEON 5F utilise un intervalle LongLife de 30 000 km avec l\'huile VW 504/507. Cependant, pour une conduite mixte urbaine/périurbaine française, une vidange à 15 000 km ou 1 an est recommandée pour préserver le moteur et le turbo.',
+    warning:null,
+  },
+  {
+    id:'rev-30', emoji:'🔩', titre:'Révision principale',
+    intervalle:'30 000 km ou 24 mois', ekm:30000, emois:24,
+    priorite:'normal', color:'#3b82f6',
+    matchKws:['révision'], intervalKm:30000, intervalMois:24, nextKmAbs:null, warnKmBefore:5000, warnMoisBefore:3, noEntryFallback:'ok',
+    cout_min:120, cout_max:180,
+    taches:[
+      'Tout le contenu de la révision intermédiaire (vidange, filtre huile, niveaux, vérifications)',
+      'Remplacement filtre d\'habitacle / antipoussière-antipollen',
+      'Vérification ou remplacement filtre à air (selon état)',
+      'Test batterie 12V approfondi (capacité résiduelle)',
+      'Vérification état des essuie-glaces avant et arrière',
+      'Contrôle serrage roues (couple 120 Nm)',
+      'Contrôle système de climatisation (présence de fluide)',
+      'Lecture auto-diagnostic OBD (codes défauts mémorisés)',
+      'Vérification jeu de direction et rotules',
+      'Contrôle flexible de frein et état des étriers',
+    ],
+    materiels:[
+      { piece:'Huile moteur 5W-30 LongLife', qte:'4 L', ref:'Castrol Edge 5W-30 LL' },
+      { piece:'Filtre à huile', qte:'1', ref:'MANN HU 7006 z' },
+      { piece:'Filtre d\'habitacle / antipollen', qte:'1', ref:'MANN CU 23 001-2 / SEAT 5Q0819653' },
+      { piece:'Filtre à air (si nécessaire)', qte:'1', ref:'MANN C 22 021 / SEAT 04E129620' },
+    ],
+    notes:'Profiter de cette révision pour vérifier l\'état général de la suspension et des soufflets de cardan. Vérifier également la date de fabrication des pneumatiques (DOT : max 6-8 ans).',
+    warning:null,
+  },
+  {
+    id:'rev-60', emoji:'⚙️', titre:'Révision majeure',
+    intervalle:'60 000 km ou 4 ans', ekm:60000, emois:48,
+    priorite:'important', color:'#f59e0b',
+    matchKws:['révision'], intervalKm:60000, intervalMois:48, nextKmAbs:null, warnKmBefore:8000, warnMoisBefore:6, noEntryFallback:'ok',
+    cout_min:200, cout_max:300,
+    taches:[
+      'Tout le contenu des révisions précédentes',
+      'Remplacement des bougies d\'allumage (4 bougies NGK ou Bosch recommandées)',
+      'Purge et remplacement du liquide de frein DOT 4',
+      'Remplacement filtre à air (obligatoire)',
+      'Remplacement filtre d\'habitacle',
+      'Vérification détaillée de la courroie de distribution (état, tension, date)',
+      'Vérification courroie d\'accessoires (alternateur/clim)',
+      'Contrôle du système Start & Stop (batterie EFB/AGM)',
+      'Vérification amortisseurs (contrôle d\'oscillation)',
+      'Contrôle disques et plaquettes (mesure précise)',
+      'Vérification joints de culasse (traces d\'huile, de refroidissement)',
+    ],
+    materiels:[
+      { piece:'Huile moteur 5W-30 LongLife', qte:'4 L', ref:'Castrol Edge 5W-30 LL' },
+      { piece:'Filtre à huile', qte:'1', ref:'MANN HU 7006 z' },
+      { piece:'Bougies d\'allumage', qte:'3 (3 cylindres)', ref:'NGK ILZKER7B8G ou Bosch 0 242 145 531' },
+      { piece:'Filtre à air', qte:'1', ref:'MANN C 22 021' },
+      { piece:'Filtre d\'habitacle', qte:'1', ref:'MANN CU 23 001-2' },
+      { piece:'Liquide de frein DOT 4', qte:'0,5 L', ref:'TOTAL FREIN DOT 4 / Ate SL.6 DOT 4' },
+    ],
+    notes:'Cette révision est réalisée à 58 686 km (Fév. 2026). L\'entretien a bien été effectué selon l\'historique connu.',
+    warning:'⚠️ EFFECTUÉE à 58 686 km le 21/02/2026 — Prochain grand entretien : 90 000 km',
+  },
+  {
+    id:'rev-75', emoji:'🛢️', titre:'Révision 75 000 km',
+    intervalle:'75 000 km ou 5 ans', ekm:75000, emois:60,
+    priorite:'normal', color:'#3b82f6',
+    matchKws:['révision'], intervalKm:null, intervalMois:null, nextKmAbs:75000, warnKmBefore:5000, warnMoisBefore:3, noEntryFallback:'ok',
+    cout_min:100, cout_max:150,
+    taches:[
+      'Vidange huile moteur et remplacement filtre à huile',
+      'Purge et remplacement du liquide de frein DOT 4 (si pas fait depuis 2 ans)',
+      'Remplacement filtre d\'habitacle',
+      'Vérification générale complète (freins, suspension, direction)',
+      'Lecture codes défauts OBD',
+      'Contrôle pression pneumatiques et profondeur des sculptures',
+      'Vérification des essuie-glaces (remplacer si nécessaire)',
+    ],
+    materiels:[
+      { piece:'Huile moteur 5W-30 LongLife', qte:'4 L', ref:'Castrol Edge 5W-30 LL' },
+      { piece:'Filtre à huile', qte:'1', ref:'MANN HU 7006 z' },
+      { piece:'Filtre d\'habitacle', qte:'1', ref:'MANN CU 23 001-2' },
+      { piece:'Liquide de frein DOT 4 (si nécessaire)', qte:'0,5 L', ref:'DOT 4' },
+    ],
+    notes:'Distance restante depuis la dernière révision (60 000km/Fév.2026) : ~16 314 km. Estimation d\'arrivée à 75 000 km : fin 2027 au rythme actuel de ~750 km/mois.',
+    warning:null,
+  },
+  {
+    id:'rev-90', emoji:'⛓️', titre:'Courroie de distribution — 90 000 km',
+    intervalle:'90 000 km ou 5 ans', ekm:90000, emois:60,
+    priorite:'critique', color:'#e5000f',
+    matchKws:['courroie','distribution'], intervalKm:null, intervalMois:null, nextKmAbs:90000, warnKmBefore:10000, warnMoisBefore:12, noEntryFallback:'ok',
+    cout_min:500, cout_max:850,
+    taches:[
+      'Remplacement IMPÉRATIF de la courroie de distribution (kit complet)',
+      'Remplacement simultané du tendeur de courroie',
+      'Remplacement du galet enrouleur de courroie',
+      'Remplacement de la pompe à eau (fortement conseillé, même coût d\'accès)',
+      'Remplacement du liquide de refroidissement G13 (OAT rose)',
+      'Vidange huile moteur + filtre à huile',
+      'Remplacement filtre à air, filtre habitacle, bougies',
+      'Purge liquide de frein si non fait depuis 2 ans',
+      'Vérification amortisseurs avant et arrière',
+      'Vérification et tension courroie d\'accessoires (alternateur)',
+      'Lecture complète auto-diagnostic OBD',
+    ],
+    materiels:[
+      { piece:'Kit courroie de distribution', qte:'1', ref:'Dayco KTB1024 / INA 530027010 ou OEM SEAT' },
+      { piece:'Pompe à eau', qte:'1', ref:'GMB GWS60A / OEM SEAT 04E121011M' },
+      { piece:'Liquide de refroidissement G13', qte:'5 L', ref:'Coolant G013A8J1G / SEAT VAG G013A8JM1' },
+      { piece:'Huile moteur 5W-30 LL', qte:'4 L', ref:'Castrol Edge 5W-30 LL' },
+      { piece:'Filtre à huile + bougies + filtres air/habitacle', qte:'1 jeu', ref:'Voir révision 60 000km' },
+    ],
+    notes:'Le remplacement de la courroie de distribution est une opération CRITIQUE. La rupture de la courroie entraîne la destruction complète du moteur. Il est fortement conseillé de confier cette opération à un professionnel qualifié même si le coût est plus élevé.',
+    warning:'🚨 OPÉRATION CRITIQUE — Ne pas dépasser l\'échéance. Coût d\'une destruction moteur par rupture : 3 000 à 6 000 €',
+  },
+  {
+    id:'frein-av', emoji:'🔴', titre:'Plaquettes + disques avant',
+    intervalle:'50 000 – 80 000 km (variable selon conduite)', ekm:70000, emois:null,
+    priorite:'important', color:'#f59e0b',
+    matchKws:['plaquette','disque avant','freins avant'], intervalKm:null, intervalMois:null, nextKmAbs:70000, warnKmBefore:10000, warnMoisBefore:null, noEntryFallback:'ok',
+    cout_min:150, cout_max:350,
+    taches:[
+      'Démontage des étriers avant et mesure épaisseur plaquettes',
+      'Remplacement plaquettes avant si épaisseur < 3 mm',
+      'Mesure épaisseur disques avant (min légal : 22 mm pour 25 mm nominaux)',
+      'Remplacement disques si usure ou voilement constaté',
+      'Nettoyage et graissage des glissières d\'étrier (Ceratec ou équivalent)',
+      'Purge partielle du circuit hydraulique avant',
+      'Test d\'efficacité freinage',
+    ],
+    materiels:[
+      { piece:'Plaquettes avant', qte:'1 jeu', ref:'Brembo P 85 143 / Ferodo FDB4424' },
+      { piece:'Disques avant (si nécessaire)', qte:'2', ref:'Brembo 09.D205.11 / SEAT 5Q0615301AC' },
+      { piece:'Graisse de montage frein', qte:'1 tube', ref:'Ceratec ou Brake Grease' },
+    ],
+    notes:'L\'usure des plaquettes de frein est visible visuellement ou via le témoin d\'usure au tableau de bord. À vérifier systématiquement lors de chaque révision. La conduite urbaine accélère l\'usure.',
+    warning:null,
+  },
+  {
+    id:'pneus', emoji:'🔵', titre:'Remplacement pneumatiques',
+    intervalle:'30 000 – 50 000 km ou si profondeur < 3 mm (légal : 1,6 mm)',
+    ekm:45000, emois:null,
+    priorite:'important', color:'#f59e0b',
+    matchKws:['pneu','pneumatique','montage pneu'], intervalKm:null, intervalMois:null, nextKmAbs:null, warnKmBefore:null, warnMoisBefore:12, noEntryFallback:'dateMec',
+    cout_min:350, cout_max:600,
+    taches:[
+      'Mesure profondeur sculptures (4 points par pneu)',
+      'Contrôle pression à froid (AV : 2,3 bar / AR : 2,2 bar)',
+      'Vérification état flancs (craquelures, hernies)',
+      'Vérification date de fabrication (DOT, max 6-8 ans)',
+      'Remplacement des 4 pneus si usure atteinte ou inégale',
+      'Géométrie et parallélisme après remplacement',
+      'Équilibrage des roues',
+    ],
+    materiels:[
+      { piece:'Pneumatiques 205/55 R16 91H (x4)', qte:'4', ref:'Michelin Primacy 4 / Continental PremiumContact 7 / Bridgestone Turanza T005' },
+      { piece:'Valves neuves', qte:'4', ref:'Valve TR414 TPMS compatible' },
+    ],
+    notes:'Le SEAT LEON 5F est équipé d\'un capteur de pression des pneus (TPMS). Lors du remplacement, vérifier l\'état des capteurs. La pression de charge maximale est de 2,8 bar AV et AR.',
+    warning:null,
+  },
+  {
+    id:'embrayage', emoji:'🔗', titre:'Kit embrayage',
+    intervalle:'100 000 – 150 000 km (variable selon style de conduite)',
+    ekm:130000, emois:null,
+    priorite:'important', color:'#8b5cf6',
+    matchKws:['embrayage','kit embrayage'], intervalKm:null, intervalMois:null, nextKmAbs:130000, warnKmBefore:15000, warnMoisBefore:null, noEntryFallback:'ok',
+    cout_min:700, cout_max:1300,
+    taches:[
+      'Démontage de la boîte de vitesses',
+      'Remplacement kit embrayage complet (disque, plateau, butée)',
+      'Vérification état du volant moteur (usure, fissures, voilement)',
+      'Remplacement du joint d\'arbre de sortie de boîte (côté moteur)',
+      'Remplacement de l\'huile de boîte de vitesses',
+      'Vérification et remplacement éventuels des joints spi',
+      'Réassemblage et réglage embrayage',
+    ],
+    materiels:[
+      { piece:'Kit embrayage complet', qte:'1', ref:'LUK 623 3499 00 / Sachs 3000 952 011' },
+      { piece:'Butée d\'embrayage', qte:'1', ref:'Incluse dans le kit' },
+      { piece:'Huile boîte vitesses', qte:'2 L', ref:'VW G 052 726 A2 (MTF-1)' },
+    ],
+    notes:'L\'embrayage est soumis à une usure progressive. Les signes d\'usure : glissement à l\'accélération, point d\'embrayage haut, odeur de brûlé. À ce stade de kilométrage (58 686 km), l\'embrayage est encore jeune.',
+    warning:null,
+  },
+  {
+    id:'essuie', emoji:'🌧️', titre:'Essuie-glaces',
+    intervalle:'1 à 2 ans ou au premier signe de détérioration',
+    ekm:null, emois:18,
+    priorite:'normal', color:'#3b82f6',
+    matchKws:['essuie-glace','essuie glace','balai essuie','essuies'], intervalKm:null, intervalMois:18, nextKmAbs:null, warnKmBefore:null, warnMoisBefore:2, noEntryFallback:'overdue',
+    cout_min:25, cout_max:55,
+    taches:[
+      'Remplacement balais essuie-glace avant (2 balais)',
+      'Remplacement balai essuie-glace arrière (1 balai)',
+      'Vérification niveau et concentration du liquide lave-glace',
+      'Nettoyage du pare-brise (tartre, film gras)',
+      'Vérification bras essuie-glace (corrosion, articulation)',
+    ],
+    materiels:[
+      { piece:'Balai essuie-glace avant droit', qte:'1 — 650mm', ref:'Bosch Aerotwin A936S ou VALEO 600 663' },
+      { piece:'Balai essuie-glace avant gauche', qte:'1 — 450mm', ref:'Inclus dans jeu A936S' },
+      { piece:'Balai essuie-glace arrière', qte:'1 — 300mm', ref:'Bosch H 301 / VALEO 578 570' },
+    ],
+    notes:'⚠️ Les essuie-glaces notés dans l\'historique sont À REMPLACER. Date de la dernière révision connue : 60 000 km (Fév. 2026). Remplacement recommandé immédiatement.',
+    warning:'⚠️ REMPLACEMENT CONSEILLÉ — Notés à remplacer dans l\'historique (état inconnu depuis dernier CT)',
+  },
+  {
+    id:'batterie', emoji:'🔋', titre:'Batterie 12V',
+    intervalle:'5 à 7 ans',
+    ekm:null, emois:72,
+    priorite:'normal', color:'#22c55e',
+    matchKws:['batterie','remplacement batterie'], intervalKm:null, intervalMois:72, nextKmAbs:null, warnKmBefore:null, warnMoisBefore:12, noEntryFallback:'dateMec',
+    cout_min:100, cout_max:180,
+    taches:[
+      'Test de la batterie (tension repos et capacité résiduelle)',
+      'Remplacement de la batterie si capacité < 60% (EFB ou AGM obligatoire Start&Stop)',
+      'Codage/paramétrage de la nouvelle batterie avec outil VAG-COM / ODIS',
+      'Vérification état des bornes et cosses (corrosion)',
+      'Vérification de l\'alternateur (tension charge : 13,5-14,5V)',
+    ],
+    materiels:[
+      { piece:'Batterie EFB 12V 60Ah 640A (Start&Stop)', qte:'1', ref:'EXIDE EL600 / VARTA E45 / BOSCH S5 A05' },
+    ],
+    notes:'IMPORTANT : Le SEAT LEON avec Start & Stop nécessite IMPÉRATIVEMENT une batterie de type EFB (Enhanced Flooded Battery) ou AGM. Ne jamais monter une batterie standard — risque de destruction du système Start & Stop. Un codage avec VCP/VCDS est nécessaire après remplacement.',
+    warning:'⚠️ Batterie de type EFB ou AGM OBLIGATOIRE — Codage VCP/VCDS requis après remplacement',
+  },
+  {
+    id:'liq-frein', emoji:'🟡', titre:'Purge liquide de frein',
+    intervalle:'Tous les 2 ans',
+    ekm:null, emois:24,
+    priorite:'important', color:'#f59e0b',
+    matchKws:['liquide frein','liquide de frein','purge frein','dot 4','dot4'], intervalKm:null, intervalMois:24, nextKmAbs:null, warnKmBefore:null, warnMoisBefore:3, noEntryFallback:'ok',
+    cout_min:30, cout_max:60,
+    taches:[
+      'Contrôle du taux d\'humidité du liquide de frein (indicateur Refractometer ou bandelette)',
+      'Vidange complète du circuit de frein (4 roues)',
+      'Remplacement par liquide DOT 4 neuf',
+      'Purge en commençant par la roue la plus éloignée du maître-cylindre (AR droit)',
+      'Vérification du niveau maître-cylindre après purge',
+      'Contrôle étanchéité flexibles et canalisations rigides',
+    ],
+    materiels:[
+      { piece:'Liquide de frein DOT 4', qte:'0,5 L', ref:'Total Frein DOT 4 / ATE SL.6 DOT 4' },
+    ],
+    notes:'⚠️ DÉPASSÉ — La purge du liquide de frein a été réalisée à la révision 45 000 km (Juillet 2023). La prochaine purge était due en Juillet 2025. Il faut procéder à cette purge dès que possible.',
+    warning:'🚨 PURGE EN RETARD — Dernière purge : Juillet 2023. Échéance dépassée (Juillet 2025). À effectuer immédiatement.',
+  },
+];
+
+// =====================================================================
+// APP STATE
+// =====================================================================
+let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let historyStack = [];
+let historyIndex = -1;
+let currentEditField = null;
+let currentEditRowId = null;
+let fuelPeriod = 12;
+let costPeriod = 1;
+let charts = {};
+
+// =====================================================================
+// INIT
+// =====================================================================
+function init() {
+  loadData();
+  applyTheme(appData.meta.theme);
+  renderAll();
+  saveHistory();
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoAction(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redoAction(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveData(); }
+    if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); }
+  });
+  // Auto-detect system theme on first load if no preference saved
+  if (!localStorage.getItem('sl_theme')) {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+}
+
+function loadData() {
+  const saved = localStorage.getItem('sl_appdata');
+  if (saved) {
+    try { appData = JSON.parse(saved); }
+    catch(e) { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+  }
+}
+
+function saveData() {
+  appData.meta.lastSaved = new Date().toISOString();
+  localStorage.setItem('sl_appdata', JSON.stringify(appData));
+  localStorage.setItem('sl_theme', appData.meta.theme);
+  showToast('Données sauvegardées ✓', 'success');
+}
+
+function saveHistory() {
+  const snap = JSON.stringify(appData);
+  historyStack = historyStack.slice(0, historyIndex + 1);
+  historyStack.push(snap);
+  if (historyStack.length > 40) historyStack.shift();
+  else historyIndex++;
+}
+
+function undoAction() {
+  if (historyIndex > 0) {
+    historyIndex--;
+    appData = JSON.parse(historyStack[historyIndex]);
+    renderAll();
+    showToast('Annulé', 'info');
+  } else showToast('Rien à annuler', 'info');
+}
+
+function redoAction() {
+  if (historyIndex < historyStack.length - 1) {
+    historyIndex++;
+    appData = JSON.parse(historyStack[historyIndex]);
+    renderAll();
+    showToast('Rétabli', 'info');
+  } else showToast('Rien à rétablir', 'info');
+}
+
+// =====================================================================
+// THEME
+// =====================================================================
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  appData.meta.theme = next;
+  saveData();
+}
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('theme-icon-sun').style.display = t === 'dark' ? 'block' : 'none';
+  document.getElementById('theme-icon-moon').style.display = t === 'light' ? 'block' : 'none';
+  // Update charts colors
+  setTimeout(() => {
+    Object.values(charts).forEach(c => { if (c) { c.destroy(); } });
+    charts = {};
+    renderCharts();
+  }, 100);
+}
+
+// =====================================================================
+// TAB SWITCHING
+// =====================================================================
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// =====================================================================
+// RENDER ALL
+// =====================================================================
+function renderAll() {
+  renderDashboard();
+  renderCarnet();
+  renderTable();
+  updateHeaderKm();
+}
+
+function updateHeaderKm() {
+  const km = appData.vehicule.kilometrageActuel;
+  document.getElementById('hdr-km').textContent = fmtKm(km);
+  document.getElementById('d-km').textContent = fmtKm(km);
+}
+
+// =====================================================================
+// DASHBOARD
+// =====================================================================
+
+// ===== CARBURANT — données dérivées depuis entretiens =====
+function getFuelMonthly() {
+  const entries = (appData.entretiens || []).filter(e => e.type === 'CARBURANT');
+  const byMonth = {};
+  entries.forEach(e => {
+    const d = new Date(e.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (!byMonth[key]) byMonth[key] = { annee:d.getFullYear(), mois:d.getMonth()+1, km:0, litres:0, total:0, count:0, prixTotal:0 };
+    byMonth[key].km += (e.kmParcourus || 0);
+    byMonth[key].litres += (e.litres || 0);
+    byMonth[key].total = Math.round((byMonth[key].total + (e.prix || 0)) * 100) / 100;
+    byMonth[key].count++;
+    byMonth[key].prixTotal += (e.litres || 0) > 0 ? (e.prixLitre || 0) * (e.litres || 0) : 0;
+  });
+  return Object.values(byMonth).sort((a,b) => a.annee*12+a.mois - b.annee*12-b.mois).map(m => ({
+    ...m,
+    prixLitre: m.litres > 0 ? Math.round(m.prixTotal / m.litres * 1000) / 1000 : 0
+  }));
+}
+
+// =====================================================================
+// MAINTENANCE STATUS — CALCUL DYNAMIQUE DEPUIS ONGLET 3 + CARNET
+// =====================================================================
+function computeMaintenanceStatus(c) {
+  const km = appData.vehicule.kilometrageActuel;
+  const now = new Date();
+  const fuelData = getFuelMonthly();
+  // Km mensuel moyen : depuis données carburant (km parcourus réels)
+  const fuelWithKm = fuelData.filter(f => f.km > 0);
+  const avgKmMonth = fuelWithKm.length > 0
+    ? fuelWithKm.reduce((s,f) => s+f.km, 0) / fuelWithKm.length : 700;
+
+  // --- Helper : chercher la dernière entrée matching dans onglet 3 ---
+  function findLastEntry(kws) {
+    if (!kws || kws.length === 0) return null;
+    return (appData.entretiens || [])
+      .filter(e => e.type !== 'CARBURANT' && e.type !== 'ADMIN')
+      .filter(e => {
+        const txt = ((e.description||'') + ' ' + (e.remarques||'')).toLowerCase();
+        return kws.some(kw => txt.includes(kw.toLowerCase()));
+      })
+      .sort((a,b) => new Date(b.date) - new Date(a.date))[0] || null;
+  }
+
+  // --- Cas CT : type de base dans onglet 3 ---
+  if (c.id === 'ct-special') {
+    const lastCT = (appData.entretiens||[]).filter(e=>e.type==='CT')
+      .sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    if (!lastCT) return { status:'unknown', label:'Aucun CT enregistré', kmRestant:null, moisRestant:null, nextKm:null, lastEntry:null };
+    const nextDate = new Date(lastCT.date);
+    nextDate.setFullYear(nextDate.getFullYear()+2);
+    const moisRestant = Math.round((nextDate-now)/(30.44*24*3600*1000));
+    const warnMois = c.warnMoisBefore||3;
+    const status = moisRestant<=0 ? 'overdue' : moisRestant<=warnMois ? 'soon' : 'ok';
+    const moisAbs = Math.abs(moisRestant);
+    const dateFmt = nextDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+    const label = moisRestant<0
+      ? `En retard depuis ${moisAbs} mois`
+      : `${dateFmt} — dans ${moisRestant} mois`;
+    return { status, label, kmRestant:null, moisRestant, nextKm:null, nextDate, lastEntry:lastCT };
+  }
+
+  // --- Calcul entrée de référence ---
+  const lastEntry = findLastEntry(c.matchKws);
+
+  // --- Référence date/km : lastEntry ou fallback vehicule dateMEC ---
+  let refKm = lastEntry ? (lastEntry.km||0) : 0;
+  let refDate = lastEntry ? new Date(lastEntry.date) : null;
+  if (!refDate && c.noEntryFallback === 'dateMec') {
+    refDate = new Date(appData.vehicule.dateMEC||'2019-09-12');
+    refKm = 0;
+  }
+
+  // --- Calcul prochaine échéance km ---
+  let nextKm = null;
+  if (c.nextKmAbs != null) {
+    nextKm = c.nextKmAbs;
+  } else if (c.intervalKm && lastEntry) {
+    nextKm = refKm + c.intervalKm;
+  }
+
+  // --- Calcul prochaine échéance date ---
+  let nextDate = null;
+  if (c.intervalMois && refDate) {
+    nextDate = new Date(refDate);
+    nextDate.setMonth(nextDate.getMonth() + c.intervalMois);
+  }
+
+  // --- Distances/délais restants ---
+  const kmRestant = nextKm != null ? nextKm - km : null;
+  let moisRestant = nextDate != null ? Math.round((nextDate-now)/(30.44*24*3600*1000)) : null;
+  // Estimation mois depuis km si pas de date cible
+  if (moisRestant == null && kmRestant != null && avgKmMonth > 0) {
+    moisRestant = Math.round(kmRestant / avgKmMonth);
+  }
+
+  // --- Statut ---
+  const wK = c.warnKmBefore||0, wM = c.warnMoisBefore||0;
+  let status = 'ok';
+  if (c.noEntryFallback === 'overdue' && !lastEntry) {
+    status = 'overdue';
+  } else if (kmRestant != null && kmRestant <= 0) {
+    status = 'overdue';
+  } else if (moisRestant != null && moisRestant <= 0) {
+    status = 'overdue';
+  } else if (wK > 0 && kmRestant != null && kmRestant <= wK) {
+    status = 'soon';
+  } else if (wM > 0 && moisRestant != null && moisRestant <= wM) {
+    status = 'soon';
+  }
+
+  // --- Label humain ---
+  let label = '';
+  const fmtDate = d => d ? d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}) : '';
+  if (status === 'overdue') {
+    if (!lastEntry && c.noEntryFallback === 'overdue') {
+      label = 'Aucun remplacement enregistré — À vérifier';
+    } else if (kmRestant != null && kmRestant < 0) {
+      const parts = [`Dépassement : +${fmtKm(Math.abs(Math.round(kmRestant)))} km`];
+      if (moisRestant != null) parts.push(`(${Math.abs(Math.round(moisRestant))} mois de retard)`);
+      label = parts.join(' ');
+    } else {
+      label = `Retard : ${Math.abs(Math.round(moisRestant||0))} mois`;
+      if (nextDate) label += ` — Échéance était ${fmtDate(nextDate)}`;
+    }
+  } else {
+    const parts = [];
+    if (kmRestant != null) parts.push(`${fmtKm(Math.max(0,Math.round(kmRestant)))} km restants`);
+    if (moisRestant != null) parts.push(`~${Math.max(0,Math.round(moisRestant))} mois`);
+    if (nextKm) parts.push(`Objectif : ${fmtKm(nextKm)} km`);
+    else if (nextDate) parts.push(fmtDate(nextDate));
+    label = parts.join(' — ') || (lastEntry ? `Dernière op. : ${new Date(lastEntry.date).toLocaleDateString('fr-FR')}` : 'Non renseigné');
+  }
+
+  return { status, label, kmRestant, moisRestant, nextKm, nextDate, lastEntry };
+}
+
+function renderDashboard() {
+  renderAlerts();
+  renderKPIs();
+  renderVehicleData();
+  renderNextMaintenance();
+  renderCharts();
+}
+
+function renderAlerts() {
+  const container = document.getElementById('dashboard-alerts');
+  if (!container) return;
+  const alerts = [];
+
+  // Alertes depuis CARNET + onglet 3
+  CARNET.forEach(c => {
+    const s = computeMaintenanceStatus(c);
+    if (s.status === 'overdue') {
+      alerts.push({ type:'danger', msg:`🚨 <b>${c.titre}</b> — ${s.label}` });
+    } else if (s.status === 'soon') {
+      alerts.push({ type:'warning', msg:`⚠️ <b>${c.titre}</b> — ${s.label}` });
+    }
+  });
+
+  // CT (hors CARNET)
+  const ctItem = { id:'ct-special', titre:'Contrôle technique', warnMoisBefore:4 };
+  const ctStatus = computeMaintenanceStatus(ctItem);
+  if (ctStatus.status === 'overdue') {
+    alerts.push({ type:'danger', msg:`🚨 <b>Contrôle technique</b> — ${ctStatus.label}` });
+  } else if (ctStatus.status === 'soon') {
+    alerts.push({ type:'info', msg:`ℹ️ <b>Contrôle technique</b> — ${ctStatus.label}` });
+  }
+
+  if (alerts.length === 0) {
+    alerts.push({ type:'ok', msg:'✅ Aucune alerte entretien — Véhicule à jour.' });
+  }
+
+  container.innerHTML = alerts.map(a =>
+    `<div class="alert-banner ${a.type}" style="line-height:1.5;">${a.msg}</div>`
+  ).join('');
+}
+
+function renderKPIs() {
+  const v = appData.vehicule;
+  const km = v.kilometrageActuel;
+
+  // Age badge
+  const mec = new Date(v.dateMEC);
+  const now = new Date();
+  const ageYears = ((now - mec) / (365.25 * 24 * 3600 * 1000)).toFixed(1);
+  const el = document.getElementById('kpi-age-badge');
+  if (el) el.textContent = ageYears + ' ans';
+
+  // Next KPI
+  const nextKm = 75000;
+  const remaining = nextKm - km;
+  const avgMonthly = 740; // km/month
+  const monthsLeft = Math.round(remaining / avgMonthly);
+  const nextEl = document.getElementById('d-next-hint');
+  if (nextEl) nextEl.textContent = `~${fmtKm(remaining)} km restants • ~${monthsLeft} mois`;
+
+  // Cost entretien — 12 derniers mois glissants (hors ADMIN et hors CARBURANT)
+  const twelveMonthsAgo = new Date(now);
+  twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+  const last12Ents = appData.entretiens.filter(e => {
+    const d = new Date(e.date);
+    return d >= twelveMonthsAgo && e.type !== 'ADMIN' && e.type !== 'CARBURANT';
+  });
+  const costYear = last12Ents.reduce((s, e) => s + (e.prix || 0), 0);
+  const costYearEl = document.getElementById('d-cost-year');
+  if (costYearEl) costYearEl.textContent = fmtMoney(costYear);
+
+  // Fuel month avg
+  const _fuelData = getFuelMonthly();
+  const fuelTotal = _fuelData.reduce((s, f) => s + (f.total || 0), 0);
+  const fuelMonths = _fuelData.length;
+  const fuelAvg = fuelMonths > 0 ? fuelTotal / fuelMonths : 0;
+  const fuelEl = document.getElementById('d-fuel-month');
+  if (fuelEl) fuelEl.textContent = Math.round(fuelAvg);
+
+  const fuelLitres = _fuelData.reduce((s, f) => s + (f.litres || 0), 0);
+  const fuelKm = _fuelData.reduce((s, f) => s + (f.km || 0), 0);
+  const conso = fuelKm > 0 ? (fuelLitres / fuelKm * 100).toFixed(1) : '6.5';
+  const fuelHintEl = document.getElementById('d-fuel-hint');
+  if (fuelHintEl) fuelHintEl.textContent = `~${Math.round(fuelAvg)} €/mois · ~${conso} L/100km`;
+
+  // Total cost
+  const achat = 13500;
+  const totalEntretien = appData.entretiens.filter(e => e.type !== 'ADMIN' && e.type !== 'CARBURANT').reduce((s,e) => s + (e.prix || 0), 0);
+  const totalCarb = getFuelMonthly().reduce((s, f) => s + (f.total || 0), 0);
+  const totalCost = achat + totalEntretien + totalCarb;
+  const tcEl = document.getElementById('d-total-cost');
+  if (tcEl) tcEl.textContent = fmtMoney(totalCost);
+
+  // Monthly since achat (Dec 2024)
+  const achatDate = new Date('2024-12-14');
+  const monthsSince = Math.max(1, ((now - achatDate) / (30.44 * 24 * 3600 * 1000)));
+  const monthlyCost = totalCost / monthsSince;
+  const mcEl = document.getElementById('d-monthly-cost');
+  if (mcEl) mcEl.textContent = fmtMoney(Math.round(monthlyCost));
+
+  // Nb entretiens since purchase
+  const nbEnt = appData.entretiens.filter(e => {
+    const d = new Date(e.date);
+    return d >= new Date('2024-12-14') && e.type !== 'ADMIN' && e.type !== 'CARBURANT';
+  }).length;
+  const nbEl = document.getElementById('d-nb-entretiens');
+  if (nbEl) nbEl.textContent = nbEnt;
+}
+
+function renderVehicleData() {
+  const v = appData.vehicule;
+  const container = document.getElementById('vehicle-data-container');
+  if (!container) return;
+
+  const fields = [
+    { k:'Marque / Modèle', val:`${v.marque} ${v.modele} ${v.generation}` },
+    { k:'Version', val:v.version },
+    { k:'Année / MEC', val:`${v.annee} — ${fmtDate(v.dateMEC)}` },
+    { k:'Couleur', val:v.couleur },
+    { k:'Immatriculation', val:v.immatriculation, edit:'immatriculation' },
+    { k:'VIN / N° de série', val:v.vin, edit:'vin' },
+    { k:'Moteur', val:v.typeMoteur },
+    { k:'Cylindrée', val:`${v.cylindree} cm³` },
+    { k:'Puissance', val:`${v.puissanceCh} ch (${v.puissanceKw} kW)` },
+    { k:'Puissance fiscale', val:`${v.puissanceFiscale} CV` },
+    { k:'Couple maxi', val:`${v.coupleNm} Nm` },
+    { k:'Boîte de vitesses', val:v.bvType },
+    { k:'Traction', val:v.traction },
+    { k:'Norme émissions', val:v.normeEmissions },
+    { k:'Carburant', val:v.carburant },
+    { k:'Huile moteur', val:v.huileMoteur },
+    { k:'Capacité huile', val:`${v.capaciteHuile} L` },
+    { k:'Intervalle vidange', val:v.intervalleVidange },
+    { k:'Capacité réservoir', val:`${v.capaciteReservoir} L` },
+    { k:'Conso. officielle', val:`${v.consOfficielle} L/100km` },
+    { k:'Conso. réelle (estimée)', val:`${v.consBrut} L/100km`, edit:'consBrut' },
+    { k:'Émissions CO₂', val:`${v.co2} g/km` },
+    { k:'Longueur / Largeur', val:`${v.longueur} / ${v.largeur} mm` },
+    { k:'Hauteur / Empattement', val:`${v.hauteur} / ${v.empattement} mm` },
+    { k:'Masse à vide', val:`${v.masseAVide} kg` },
+    { k:'Pneumatiques AV/AR', val:`${v.pneusAv}` },
+    { k:'Pression pneus AV', val:`${v.pressionAv} bar` },
+    { k:'Pression pneus AR', val:`${v.pressionAr} bar` },
+    { k:'Pression en charge', val:`${v.pressionCharge} bar` },
+    { k:'Distribution', val:v.typeDistribution },
+    { k:'Intervalle distribution', val:v.intervalleDistribution },
+    { k:'Freins avant', val:v.freinsAv },
+    { k:'Freins arrière', val:v.freinsAr },
+    { k:'Batterie', val:v.batterie },
+    { k:'Liquide de frein', val:v.liquideFrein },
+    { k:'Liquide refroidissement', val:v.liquideRefroid },
+    { k:'Kilométrage actuel', val:`${fmtKm(v.kilometrageActuel)} km`, edit:'kilometrageActuel', editNum:true },
+  ];
+
+  const rows = fields.map(f => {
+    const editBtn = f.edit ? `<span class="pencil-btn" onclick="editVehicleField('${f.edit}','${f.k}',${f.editNum?'true':'false'})" title="Modifier"><svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span>` : '';
+    return `<div class="vi-row">
+      <div class="vi-key">${f.k}</div>
+      <div class="vi-val"><span class="editable-wrap">${f.val}${editBtn}</span></div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `<div class="vehicle-info-grid">${rows}</div>`;
+
+  // Restore photo
+  if (v.photo) {
+    const w = document.getElementById('photo-wrap');
+    w.innerHTML = `<img src="${v.photo}" alt="Photo véhicule" style="width:100%;height:200px;object-fit:cover;">
+    <div style="position:absolute;bottom:8px;right:8px;"><button class="btn btn-secondary btn-sm" onclick="document.getElementById('photo-input').click()">✏️</button></div>`;
+  }
+}
+
+function renderNextMaintenance() {
+  const container = document.getElementById('next-maintenance-list');
+  if (!container) return;
+
+  // Construire la liste depuis CARNET + CT
+  const items = CARNET.map(c => ({ c, s: computeMaintenanceStatus(c) }));
+  // Ajouter CT
+  const ctItem = { id:'ct-special', emoji:'🔍', titre:'Contrôle technique', intervalle:'Tous les 2 ans', cout_min:70, cout_max:90, warnMoisBefore:4, matchKws:[] };
+  items.push({ c: ctItem, s: computeMaintenanceStatus(ctItem) });
+
+  // Trier : overdue → soon → ok, puis par kmRestant/moisRestant croissant
+  const order = { overdue:0, soon:1, ok:2, unknown:3 };
+  items.sort((a,b) => {
+    const oa = order[a.s.status]??3, ob = order[b.s.status]??3;
+    if (oa !== ob) return oa - ob;
+    const ar = a.s.kmRestant??a.s.moisRestant*700??9999999;
+    const br = b.s.kmRestant??b.s.moisRestant*700??9999999;
+    return ar - br;
+  });
+
+  const dotCol = { overdue:'red', soon:'yellow', ok:'green', unknown:'blue' };
+  const badgeHtml = {
+    overdue:`<span class="maint-overdue">EN RETARD</span>`,
+    soon:`<span class="maint-soon">BIENTÔT</span>`,
+    ok:'', unknown:''
+  };
+
+  container.innerHTML = items.map(({c,s}) => `
+    <div class="maint-item">
+      <div class="maint-dot ${dotCol[s.status]||'blue'}"></div>
+      <div class="maint-info">
+        <div class="maint-label">${c.emoji||'🔧'} ${c.titre}</div>
+        <div class="maint-sub">${s.label}</div>
+      </div>
+      ${s.nextKm ? `<div class="maint-km">${fmtKm(s.nextKm)} km</div>` : ''}
+      <div class="maint-price">${c.cout_min}–${c.cout_max} €</div>
+      ${badgeHtml[s.status]||''}
+    </div>`).join('');
+}
+
+// =====================================================================
+// CHARTS
+// =====================================================================
+function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function chartText() { return isDark() ? '#9aa0b8' : '#555870'; }
+function chartGrid() { return isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)'; }
+
+function renderCharts() {
+  renderFuelChart();
+  renderCostPieChart();
+  renderAnnualChart();
+}
+
+function renderFuelChart() {
+  if (charts.fuel) { charts.fuel.destroy(); charts.fuel = null; }
+  const ctx = document.getElementById('chart-fuel');
+  if (!ctx) return;
+
+  const data = getFuelMonthly();
+  const recent = data.slice(-fuelPeriod);
+  const months = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+
+  charts.fuel = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: recent.map(f => `${months[f.mois-1]} ${f.annee}`),
+      datasets: [{
+        label: 'Carburant (€)',
+        data: recent.map(f => f.total),
+        backgroundColor: 'rgba(229,0,15,0.7)',
+        borderColor: '#e5000f',
+        borderWidth: 0,
+        borderRadius: 5,
+      },{
+        label: 'Consommation (L)',
+        data: recent.map(f => f.litres),
+        backgroundColor: 'rgba(59,130,246,0.5)',
+        borderColor: '#3b82f6',
+        borderWidth: 0,
+        borderRadius: 5,
+        type: 'line',
+        yAxisID: 'y2',
+        tension: 0.4,
+        pointRadius: 3,
+        borderWidth: 2,
+        fill: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode:'index', intersect:false },
+      plugins: { legend:{ labels:{ color:chartText(), font:{family:'Exo 2',size:11} } } },
+      scales: {
+        x: { ticks:{ color:chartText(), font:{family:'Exo 2',size:10} }, grid:{ color:chartGrid() } },
+        y: { ticks:{ color:chartText(), font:{family:'Exo 2',size:10}, callback:v=>`${v}€` }, grid:{ color:chartGrid() } },
+        y2: { position:'right', ticks:{ color:chartText(), font:{family:'Exo 2',size:10}, callback:v=>`${v}L` }, grid:{ display:false } },
+      }
+    }
+  });
+}
+
+function renderCostPieChart() {
+  if (charts.pie) { charts.pie.destroy(); charts.pie = null; }
+  const ctx = document.getElementById('chart-cost-pie');
+  if (!ctx) return;
+
+  const achat = 13500;
+  const totalCarb = getFuelMonthly().reduce((s,f) => s + f.total, 0);
+  const totalRev = appData.entretiens.filter(e=>e.categorie==='Révision').reduce((s,e)=>s+(e.prix||0),0);
+  const totalCT = appData.entretiens.filter(e=>e.type==='CT').reduce((s,e)=>s+(e.prix||0),0);
+  const totalEq = appData.entretiens.filter(e=>e.categorie==='Équipement').reduce((s,e)=>s+(e.prix||0),0);
+
+  const vals = [achat, totalCarb, totalRev, totalCT, totalEq];
+  const labels = ['Achat', 'Carburant', 'Révisions', 'CT', 'Équipement'];
+  const colors = ['#e5000f','#3b82f6','#f59e0b','#8b5cf6','#22c55e'];
+
+  charts.pie = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data:vals, backgroundColor:colors, borderWidth:2, borderColor:isDark()?'#191d2c':'#f8f9fc', hoverOffset:8 }] },
+    options: {
+      responsive: true, cutout:'65%',
+      plugins: {
+        legend: { display:false },
+        tooltip: { callbacks:{ label:ctx=>`${ctx.label}: ${fmtMoney(ctx.raw)} €` } }
+      }
+    }
+  });
+
+  const total = vals.reduce((s,v)=>s+v,0);
+  const legend = document.getElementById('pie-legend');
+  if (legend) {
+    legend.innerHTML = labels.map((l,i) => `<div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:${colors[i]};flex-shrink:0;display:inline-block;"></span>${l}: <b>${fmtMoney(vals[i])}</b></div>`).join('');
+  }
+}
+
+function renderAnnualChart() {
+  if (charts.annual) { charts.annual.destroy(); charts.annual = null; }
+  const ctx = document.getElementById('chart-annual');
+  if (!ctx) return;
+
+  // Group by year
+  const years = {};
+  appData.entretiens.filter(e=>e.type!=='ADMIN' && e.type!=='CARBURANT').forEach(e => {
+    const y = new Date(e.date).getFullYear();
+    if (!years[y]) years[y] = { entretien:0, carb:0 };
+    years[y].entretien += (e.prix || 0);
+  });
+  getFuelMonthly().forEach(f => {
+    const y = f.annee;
+    if (!years[y]) years[y] = { entretien:0, carb:0 };
+    years[y].carb += f.total;
+  });
+
+  const allYears = Object.keys(years).sort().slice(-Math.max(3, costPeriod));
+  const entData = allYears.map(y => years[y]?.entretien || 0);
+  const carbData = allYears.map(y => years[y]?.carb || 0);
+
+  charts.annual = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: allYears,
+      datasets: [
+        { label:'Entretien (€)', data:entData, backgroundColor:'rgba(245,158,11,0.8)', borderRadius:5, borderWidth:0 },
+        { label:'Carburant (€)', data:carbData, backgroundColor:'rgba(229,0,15,0.7)', borderRadius:5, borderWidth:0 },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend:{ labels:{ color:chartText(), font:{family:'Exo 2',size:11} } } },
+      scales: {
+        x: { stacked:true, ticks:{ color:chartText() }, grid:{ color:chartGrid() } },
+        y: { stacked:true, ticks:{ color:chartText(), callback:v=>`${v}€` }, grid:{ color:chartGrid() } },
+      }
+    }
+  });
+}
+
+function setFuelPeriod(n, btn) {
+  fuelPeriod = n;
+  document.querySelectorAll('.chart-period-btns .period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (charts.fuel) { charts.fuel.destroy(); charts.fuel = null; }
+  renderFuelChart();
+}
+
+function setCostPeriod(n, btn) {
+  costPeriod = n;
+  btn.closest('.chart-period-btns').querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (charts.annual) { charts.annual.destroy(); charts.annual = null; }
+  renderAnnualChart();
+}
+
+// =====================================================================
+// CARNET D'ENTRETIEN
+// =====================================================================
+function renderCarnet() {
+  const container = document.getElementById('carnet-container');
+  if (!container) return;
+
+  container.innerHTML = CARNET.map(c => renderAccordion(c)).join('');
+}
+
+function renderAccordion(c) {
+  const prioColors = { normal:'#3b82f6', important:'#f59e0b', critique:'#e5000f' };
+  const color = prioColors[c.priorite] || '#3b82f6';
+
+  return `<div class="accordion-section">
+    <div class="accordion-header" onclick="toggleAccordion(this)" id="acc-${c.id}">
+      <div class="acc-icon" style="background:${color}20;">
+        <span>${c.emoji}</span>
+      </div>
+      <div class="acc-title-group">
+        <div class="acc-title">${c.titre}</div>
+        <div class="acc-subtitle">${c.intervalle}</div>
+      </div>
+      <div class="acc-badges">
+        ${c.ekm ? `<span class="acc-badge badge-km">📍 ${fmtKm(c.ekm)} km</span>` : ''}
+        ${c.emois ? `<span class="acc-badge badge-time">⏱ ${c.emois} mois</span>` : ''}
+        <span class="acc-badge badge-price" style="background:${color}18;color:${color};">💶 ${c.cout_min}-${c.cout_max} €</span>
+        ${c.priorite === 'critique' ? `<span class="acc-badge badge-critical">🚨 CRITIQUE</span>` : ''}
+        ${c.priorite === 'important' ? `<span class="acc-badge" style="background:rgba(245,158,11,0.12);color:#f59e0b;">⚠️ IMPORTANT</span>` : ''}
+      </div>
+      <svg class="acc-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+    </div>
+    <div class="accordion-body" id="body-${c.id}">
+      <!-- Alertes d'état retirées de l'onglet 2 : voir Tableau de bord onglet 1 -->
+      <div class="carnet-grid">
+        <div>
+          <div class="carnet-section-title">✅ Opérations à réaliser</div>
+          <div class="task-list">
+            ${c.taches.map(t => `<div class="task-item"><span class="task-check">✓</span><span>${t}</span></div>`).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="carnet-section-title">🔩 Matériels &amp; Pièces</div>
+          <table class="parts-table">
+            <thead><tr><th>Pièce</th><th>Qté</th><th>Référence</th></tr></thead>
+            <tbody>
+              ${c.materiels.map(m => `<tr><td>${m.piece}</td><td>${m.qte}</td><td style="color:var(--text2);font-size:11px;">${m.ref}</td></tr>`).join('')}
+            </tbody>
+          </table>
+          <div style="margin-top:12px;" class="flex-between">
+            <span style="font-size:12px;color:var(--text2);">💶 Coût estimé</span>
+            <span style="font-family:var(--font2);font-weight:700;color:var(--accent);">${c.cout_min} – ${c.cout_max} €</span>
+          </div>
+        </div>
+      </div>
+      ${c.notes ? `<div class="carnet-note">ℹ️ ${c.notes}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// =====================================================================
+// DATABASE TABLE
+// =====================================================================
+function renderTable() {
+  const search = (document.getElementById('db-search')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('db-filter-type')?.value || '';
+  const intervenantFilter = document.getElementById('db-filter-intervenant')?.value || '';
+  const sortVal = document.getElementById('db-sort')?.value || 'date-desc';
+
+  // Update intervenant filter options
+  const intervenants = [...new Set(appData.entretiens.map(e => e.intervenant).filter(Boolean))];
+  const intSel = document.getElementById('db-filter-intervenant');
+  if (intSel) {
+    const current = intSel.value;
+    intSel.innerHTML = '<option value="">Tous intervenants</option>' +
+      intervenants.map(i => `<option value="${i}" ${i===current?'selected':''}>${i}</option>`).join('');
+  }
+
+  let rows = [...appData.entretiens];
+
+  // Filter
+  if (search) rows = rows.filter(r =>
+    (r.description||'').toLowerCase().includes(search) ||
+    (r.intervenant||'').toLowerCase().includes(search) ||
+    (r.remarques||'').toLowerCase().includes(search) ||
+    (r.type||'').toLowerCase().includes(search)
+  );
+  if (typeFilter) rows = rows.filter(r => r.type === typeFilter);
+  if (intervenantFilter) rows = rows.filter(r => r.intervenant === intervenantFilter);
+
+  // Sort
+  rows.sort((a,b) => {
+    if (sortVal === 'date-desc') return new Date(b.date||0) - new Date(a.date||0);
+    if (sortVal === 'date-asc') return new Date(a.date||0) - new Date(b.date||0);
+    if (sortVal === 'km-desc') return (b.km||0) - (a.km||0);
+    if (sortVal === 'km-asc') return (a.km||0) - (b.km||0);
+    if (sortVal === 'prix-desc') return (b.prix||0) - (a.prix||0);
+    if (sortVal === 'alpha-asc') return (a.description||'').localeCompare(b.description||'');
+    return 0;
+  });
+
+  const tbody = document.getElementById('db-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = rows.map(r => {
+    const typeBadge = `<span class="td-type-badge type-${(r.type||'').toLowerCase().replace(/\s/g,'-')}">${r.type || '—'}</span>`;
+    return `<tr>
+      <td>${r.date ? fmtDate(r.date) : '—'}</td>
+      <td>${typeBadge}</td>
+      <td>${r.description || '—'}</td>
+      <td class="td-km">${r.km ? fmtKm(r.km)+' km' : '—'}</td>
+      <td>${r.intervenant || '—'}</td>
+      <td class="td-price">${r.prix != null && r.prix !== '' ? fmtMoney(r.prix)+' €' : '—'}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.remarques||''}">${r.remarques||'—'}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-secondary btn-xs" onclick="openRowModal(${r.id})" title="Modifier">✏️</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteRow(${r.id})" title="Supprimer">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  const count = document.getElementById('db-count');
+  if (count) count.textContent = `${rows.length} entrée${rows.length > 1 ? 's' : ''} affichée${rows.length > 1 ? 's' : ''}`;
+
+  // Stats bar
+  const totalCost = rows.reduce((s,r) => s + (r.prix || 0), 0);
+  const totalKm = rows.filter(r => r.km).reduce((s,r) => Math.max(s, r.km || 0), 0);
+  const statsBar = document.getElementById('db-stats-bar');
+  if (statsBar) {
+    statsBar.innerHTML = `
+      <div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;color:var(--text2);">
+        Total : <span style="color:var(--accent);font-family:var(--font2);">${fmtMoney(totalCost)} €</span>
+      </div>
+      <div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;color:var(--text2);">
+        Km max affiché : <span style="color:var(--text);font-family:var(--font2);">${fmtKm(totalKm)} km</span>
+      </div>
+      <div style="padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;color:var(--text2);">
+        Entrées : <span style="color:var(--text);">${rows.length}</span>
+      </div>
+    `;
+  }
+}
+
+function setSort(d, a) {
+  const sel = document.getElementById('db-sort');
+  if (sel) {
+    sel.value = sel.value === d ? a : d;
+    renderTable();
+  }
+}
+
+// ===== ROW CRUD =====
+function openRowModal(id) {
+  currentEditRowId = id;
+  const modal = document.getElementById('modal-row');
+  const title = document.getElementById('row-modal-title');
+
+  if (id === null) {
+    title.textContent = '➕ Nouvelle entrée';
+    document.getElementById('row-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('row-km').value = appData.vehicule.kilometrageActuel;
+    document.getElementById('row-type').value = 'ENTRETIEN';
+    document.getElementById('row-categorie').value = 'Révision';
+    document.getElementById('row-desc').value = '';
+    document.getElementById('row-intervenant').value = '';
+    document.getElementById('row-prix').value = '';
+    document.getElementById('row-remarques').value = '';
+  } else {
+    const row = appData.entretiens.find(e => e.id === id);
+    if (!row) return;
+    title.textContent = '✏️ Modifier l\'entrée';
+    document.getElementById('row-date').value = row.date || '';
+    document.getElementById('row-km').value = row.km || '';
+    document.getElementById('row-type').value = row.type || 'ENTRETIEN';
+    document.getElementById('row-categorie').value = row.categorie || 'Révision';
+    document.getElementById('row-desc').value = row.description || '';
+    document.getElementById('row-intervenant').value = row.intervenant || '';
+    document.getElementById('row-prix').value = row.prix != null ? row.prix : '';
+    document.getElementById('row-remarques').value = row.remarques || '';
+  }
+
+  modal.classList.add('open');
+}
+
+function saveRow() {
+  const date = document.getElementById('row-date').value;
+  const desc = document.getElementById('row-desc').value;
+  if (!date || !desc) { showToast('Date et description obligatoires', 'error'); return; }
+
+  saveHistory();
+
+  const entry = {
+    id: currentEditRowId || (Math.max(0, ...appData.entretiens.map(e=>e.id)) + 1),
+    date,
+    type: document.getElementById('row-type').value,
+    categorie: document.getElementById('row-categorie').value,
+    description: desc,
+    km: parseFloat(document.getElementById('row-km').value) || null,
+    intervenant: document.getElementById('row-intervenant').value,
+    prix: parseFloat(document.getElementById('row-prix').value) || 0,
+    remarques: document.getElementById('row-remarques').value,
+  };
+
+  if (currentEditRowId === null) {
+    appData.entretiens.push(entry);
+    showToast('Entrée ajoutée ✓', 'success');
+  } else {
+    const idx = appData.entretiens.findIndex(e => e.id === currentEditRowId);
+    if (idx >= 0) appData.entretiens[idx] = entry;
+    showToast('Entrée modifiée ✓', 'success');
+  }
+
+  saveData();
+  closeModal('modal-row');
+  renderTable();
+  renderDashboard();
+}
+
+function deleteRow(id) {
+  if (!confirm('Supprimer cette entrée ?')) return;
+  saveHistory();
+  appData.entretiens = appData.entretiens.filter(e => e.id !== id);
+  saveData();
+  renderTable();
+  renderDashboard();
+  showToast('Entrée supprimée', 'success');
+}
+
+// =====================================================================
+// EDIT FUNCTIONS
+// =====================================================================
+function editKm() {
+  document.getElementById('km-inp').value = appData.vehicule.kilometrageActuel;
+  document.getElementById('modal-edit-km').classList.add('open');
+}
+
+function applyKm() {
+  const val = parseInt(document.getElementById('km-inp').value);
+  if (!val || val < 0) { showToast('Valeur invalide', 'error'); return; }
+  saveHistory();
+  appData.vehicule.kilometrageActuel = val;
+  saveData();
+  closeModal('modal-edit-km');
+  renderAll();
+  showToast('Kilométrage mis à jour ✓', 'success');
+}
+
+function editVehicleField(field, label, isNum) {
+  currentEditField = field;
+  document.getElementById('met-title').textContent = `Modifier : ${label}`;
+  document.getElementById('met-label').textContent = label;
+  const inp = document.getElementById('met-input');
+  inp.type = isNum ? 'number' : 'text';
+  inp.value = appData.vehicule[field] || '';
+  document.getElementById('modal-edit-text').classList.add('open');
+}
+
+function applyTextEdit() {
+  if (!currentEditField) return;
+  const val = document.getElementById('met-input').value;
+  saveHistory();
+  appData.vehicule[currentEditField] = val;
+  saveData();
+  closeModal('modal-edit-text');
+  renderVehicleData();
+  showToast('Modifié ✓', 'success');
+}
+
+function closeModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+}
+
+function loadPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    appData.vehicule.photo = e.target.result;
+    saveData();
+    renderVehicleData();
+    showToast('Photo chargée ✓', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+// =====================================================================
+// EXPORT / IMPORT
+// =====================================================================
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+  dl(blob, `SEAT_LEON_backup_${today()}.json`);
+  showToast('Export JSON ✓', 'success');
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      saveHistory();
+      appData = data;
+      saveData();
+      renderAll();
+      showToast('Import JSON réussi ✓', 'success');
+    } catch { showToast('Fichier JSON invalide', 'error'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function exportTableCSV() {
+  const rows = appData.entretiens;
+  const headers = ['Date','Type','Catégorie','Description','Kilométrage','Intervenant','Prix (€)','Remarques'];
+  const lines = [headers.join(';')];
+  rows.forEach(r => {
+    lines.push([r.date, r.type, r.categorie, `"${r.description||''}"`, r.km||'', `"${r.intervenant||''}"`, r.prix||0, `"${(r.remarques||'').replace(/"/g,'""')}"`].join(';'));
+  });
+  const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  dl(blob, `SEAT_LEON_suivi_${today()}.csv`);
+  showToast('Export CSV ✓', 'success');
+}
+
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result.replace(/^\uFEFF/, '');
+      const lines = text.split('\n').filter(l => l.trim());
+      const maxId = Math.max(0, ...appData.entretiens.map(e=>e.id));
+      let added = 0;
+      lines.slice(1).forEach((line, i) => {
+        const cols = line.split(';').map(c => c.replace(/^"|"$/g,'').trim());
+        if (cols.length >= 5 && cols[0]) {
+          appData.entretiens.push({
+            id: maxId + i + 1,
+            date: cols[0], type: cols[1]||'ENTRETIEN', categorie: cols[2]||'Révision',
+            description: cols[3], km: parseFloat(cols[4])||null,
+            intervenant: cols[5]||'', prix: parseFloat(cols[6])||0,
+            remarques: cols[7]||''
+          });
+          added++;
+        }
+      });
+      saveData();
+      renderTable();
+      showToast(`${added} entrées importées ✓`, 'success');
+    } catch { showToast('Erreur import CSV', 'error'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+  input.value = '';
+}
+
+async function exportSection(elementId, filename, format) {
+  const el = document.getElementById(elementId);
+  if (!el) { showToast('Élément introuvable', 'error'); return; }
+  showToast('Export en cours...', 'info');
+  try {
+    const canvas = await html2canvas(el, {
+      scale: 2,
+      backgroundColor: isDark() ? '#12151f' : '#ffffff',
+      useCORS: true,
+      logging: false,
+    });
+    if (format === 'png' || format === 'jpeg') {
+      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      canvas.toBlob(blob => dl(blob, `${filename}_${today()}.${format}`), mimeType, 0.95);
+    } else if (format === 'pdf') {
+      const { jsPDF } = window.jspdf;
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: canvas.width > canvas.height ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW - 10;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      if (imgH <= pageH - 10) {
+        pdf.addImage(imgData, 'PNG', 5, 5, imgW, imgH);
+      } else {
+        let y = 0;
+        while (y < imgH) {
+          pdf.addImage(imgData, 'PNG', 5, 5 - y, imgW, imgH);
+          y += pageH - 10;
+          if (y < imgH) pdf.addPage();
+        }
+      }
+      pdf.save(`${filename}_${today()}.pdf`);
+    }
+    showToast(`Export ${format.toUpperCase()} ✓`, 'success');
+  } catch (e) {
+    showToast('Erreur export : ' + e.message, 'error');
+  }
+}
+
+function exportDashboardRTF() {
+  const v = appData.vehicule;
+  let rtf = `{\\rtf1\\ansi\\deff0
+{\\fonttbl{\\f0 Calibri;}}
+{\\colortbl ;\\red229\\green0\\blue15;\\red80\\green80\\blue80;}
+\\f0\\fs24
+\\pard\\qc\\b\\fs36 SEAT LEON — TABLEAU DE BORD\\b0\\par
+\\fs20\\cf2 ${v.generation} — ${v.version} — ${v.annee}\\cf0\\par
+\\par
+\\pard\\b\\fs24 DONNÉES VÉHICULE\\b0\\par
+\\par
+Immatriculation: ${v.immatriculation}\\par
+Kilométrage actuel: ${fmtKm(v.kilometrageActuel)} km\\par
+Mise en circulation: ${fmtDate(v.dateMEC)}\\par
+Moteur: ${v.typeMoteur}\\par
+Carburant: ${v.carburant}\\par
+Huile: ${v.huileMoteur}\\par
+\\par
+\\b RÉCAPITULATIF DES COÛTS\\b0\\par
+\\par
+Total carburant: ${fmtMoney(getFuelMonthly().reduce((s,f)=>s+f.total,0))} EUR\\par
+Total entretiens: ${fmtMoney(appData.entretiens.filter(e=>e.type!=='ADMIN').reduce((s,e)=>s+(e.prix||0),0))} EUR\\par
+Achat du véhicule: 13 500 EUR\\par
+\\par
+\\b PROCHAINS ENTRETIENS\\b0\\par
+\\par
+- Purge liquide de frein : EN RETARD (depuis juillet 2025)\\par
+- Essuie-glaces : A remplacer\\par
+- Contrôle technique : Novembre 2026\\par
+- Révision 75 000 km : ~${fmtKm(75000-v.kilometrageActuel)} km restants\\par
+- Courroie de distribution : ~${fmtKm(90000-v.kilometrageActuel)} km restants (CRITIQUE)\\par
+\\par
+\\b HISTORIQUE D'ENTRETIEN\\b0\\par
+\\par
+${appData.entretiens.map(e => `${e.date||''} — ${e.type} — ${e.description||''} — ${e.km?fmtKm(e.km)+' km':''} — ${e.prix?fmtMoney(e.prix)+' EUR':''}\\par`).join('')}
+}`;
+  const blob = new Blob([rtf], { type: 'application/rtf' });
+  dl(blob, `SEAT_LEON_tableau_bord_${today()}.rtf`);
+  showToast('Export RTF ✓', 'success');
+}
+
+function exportCarnetRTF() {
+  let rtf = `{\\rtf1\\ansi\\deff0
+{\\fonttbl{\\f0 Calibri;}}
+\\f0\\fs24
+\\pard\\qc\\b\\fs36 CARNET D'ENTRETIEN\\b0\\par
+\\fs22 SEAT LEON 5F III — 1.0 TSI 115 12V (2019)\\par
+\\par
+`;
+  CARNET.forEach(c => {
+    rtf += `\\pard\\b\\fs28 ${c.titre}\\b0\\par\\fs22
+Intervalle: ${c.intervalle}\\par
+Coût estimé: ${c.cout_min} - ${c.cout_max} EUR\\par
+\\par
+\\b Opérations:\\b0\\par
+${c.taches.map(t => `  - ${t}\\par`).join('')}
+\\par
+\\b Matériels:\\b0\\par
+${c.materiels.map(m => `  - ${m.piece} x${m.qte} (${m.ref})\\par`).join('')}
+${c.notes ? `\\par Note: ${c.notes}\\par` : ''}
+${c.warning ? `\\par ATTENTION: ${c.warning}\\par` : ''}
+\\pard\\par \\line\\par
+`;
+  });
+  rtf += '}';
+  const blob = new Blob([rtf], { type: 'application/rtf' });
+  dl(blob, `SEAT_LEON_carnet_entretien_${today()}.rtf`);
+  showToast('Export RTF ✓', 'success');
+}
+
+// =====================================================================
+// UTILS
+// =====================================================================
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function fmtKm(n) {
+  if (n == null || n === '') return '—';
+  return Math.round(n).toLocaleString('fr-FR');
+}
+
+function fmtMoney(n) {
+  if (n == null || n === '') return '—';
+  return Number(n).toLocaleString('fr-FR', { minimumFractionDigits:0, maximumFractionDigits:0 });
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function dl(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function showToast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// =====================================================================
+// START
+// =====================================================================
+init();
+</script>
+</body>
+</html>
