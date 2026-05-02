@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CorpsSanté — Suivi Personnel de Santé</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* =================== VARIABLES & RESET =================== */
+:root {
+  --c-bg: #f0f4f8;
+  --c-surface: #ffffff;
+  --c-surface2: #e8edf3;
+  --c-border: #cbd5e1;
+  --c-text: #0d1b2a;
+  --c-text2: #4a5568;
+  --c-text3: #94a3b8;
+  --c-accent: #0a7c7c;
+  --c-accent2: #0f9e9e;
+  --c-accent-light: #e0f5f5;
+  --c-danger: #e53e3e;
+  --c-warning: #d97706;
+  --c-success: #16a34a;
+  --c-info: #2563eb;
+  --c-ras: #16a34a;
+  --c-fragile: #d97706;
+  --c-surveiller: #dc8a1a;
+  --c-soigner: #e53e3e;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --tab-h: 56px;
+  --toolbar-h: 48px;
+  --font: 'Outfit', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --transition: 0.2s ease;
+}
+[data-theme="dark"] {
+  --c-bg: #0a1520;
+  --c-surface: #111d2b;
+  --c-surface2: #192636;
+  --c-border: #2a3d52;
+  --c-text: #e8f0f7;
+  --c-text2: #8da4bc;
+  --c-text3: #4a6278;
+  --c-accent: #0fb8b8;
+  --c-accent2: #17d4d4;
+  --c-accent-light: #0a2a2a;
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font); background: var(--c-bg); color: var(--c-text); font-size: 15px; line-height: 1.5; transition: background var(--transition), color var(--transition); }
+
+/* =================== TOOLBAR =================== */
+#toolbar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px; height: var(--toolbar-h);
+  box-shadow: var(--shadow);
+}
+#toolbar .app-title {
+  font-weight: 800; font-size: 1.1rem; color: var(--c-accent);
+  letter-spacing: -0.5px; white-space: nowrap; margin-right: 8px;
+}
+#toolbar .app-title span { color: var(--c-text2); font-weight: 400; font-size: 0.8rem; margin-left: 4px; }
+.tb-sep { width: 1px; height: 24px; background: var(--c-border); margin: 0 4px; }
+.tb-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 5px; padding: 5px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border); background: var(--c-surface);
+  color: var(--c-text2); font-size: 0.78rem; font-family: var(--font);
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.tb-btn:hover { background: var(--c-accent-light); color: var(--c-accent); border-color: var(--c-accent); }
+.tb-btn.tb-icon { padding: 5px 8px; }
+.tb-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.tb-btn.danger:hover { background: #fff0f0; color: var(--c-danger); border-color: var(--c-danger); }
+#tb-status { font-size: 0.72rem; color: var(--c-text3); margin-left: auto; font-family: var(--font-mono); }
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+
+/* =================== TABS =================== */
+#tabs-bar {
+  position: sticky; top: var(--toolbar-h); z-index: 190;
+  background: var(--c-surface); border-bottom: 2px solid var(--c-border);
+  display: flex; padding: 0 16px; gap: 4px;
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 18px; height: var(--tab-h);
+  border: none; background: none;
+  font-family: var(--font); font-size: 0.88rem; font-weight: 600;
+  color: var(--c-text2); cursor: pointer; position: relative;
+  transition: color var(--transition); white-space: nowrap;
+}
+.tab-btn::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 3px;
+  background: var(--c-accent); border-radius: 2px 2px 0 0;
+  transform: scaleX(0); transition: transform var(--transition);
+}
+.tab-btn.active { color: var(--c-accent); }
+.tab-btn.active::after { transform: scaleX(1); }
+.tab-btn svg { width: 16px; height: 16px; }
+
+/* =================== CONTENT =================== */
+#tab-content { min-height: calc(100vh - var(--toolbar-h) - var(--tab-h)); }
+.tab-panel { display: none; padding: 20px; }
+.tab-panel.active { display: block; }
+
+/* =================== CARDS =================== */
+.card {
+  background: var(--c-surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); border: 1px solid var(--c-border);
+  overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface2);
+}
+.card-title {
+  font-weight: 700; font-size: 0.9rem; color: var(--c-text);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title svg { color: var(--c-accent); }
+.card-body { padding: 18px; }
+
+/* =================== EDITABLE FIELDS =================== */
+.editable-field { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+.edit-val {
+  font-family: var(--font-mono); font-size: 0.9rem;
+  padding: 3px 6px; border-radius: 6px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--c-text); min-width: 60px; cursor: default;
+  transition: border-color var(--transition), background var(--transition);
+}
+.edit-val:focus {
+  outline: none; border-color: var(--c-accent);
+  background: var(--c-accent-light); cursor: text;
+}
+.pencil-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 6px; border: none;
+  background: none; color: var(--c-text3); cursor: pointer;
+  transition: all var(--transition); flex-shrink: 0;
+}
+.pencil-btn:hover { background: var(--c-accent-light); color: var(--c-accent); }
+.pencil-btn svg { width: 12px; height: 12px; }
+
+/* =================== DASHBOARD GRID =================== */
+.dash-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px; margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--c-surface); border-radius: var(--radius);
+  border: 1px solid var(--c-border); box-shadow: var(--shadow);
+  padding: 16px; display: flex; flex-direction: column; gap: 8px;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--c-accent);
+}
+.stat-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--c-text3); }
+.stat-value { font-size: 1.8rem; font-weight: 800; color: var(--c-text);
+  font-family: var(--font-mono); line-height: 1; }
+.stat-value .unit { font-size: 0.9rem; font-weight: 400; color: var(--c-text2); margin-left: 4px; }
+.stat-icon { position: absolute; top: 14px; right: 14px; color: var(--c-accent); opacity: 0.2; }
+.stat-icon svg { width: 36px; height: 36px; }
+.stat-sub { font-size: 0.78rem; color: var(--c-text2); }
+
+/* =================== BMI =================== */
+.bmi-bar { height: 10px; border-radius: 5px; background: var(--c-surface2);
+  position: relative; margin: 6px 0; overflow: visible; }
+.bmi-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease;
+  background: linear-gradient(90deg, #16a34a, #d97706, #e53e3e); }
+.bmi-marker { position: absolute; top: -4px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--c-accent); border: 3px solid var(--c-surface);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3); transform: translateX(-50%);
+  transition: left 0.5s ease; }
+
+/* =================== CHARTS SECTION =================== */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } .dash-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .dash-grid { grid-template-columns: 1fr; } }
+.chart-wrap { position: relative; height: 200px; }
+
+/* =================== BADGES / ETAT =================== */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.badge-ras { background: #dcfce7; color: #15803d; }
+.badge-fragile { background: #fef9c3; color: #92400e; }
+.badge-surveiller { background: #ffedd5; color: #c2410c; }
+.badge-soigner { background: #fee2e2; color: #b91c1c; }
+[data-theme="dark"] .badge-ras { background: #052e16; color: #4ade80; }
+[data-theme="dark"] .badge-fragile { background: #1c1100; color: #fbbf24; }
+[data-theme="dark"] .badge-surveiller { background: #1c0a00; color: #fb923c; }
+[data-theme="dark"] .badge-soigner { background: #1c0000; color: #f87171; }
+
+/* =================== TAB 2 — BODY MAP =================== */
+#tab2 { padding: 16px; }
+.body-map-container {
+  display: flex; align-items: flex-start; gap: 0;
+  position: relative; min-height: 500px;
+  background: var(--c-surface); border-radius: var(--radius);
+  border: 1px solid var(--c-border); box-shadow: var(--shadow);
+  overflow: hidden; padding: 12px;
+}
+.body-col { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; padding: 8px 4px; }
+.body-col.right { align-items: flex-end; }
+.body-center {
+  flex: 1; display: flex; justify-content: center; align-items: flex-start;
+  position: relative; min-height: 480px;
+}
+.body-svg-wrapper {
+  display: flex; gap: 20px; justify-content: center; align-items: flex-start;
+  padding-top: 10px; position: relative;
+}
+.body-svg-label { text-align: center; font-size: 0.7rem; color: var(--c-text3); font-weight: 600; margin-top: 4px; }
+
+/* Body part buttons */
+.bp-item {
+  display: flex; align-items: center; gap: 4px; width: 100%;
+  border-radius: 22px; transition: border 0.15s;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+}
+.bp-item.drag-over-top { border-top-color: var(--c-accent); margin-top: -2px; }
+.bp-item.drag-over-bottom { border-bottom-color: var(--c-accent); margin-bottom: -2px; }
+.bp-item.dragging { opacity: 0.35; }
+
+.drag-handle {
+  display: none; cursor: grab; padding: 4px 3px; color: var(--c-text3);
+  font-size: 1rem; line-height: 1; user-select: none; flex-shrink: 0;
+  border-radius: 6px; transition: color var(--transition);
+}
+.drag-handle:hover { color: var(--c-accent); }
+.drag-handle:active { cursor: grabbing; }
+
+.side-switch-btn {
+  display: none; flex-shrink: 0; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--c-border);
+  background: var(--c-surface); color: var(--c-text3); cursor: pointer;
+  font-size: 0.75rem; transition: all var(--transition); line-height: 1;
+}
+.side-switch-btn:hover { background: var(--c-accent); color: white; border-color: var(--c-accent); }
+
+.edit-map-mode .drag-handle { display: flex; }
+.edit-map-mode .side-switch-btn { display: flex; }
+.edit-map-mode .bp-btn { cursor: default !important; }
+.edit-map-mode .bp-btn:hover { border-color: var(--c-border); background: var(--c-surface2); color: var(--c-text); }
+.edit-map-mode .bp-item { cursor: grab; }
+
+.body-col.drop-target {
+  background: var(--c-accent-light);
+  outline: 2px dashed var(--c-accent);
+  outline-offset: -3px; border-radius: var(--radius-sm);
+}
+
+.bp-btn {
+  display: flex; align-items: center; gap: 6px; flex: 1;
+  padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+  border: 1.5px solid var(--c-border); background: var(--c-surface2);
+  color: var(--c-text); cursor: pointer; transition: all var(--transition);
+  white-space: nowrap; position: relative; user-select: none;
+  font-family: var(--font); min-width: 0;
+}
+.bp-btn:hover { border-color: var(--c-accent); background: var(--c-accent-light); color: var(--c-accent); }
+.bp-btn.has-data { border-color: var(--c-accent); }
+.bp-btn.state-soigner { border-color: var(--c-danger); background: #fff0f0; color: var(--c-danger); }
+.bp-btn.state-surveiller { border-color: var(--c-warning); }
+.bp-btn .bp-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+[data-theme="dark"] .bp-btn.state-soigner { background: #1c0000; }
+.bp-btn .bp-del { margin-left: 4px; color: var(--c-text3); font-size: 0.65rem; opacity: 0; transition: opacity 0.1s; flex-shrink: 0; }
+.bp-btn:hover .bp-del { opacity: 1; }
+
+/* Map mode buttons overlay */
+.body-map-overlay { position: absolute; inset: 0; }
+.bp-floating {
+  position: absolute; transform: translate(-50%, -50%);
+  padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+  border: 2px solid var(--c-accent); background: var(--c-surface);
+  color: var(--c-accent); cursor: pointer; white-space: nowrap;
+  font-family: var(--font); box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all var(--transition); user-select: none;
+}
+.bp-floating:hover { background: var(--c-accent); color: white; transform: translate(-50%,-50%) scale(1.05); }
+.bp-floating.dragging { cursor: grabbing; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+.map-toolbar {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  background: var(--c-surface2); border-bottom: 1px solid var(--c-border);
+  flex-wrap: wrap;
+}
+.map-toolbar label { font-size: 0.78rem; color: var(--c-text2); font-weight: 600; }
+.body-map-wrap { border-radius: var(--radius); border: 1px solid var(--c-border); overflow: hidden; background: var(--c-surface); box-shadow: var(--shadow); }
+
+/* =================== MODAL =================== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--c-surface); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--c-border);
+  width: min(700px, 100%); max-height: 85vh; display: flex; flex-direction: column;
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity:0; transform: scale(0.94) translateY(-10px); } to { opacity:1; transform: scale(1) translateY(0); } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--c-border);
+  background: var(--c-accent); color: white; border-radius: var(--radius) var(--radius) 0 0;
+}
+.modal-header h3 { font-size: 1rem; font-weight: 700; }
+.modal-close { background: none; border: none; color: white; cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 2px 6px; border-radius: 6px; }
+.modal-close:hover { background: rgba(255,255,255,0.2); }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid var(--c-border); display: flex; gap: 8px; justify-content: flex-end; background: var(--c-surface2); border-radius: 0 0 var(--radius) var(--radius); }
+
+/* =================== TABLE =================== */
+.table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--c-border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th {
+  background: var(--c-surface2); color: var(--c-text2); font-weight: 700;
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 10px 12px; border-bottom: 2px solid var(--c-border);
+  text-align: left; white-space: nowrap; cursor: pointer; user-select: none;
+}
+th:hover { color: var(--c-accent); }
+td {
+  padding: 9px 12px; border-bottom: 1px solid var(--c-border);
+  vertical-align: middle; color: var(--c-text);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--c-accent-light); }
+.td-edit { display: flex; gap: 4px; align-items: center; }
+
+/* =================== FORMS =================== */
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+.form-group label { font-size: 0.75rem; font-weight: 600; color: var(--c-text2); }
+.form-input, .form-select, .form-textarea {
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--c-border); background: var(--c-surface);
+  color: var(--c-text); font-family: var(--font); font-size: 0.85rem;
+  transition: border-color var(--transition); width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--c-accent);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-select { cursor: pointer; }
+
+/* =================== BUTTONS =================== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: none; font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.btn-primary { background: var(--c-accent); color: white; }
+.btn-primary:hover { background: var(--c-accent2); }
+.btn-secondary { background: var(--c-surface2); color: var(--c-text); border: 1px solid var(--c-border); }
+.btn-secondary:hover { background: var(--c-accent-light); color: var(--c-accent); border-color: var(--c-accent); }
+.btn-danger { background: #fee2e2; color: var(--c-danger); border: 1px solid #fca5a5; }
+.btn-danger:hover { background: var(--c-danger); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+.btn svg { width: 14px; height: 14px; }
+
+/* =================== FILTERS BAR =================== */
+.filters-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  padding: 12px; background: var(--c-surface2); border-radius: var(--radius-sm);
+  margin-bottom: 12px; border: 1px solid var(--c-border);
+}
+.filter-input {
+  padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--c-border);
+  background: var(--c-surface); color: var(--c-text); font-family: var(--font);
+  font-size: 0.82rem; width: 180px; transition: border-color var(--transition);
+}
+.filter-input:focus { outline: none; border-color: var(--c-accent); }
+.filter-select {
+  padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--c-border);
+  background: var(--c-surface); color: var(--c-text); font-family: var(--font);
+  font-size: 0.82rem; cursor: pointer;
+}
+.filter-select:focus { outline: none; border-color: var(--c-accent); }
+.record-count { font-size: 0.75rem; color: var(--c-text3); font-family: var(--font-mono); margin-left: auto; }
+
+/* =================== PROFILE SECTION =================== */
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.profile-item {
+  background: var(--c-surface2); border-radius: var(--radius-sm);
+  padding: 12px; border: 1px solid var(--c-border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.profile-item-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-text3); }
+.profile-item-value { font-weight: 600; color: var(--c-text); font-size: 0.95rem; }
+
+/* =================== HEALTH SUMMARY =================== */
+.health-summary { background: var(--c-surface); border-radius: var(--radius); border: 1px solid var(--c-border); padding: 16px; margin-bottom: 16px; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 600px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+.summary-item { text-align: center; padding: 12px; background: var(--c-surface2); border-radius: var(--radius-sm); border: 1px solid var(--c-border); }
+.summary-num { font-size: 1.8rem; font-weight: 800; font-family: var(--font-mono); color: var(--c-accent); }
+.summary-lbl { font-size: 0.7rem; color: var(--c-text2); font-weight: 600; text-transform: uppercase; }
+
+/* =================== MISC =================== */
+.section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-text3); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--c-border); display: flex; align-items: center; gap: 8px; }
+.url-link { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--c-accent); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: var(--c-accent-light); }
+.url-link:hover { text-decoration: underline; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--c-text3); }
+.empty-state svg { width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px; }
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; background: var(--c-surface2); color: var(--c-text2); border: 1px solid var(--c-border); }
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--c-text); color: var(--c-bg); padding: 10px 18px;
+  border-radius: var(--radius-sm); font-size: 0.84rem; font-weight: 500;
+  box-shadow: var(--shadow-lg); animation: toastIn 0.3s ease;
+  pointer-events: none; max-width: 300px;
+}
+.toast.success { background: var(--c-success); color: white; }
+.toast.error { background: var(--c-danger); color: white; }
+@keyframes toastIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+.divider { height: 1px; background: var(--c-border); margin: 16px 0; }
+.add-btn { 
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  padding: 8px 12px; border: 2px dashed var(--c-border); border-radius: var(--radius-sm);
+  background: none; color: var(--c-text3); font-family: var(--font); font-size: 0.82rem;
+  cursor: pointer; transition: all var(--transition); justify-content: center;
+}
+.add-btn:hover { border-color: var(--c-accent); color: var(--c-accent); background: var(--c-accent-light); }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--c-border); border-top-color: var(--c-accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* =================== RESPONSIVE =================== */
+/* =================== DOC LINKS =================== */
+.doc-links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:4px; }
+.doc-link-card {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 14px; border-radius:var(--radius-sm);
+  border:1.5px solid var(--c-border); background:var(--c-surface2);
+  transition:border-color var(--transition);
+}
+.doc-link-card:focus-within { border-color:var(--c-accent); }
+.doc-link-icon { font-size:1.4rem; flex-shrink:0; }
+.doc-link-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.doc-link-label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--c-text3); }
+.doc-link-input { font-size:0.78rem; color:var(--c-text); background:transparent; border:none; outline:none; width:100%; font-family:var(--font); min-width:0; }
+.doc-link-input::placeholder { color:var(--c-text3); }
+.doc-link-open { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:6px; border:1px solid var(--c-border); background:var(--c-surface); color:var(--c-accent); cursor:pointer; flex-shrink:0; transition:all var(--transition); text-decoration:none; font-size:0.85rem; }
+.doc-link-open:hover { background:var(--c-accent); color:white; border-color:var(--c-accent); }
+.doc-link-open.disabled { opacity:0.3; pointer-events:none; }
+
+/* =================== HEALTH ALERTS =================== */
+.alert-item {
+  display:flex; align-items:center; gap:10px; padding:10px 14px;
+  border-radius:var(--radius-sm); border:1.5px solid; margin-bottom:8px;
+  transition:all var(--transition);
+}
+.alert-item.ok { border-color:#bbf7d0; background:#f0fdf4; }
+.alert-item.warn { border-color:#fde68a; background:#fffbeb; }
+[data-theme="dark"] .alert-item.ok { border-color:#14532d; background:#052e16; }
+[data-theme="dark"] .alert-item.warn { border-color:#78350f; background:#1c1100; }
+.alert-icon { font-size:1.3rem; flex-shrink:0; }
+.alert-text { flex:1; }
+.alert-title { font-weight:700; font-size:0.84rem; }
+.alert-title.ok { color:var(--c-success); }
+.alert-title.warn { color:var(--c-warning); }
+.alert-desc { font-size:0.73rem; color:var(--c-text2); margin-top:2px; }
+.alert-badge { padding:3px 12px; border-radius:20px; font-size:0.72rem; font-weight:700; flex-shrink:0; }
+.alert-badge.ok { background:#dcfce7; color:#15803d; }
+.alert-badge.warn { background:#fef3c7; color:#92400e; }
+[data-theme="dark"] .alert-badge.ok { background:#052e16; color:#4ade80; }
+[data-theme="dark"] .alert-badge.warn { background:#1c0800; color:#fbbf24; }
+
+/* =================== BP PREVIEW =================== */
+.bp-preview-panel {
+  display:none; padding:6px 8px; margin-top:3px;
+  background:var(--c-surface); border:1px solid var(--c-border);
+  border-radius:8px; font-size:0.72rem;
+}
+.bp-preview-row {
+  display:flex; align-items:center; gap:6px; padding:3px 0;
+  border-bottom:1px solid var(--c-border);
+}
+.bp-preview-row:last-child { border-bottom:none; }
+.bp-preview-date { font-family:var(--font-mono); font-size:0.68rem; color:var(--c-accent); flex-shrink:0; }
+.bp-preview-obs { font-size:0.7rem; color:var(--c-text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.bp-toggle { cursor:pointer; font-size:0.65rem; color:var(--c-text3); flex-shrink:0; padding:0 2px; line-height:1; background:none; border:none; transition:color var(--transition); }
+.bp-toggle:hover { color:var(--c-accent); }
+.bp-toggle.open { color:var(--c-accent); }
+
+/* =================== RESPONSIVE =================== */
+@media (max-width: 700px) {
+  .body-col { width: 130px; }
+  #toolbar .app-title span { display: none; }
+  .tb-btn span { display: none; }
+  .charts-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .body-map-container { flex-direction: column; }
+  .body-col { width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+}
+</style>
+</head>
+<body>
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <div class="app-title">💊 CorpsSanté <span>v2.0</span></div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn tb-icon" onclick="undo()" title="Annuler (Ctrl+Z)" id="btn-undo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+  </button>
+  <button class="tb-btn tb-icon" onclick="redo()" title="Rétablir (Ctrl+Y)" id="btn-redo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+  </button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn tb-icon" onclick="saveData()" title="Sauvegarder">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+  </button>
+  <button class="tb-btn" onclick="exportJSON()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span>Export JSON</span>
+  </button>
+  <button class="tb-btn" onclick="importJSON()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>Import JSON</span>
+  </button>
+  <div class="tb-right">
+    <span id="tb-status"></span>
+    <button class="tb-btn tb-icon" onclick="toggleTheme()" title="Changer le thème" id="btn-theme">
+      <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="icon-sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</div>
+<input type="file" id="json-file-input" style="display:none" accept=".json" onchange="handleJSONImport(event)">
+
+<!-- TABS BAR -->
+<div id="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab(0)" data-tab="0">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    Tableau de bord
+  </button>
+  <button class="tab-btn" onclick="switchTab(1)" data-tab="1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M12 12v12M8 14l4 4 4-4"/></svg>
+    Cartographie
+  </button>
+  <button class="tab-btn" onclick="switchTab(2)" data-tab="2">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Historique santé
+  </button>
+</div>
+
+<!-- TAB CONTENT -->
+<div id="tab-content">
+
+<!-- ===== TAB 1 : TABLEAU DE BORD ===== -->
+<div class="tab-panel active" id="tab0">
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>
+    Profil personnel
+    <button class="btn btn-sm btn-secondary" onclick="openProfileModal()" style="margin-left:auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+      Modifier le profil
+    </button>
+  </div>
+  <div class="profile-grid" id="profile-grid"></div>
+  <div class="divider"></div>
+
+  <!-- Stats KPI -->
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Indicateurs clés
+  </div>
+  <div class="dash-grid" id="kpi-grid">
+    <div class="stat-card" id="kpi-imc">
+      <div class="stat-label">IMC</div>
+      <div class="stat-value" id="imc-val">—</div>
+      <div class="stat-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2zm0 12c5.33 0 8 2.67 8 4v2H4v-2c0-1.33 2.67-4 8-4z"/></svg></div>
+      <div class="bmi-bar"><div class="bmi-fill" id="bmi-fill" style="width:0%"></div><div class="bmi-marker" id="bmi-marker" style="left:0%"></div></div>
+      <div class="stat-sub" id="imc-label">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Suivi actif</div>
+      <div class="stat-value"><span id="kpi-total">0</span><span class="unit">entrées</span></div>
+      <div class="stat-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="stat-sub">historique de santé</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">À soigner</div>
+      <div class="stat-value" style="color:var(--c-danger)"><span id="kpi-soigner">0</span></div>
+      <div class="stat-icon" style="color:var(--c-danger)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-1-5h2v2h-2zm0-8h2v6h-2z"/></svg></div>
+      <div class="stat-sub">zones à traiter</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">À surveiller</div>
+      <div class="stat-value" style="color:var(--c-warning)"><span id="kpi-surveiller">0</span></div>
+      <div class="stat-icon" style="color:var(--c-warning)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21L12 2l11 19H1zm11-3v2h2v-2h-2zm0-6v4h2v-4h-2z"/></svg></div>
+      <div class="stat-sub">zones à surveiller</div>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Charts -->
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Graphiques de suivi
+    <button class="btn btn-sm btn-secondary" onclick="addWeightEntry()" style="margin-left:auto">+ Poids</button>
+  </div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Évolution du poids</div></div>
+      <div class="card-body"><div class="chart-wrap"><canvas id="chart-poids"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Répartition état de santé</div></div>
+      <div class="card-body"><div class="chart-wrap"><canvas id="chart-etat"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- Documents personnels -->
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Documents de santé
+    <span style="font-size:0.72rem;color:var(--c-text3);margin-left:6px;font-weight:400">Liens vers vos documents personnels</span>
+  </div>
+  <div class="doc-links-grid" id="doc-links-grid">
+    <div class="doc-link-card">
+      <div class="doc-link-icon">📋</div>
+      <div class="doc-link-body">
+        <div class="doc-link-label">Carnet de santé</div>
+        <input class="doc-link-input" id="url-carnet" type="url" placeholder="https://..." oninput="saveDocUrl('urlCarnetSante',this.value)" autocomplete="off">
+      </div>
+      <a id="open-carnet" class="doc-link-open disabled" href="#" target="_blank" title="Ouvrir" onclick="return openDocLink('url-carnet')">↗</a>
+    </div>
+    <div class="doc-link-card">
+      <div class="doc-link-icon">🩸</div>
+      <div class="doc-link-body">
+        <div class="doc-link-label">Carte de groupe sanguin</div>
+        <input class="doc-link-input" id="url-sang" type="url" placeholder="https://..." oninput="saveDocUrl('urlCarteSang',this.value)" autocomplete="off">
+      </div>
+      <a id="open-sang" class="doc-link-open disabled" href="#" target="_blank" title="Ouvrir" onclick="return openDocLink('url-sang')">↗</a>
+    </div>
+    <div class="doc-link-card">
+      <div class="doc-link-icon">📄</div>
+      <div class="doc-link-body">
+        <div class="doc-link-label">Directives anticipées</div>
+        <input class="doc-link-input" id="url-directives" type="url" placeholder="https://..." oninput="saveDocUrl('urlDirectivesAnticipees',this.value)" autocomplete="off">
+      </div>
+      <a id="open-directives" class="doc-link-open disabled" href="#" target="_blank" title="Ouvrir" onclick="return openDocLink('url-directives')">↗</a>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Alertes bilans réguliers -->
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    Bilans de santé réguliers
+    <span style="font-size:0.72rem;color:var(--c-text3);margin-left:6px;font-weight:400">Alertes automatiques basées sur votre historique</span>
+  </div>
+  <div id="health-alerts"></div>
+  <div class="divider"></div>
+
+  <!-- Résumé récent -->
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Dernières entrées de santé
+    <button class="btn btn-sm btn-secondary" onclick="exportReport()" style="margin-left:auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Rapport PDF
+    </button>
+  </div>
+  <div id="recent-entries">
+    <div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><p>Aucune entrée. Utilisez l'onglet "Historique santé" pour commencer.</p></div>
+  </div>
+</div>
+
+<!-- ===== TAB 2 : CARTOGRAPHIE ===== -->
+<div class="tab-panel" id="tab1">
+  <div class="body-map-wrap">
+    <div class="map-toolbar">
+      <label>Mode :</label>
+      <button class="btn btn-sm btn-secondary" id="btn-edit-map" onclick="toggleMapEditMode()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+        Mode édition
+      </button>
+      <button class="btn btn-sm btn-secondary" onclick="openAddBodyPartModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter une zone
+      </button>
+      <button class="btn btn-sm btn-secondary" id="btn-toggle-all-previews" onclick="toggleAllPreviews()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+        Tout développer
+      </button>
+      <span style="font-size:0.72rem;color:var(--c-text3);margin-left:8px" id="map-mode-hint">Cliquez sur une zone pour voir son historique.</span>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn btn-sm btn-secondary" onclick="exportMapPNG()">PNG</button>
+        <button class="btn btn-sm btn-secondary" onclick="exportMapPDF()">PDF</button>
+      </div>
+    </div>
+    <div class="body-map-container" id="body-map-container">
+      <!-- LEFT COLUMN -->
+      <div class="body-col left" id="bp-col-left"></div>
+      <!-- CENTER: body SVG -->
+      <div class="body-center" id="body-center">
+        <div id="body-map-overlay" style="position:absolute;inset:0;pointer-events:none;z-index:10"></div>
+        <div class="body-svg-wrapper" id="body-svg-wrapper">
+          <div>
+            <svg viewBox="0 0 160 400" width="140" style="display:block;color:var(--c-accent)">
+              <!-- FRONT VIEW -->
+              <!-- Head -->
+              <ellipse cx="80" cy="30" rx="24" ry="27" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <circle cx="72" cy="26" r="2.5" fill="var(--c-accent)" opacity="0.6"/>
+              <circle cx="88" cy="26" r="2.5" fill="var(--c-accent)" opacity="0.6"/>
+              <path d="M75,34 Q80,38 85,34" fill="none" stroke="var(--c-accent)" stroke-width="1.5" opacity="0.6"/>
+              <line x1="80" y1="29" x2="80" y2="33" stroke="var(--c-accent)" stroke-width="1" opacity="0.4"/>
+              <!-- Neck -->
+              <rect x="74" y="55" width="12" height="14" rx="4" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Shoulders -->
+              <path d="M40,72 Q58,66 74,69" fill="none" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M86,69 Q102,66 120,72" fill="none" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Torso -->
+              <path d="M40,72 L36,145 L64,155 L96,155 L124,145 L120,72 Q102,66 86,69 L74,69 Q58,66 40,72 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Chest line -->
+              <line x1="80" y1="72" x2="80" y2="145" stroke="var(--c-accent)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+              <!-- Ribs suggestion -->
+              <path d="M58,90 Q70,95 80,92 Q90,95 102,90" fill="none" stroke="var(--c-accent)" stroke-width="0.8" opacity="0.3"/>
+              <path d="M56,105 Q70,110 80,107 Q90,110 104,105" fill="none" stroke="var(--c-accent)" stroke-width="0.8" opacity="0.3"/>
+              <path d="M55,120 Q70,125 80,122 Q90,125 105,120" fill="none" stroke="var(--c-accent)" stroke-width="0.8" opacity="0.3"/>
+              <!-- Belly button -->
+              <circle cx="80" cy="138" r="2" fill="var(--c-accent)" opacity="0.3"/>
+              <!-- Left arm -->
+              <path d="M40,72 L22,115 L20,158" fill="none" stroke="var(--c-accent)" stroke-width="8" stroke-linecap="round" opacity="0.15"/>
+              <path d="M40,72 L22,115 L20,158" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Left hand -->
+              <ellipse cx="19" cy="165" rx="7" ry="9" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Right arm -->
+              <path d="M120,72 L138,115 L140,158" fill="none" stroke="var(--c-accent)" stroke-width="8" stroke-linecap="round" opacity="0.15"/>
+              <path d="M120,72 L138,115 L140,158" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Right hand -->
+              <ellipse cx="141" cy="165" rx="7" ry="9" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Hips/pelvis -->
+              <path d="M64,155 L55,185 L105,185 L96,155 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Left leg upper -->
+              <path d="M55,185 L48,260" fill="none" stroke="var(--c-accent)" stroke-width="12" stroke-linecap="round" opacity="0.15"/>
+              <path d="M55,185 L48,260" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Left knee -->
+              <ellipse cx="47" cy="264" rx="9" ry="7" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Left shin -->
+              <path d="M48,270 L44,335" fill="none" stroke="var(--c-accent)" stroke-width="9" stroke-linecap="round" opacity="0.15"/>
+              <path d="M48,270 L44,335" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Left ankle/foot -->
+              <ellipse cx="43" cy="340" rx="8" ry="5" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M36,344 L56,344 L58,352 L32,352 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Right leg upper -->
+              <path d="M105,185 L112,260" fill="none" stroke="var(--c-accent)" stroke-width="12" stroke-linecap="round" opacity="0.15"/>
+              <path d="M105,185 L112,260" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Right knee -->
+              <ellipse cx="113" cy="264" rx="9" ry="7" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Right shin -->
+              <path d="M112,270 L116,335" fill="none" stroke="var(--c-accent)" stroke-width="9" stroke-linecap="round" opacity="0.15"/>
+              <path d="M112,270 L116,335" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Right ankle/foot -->
+              <ellipse cx="117" cy="340" rx="8" ry="5" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M104,344 L128,344 L130,352 L102,352 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+            </svg>
+            <div class="body-svg-label">FACE AVANT</div>
+          </div>
+          <div>
+            <svg viewBox="0 0 160 400" width="140" style="display:block;color:var(--c-accent)">
+              <!-- BACK VIEW -->
+              <ellipse cx="80" cy="30" rx="24" ry="27" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Spine suggestion on head -->
+              <line x1="80" y1="10" x2="80" y2="28" stroke="var(--c-accent)" stroke-width="1" opacity="0.3"/>
+              <!-- Neck -->
+              <rect x="74" y="55" width="12" height="14" rx="4" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Shoulders back -->
+              <path d="M40,72 Q58,66 74,69" fill="none" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M86,69 Q102,66 120,72" fill="none" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Back torso -->
+              <path d="M40,72 L36,145 L64,155 L96,155 L124,145 L120,72 Q102,66 86,69 L74,69 Q58,66 40,72 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Spine -->
+              <line x1="80" y1="69" x2="80" y2="155" stroke="var(--c-accent)" stroke-width="2" opacity="0.5"/>
+              <!-- Shoulder blades -->
+              <ellipse cx="62" cy="100" rx="14" ry="18" fill="var(--c-accent)" opacity="0.08" stroke="var(--c-accent)" stroke-width="1" stroke-dasharray="2,2"/>
+              <ellipse cx="98" cy="100" rx="14" ry="18" fill="var(--c-accent)" opacity="0.08" stroke="var(--c-accent)" stroke-width="1" stroke-dasharray="2,2"/>
+              <!-- Lumbar muscles -->
+              <path d="M66,135 Q72,128 80,130 Q88,128 94,135 L94,152 L66,152 Z" fill="var(--c-accent)" opacity="0.08"/>
+              <!-- Left arm back -->
+              <path d="M40,72 L22,115 L20,158" fill="none" stroke="var(--c-accent)" stroke-width="8" stroke-linecap="round" opacity="0.15"/>
+              <path d="M40,72 L22,115 L20,158" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <ellipse cx="19" cy="165" rx="7" ry="9" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Right arm back -->
+              <path d="M120,72 L138,115 L140,158" fill="none" stroke="var(--c-accent)" stroke-width="8" stroke-linecap="round" opacity="0.15"/>
+              <path d="M120,72 L138,115 L140,158" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <ellipse cx="141" cy="165" rx="7" ry="9" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Hips back -->
+              <path d="M64,155 L55,185 L105,185 L96,155 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <!-- Gluteus -->
+              <ellipse cx="66" cy="178" rx="13" ry="11" fill="var(--c-accent)" opacity="0.1" stroke="var(--c-accent)" stroke-width="1"/>
+              <ellipse cx="94" cy="178" rx="13" ry="11" fill="var(--c-accent)" opacity="0.1" stroke="var(--c-accent)" stroke-width="1"/>
+              <!-- Back legs -->
+              <path d="M55,185 L48,260" fill="none" stroke="var(--c-accent)" stroke-width="12" stroke-linecap="round" opacity="0.15"/>
+              <path d="M55,185 L48,260" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <ellipse cx="47" cy="264" rx="9" ry="7" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M48,270 L44,335" fill="none" stroke="var(--c-accent)" stroke-width="9" stroke-linecap="round" opacity="0.15"/>
+              <path d="M48,270 L44,335" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- Calf muscle hint -->
+              <ellipse cx="46" cy="298" rx="6" ry="14" fill="var(--c-accent)" opacity="0.08"/>
+              <ellipse cx="46" cy="298" rx="6" ry="14" fill="none" stroke="var(--c-accent)" stroke-width="1" stroke-dasharray="2,2"/>
+              <ellipse cx="43" cy="340" rx="8" ry="5" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M36,344 L56,344 L58,352 L32,352 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M105,185 L112,260" fill="none" stroke="var(--c-accent)" stroke-width="12" stroke-linecap="round" opacity="0.15"/>
+              <path d="M105,185 L112,260" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <ellipse cx="113" cy="264" rx="9" ry="7" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M112,270 L116,335" fill="none" stroke="var(--c-accent)" stroke-width="9" stroke-linecap="round" opacity="0.15"/>
+              <path d="M112,270 L116,335" fill="none" stroke="var(--c-accent)" stroke-width="1.5" stroke-linecap="round"/>
+              <ellipse cx="114" cy="298" rx="6" ry="14" fill="var(--c-accent)" opacity="0.08"/>
+              <ellipse cx="114" cy="298" rx="6" ry="14" fill="none" stroke="var(--c-accent)" stroke-width="1" stroke-dasharray="2,2"/>
+              <ellipse cx="117" cy="340" rx="8" ry="5" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+              <path d="M104,344 L128,344 L130,352 L102,352 Z" fill="var(--c-accent-light)" stroke="var(--c-accent)" stroke-width="1.5"/>
+            </svg>
+            <div class="body-svg-label">FACE ARRIÈRE</div>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT COLUMN -->
+      <div class="body-col right" id="bp-col-right"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 3 : HISTORIQUE SANTÉ ===== -->
+<div class="tab-panel" id="tab2">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="openAddRecordModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouvelle entrée
+    </button>
+    <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-sm btn-secondary" onclick="exportTableCSV()">CSV</button>
+      <button class="btn btn-sm btn-secondary" onclick="exportTablePNG()">PNG</button>
+      <button class="btn btn-sm btn-secondary" onclick="exportTablePDF()">PDF</button>
+    </div>
+  </div>
+  <div class="filters-bar">
+    <input type="text" class="filter-input" id="filter-search" placeholder="🔍 Rechercher..." oninput="renderTable()">
+    <select class="filter-select" id="filter-partie" onchange="renderTable()">
+      <option value="">Toutes les parties</option>
+    </select>
+    <select class="filter-select" id="filter-etat" onchange="renderTable()">
+      <option value="">Tous les états</option>
+      <option value="ras">RAS</option>
+      <option value="fragile">Fragile</option>
+      <option value="surveiller">À surveiller</option>
+      <option value="soigner">À soigner</option>
+    </select>
+    <select class="filter-select" id="filter-sort" onchange="renderTable()">
+      <option value="date-desc">Date ↓</option>
+      <option value="date-asc">Date ↑</option>
+      <option value="partie-asc">Partie A→Z</option>
+      <option value="partie-desc">Partie Z→A</option>
+      <option value="etat">Par état</option>
+    </select>
+    <span class="record-count" id="record-count">0 entrée(s)</span>
+  </div>
+  <div class="table-wrap" id="table-wrap">
+    <table id="health-table">
+      <thead>
+        <tr>
+          <th onclick="sortBy('date')">Date</th>
+          <th onclick="sortBy('partieCorps')">Partie du corps</th>
+          <th onclick="sortBy('medecin')">Médecin / Praticien</th>
+          <th>Observations</th>
+          <th>Résultats</th>
+          <th onclick="sortBy('etat')">État</th>
+          <th>Liens</th>
+          <th style="width:80px">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="health-tbody"></tbody>
+    </table>
+  </div>
+</div>
+</div><!-- #tab-content -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <h3>👤 Modifier le profil</h3>
+      <button class="modal-close" onclick="closeModal('modal-profile')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Prénom</label><input class="form-input" id="p-prenom" type="text"></div>
+        <div class="form-group"><label>Nom</label><input class="form-input" id="p-nom" type="text"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Âge</label><input class="form-input" id="p-age" type="number" min="0" max="150"></div>
+        <div class="form-group"><label>Taille (cm)</label><input class="form-input" id="p-taille" type="number" min="0"></div>
+        <div class="form-group"><label>Poids (kg)</label><input class="form-input" id="p-poids" type="number" step="0.1"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Groupe sanguin</label>
+          <select class="form-select" id="p-groupe">
+            <option value="">—</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Date de naissance</label><input class="form-input" id="p-ddn" type="date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2"><label>Allergies connues</label><input class="form-input" id="p-allergies" type="text" placeholder="ex: arachides, pénicilline..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Vue</label>
+          <select class="form-select" id="p-vue">
+            <option value="">—</option><option>Normale</option><option>Myopie</option><option>Hypermétropie</option><option>Astigmatisme</option><option>Presbytie</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Ouïe</label>
+          <select class="form-select" id="p-ouie">
+            <option value="">—</option><option>Normale</option><option>Légère perte</option><option>Perte modérée</option><option>Perte sévère</option><option>Appareillé</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Médecin traitant</label><input class="form-input" id="p-medecin" type="text"></div>
+        <div class="form-group"><label>N° Sécu</label><input class="form-input" id="p-secu" type="text"></div>
+      </div>
+      <div class="form-group"><label>Notes / Points particuliers</label><textarea class="form-textarea" id="p-notes" placeholder="Antécédents, chirurgies, traitements en cours..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-profile')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProfile()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Record Modal -->
+<div class="modal-overlay" id="modal-record">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-record-title">📝 Nouvelle entrée de santé</h3>
+      <button class="modal-close" onclick="closeModal('modal-record')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Date *</label><input class="form-input" id="r-date" type="date"></div>
+        <div class="form-group"><label>Partie du corps *</label>
+          <select class="form-select" id="r-partie"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2"><label>Médecin / Praticien</label><input class="form-input" id="r-medecin" type="text" placeholder="Dr Martin, kinésithérapeute..."></div>
+        <div class="form-group"><label>État *</label>
+          <select class="form-select" id="r-etat">
+            <option value="ras">✅ RAS</option>
+            <option value="fragile">⚠️ Fragile</option>
+            <option value="surveiller">🔶 À surveiller</option>
+            <option value="soigner">🔴 À soigner</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label>Observations</label><textarea class="form-textarea" id="r-observations" placeholder="Description des symptômes, contexte, circonstances..."></textarea></div>
+      <div class="form-group" style="margin-bottom:12px"><label>Résultats / Traitement prescrit</label><textarea class="form-textarea" id="r-resultats" placeholder="Diagnostics, prescriptions, conclusions médicales..."></textarea></div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Liens externes (URL vers documents, images, analyses)</label>
+        <div id="urls-container"></div>
+        <button class="add-btn" onclick="addUrlField()" style="margin-top:8px">+ Ajouter un lien</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-record')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRecord()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Body Part Detail Modal -->
+<div class="modal-overlay" id="modal-body-part">
+  <div class="modal" style="max-width:750px">
+    <div class="modal-header" id="modal-bp-header">
+      <h3 id="modal-bp-title">Historique de santé</h3>
+      <button class="modal-close" onclick="closeModal('modal-body-part')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="addRecordForPart(currentBodyPart)">+ Ajouter une entrée</button>
+      </div>
+      <div id="modal-bp-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Body Part Modal -->
+<div class="modal-overlay" id="modal-add-bp">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>➕ Ajouter une zone</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-bp')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px"><label>Nom de la partie / organe *</label><input class="form-input" id="new-bp-name" type="text" placeholder="ex: Rate, Thyroïde, Achille gauche..."></div>
+      <div class="form-row">
+        <div class="form-group"><label>Côté</label>
+          <select class="form-select" id="new-bp-side">
+            <option value="left">Gauche</option><option value="right">Droite</option><option value="center">Centre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-bp')">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmAddBodyPart()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weight Entry Modal -->
+<div class="modal-overlay" id="modal-weight">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header"><h3>⚖️ Ajouter une mesure de poids</h3><button class="modal-close" onclick="closeModal('modal-weight')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input class="form-input" id="w-date" type="date"></div>
+        <div class="form-group"><label>Poids (kg)</label><input class="form-input" id="w-val" type="number" step="0.1" placeholder="70.5"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-weight')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveWeightEntry()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== DATA ===================
+const DEFAULT_BODY_PARTS = [
+  {id:'tete',label:'Tête',side:'center'},{id:'yeux-g',label:'Œil gauche',side:'left'},{id:'yeux-d',label:'Œil droit',side:'right'},
+  {id:'nez',label:'Nez',side:'center'},{id:'bouche',label:'Bouche',side:'center'},{id:'cou',label:'Cou',side:'center'},
+  {id:'epaule-g',label:'Épaule gauche',side:'left'},{id:'epaule-d',label:'Épaule droite',side:'right'},
+  {id:'thorax',label:'Thorax',side:'center'},{id:'poumons',label:'Poumons',side:'center'},{id:'coeur',label:'Cœur',side:'left'},
+  {id:'bras-g',label:'Bras gauche',side:'left'},{id:'bras-d',label:'Bras droit',side:'right'},
+  {id:'avbras-g',label:'Avant-bras gauche',side:'left'},{id:'avbras-d',label:'Avant-bras droit',side:'right'},
+  {id:'main-g',label:'Main gauche',side:'left'},{id:'main-d',label:'Main droite',side:'right'},
+  {id:'doigts-g',label:'Doigts gauches',side:'left'},{id:'doigts-d',label:'Doigts droits',side:'right'},
+  {id:'ventre',label:'Ventre',side:'center'},{id:'estomac',label:'Estomac',side:'center'},
+  {id:'intestins',label:'Intestins',side:'center'},{id:'foie',label:'Foie',side:'right'},
+  {id:'hanches-g',label:'Hanche gauche',side:'left'},{id:'hanches-d',label:'Hanche droite',side:'right'},
+  {id:'bassin',label:'Bassin',side:'center'},{id:'vessie',label:'Vessie',side:'center'},
+  {id:'perinee',label:'Périnée / Organes génitaux',side:'center'},{id:'anus',label:'Anus',side:'center'},
+  {id:'jambe-g',label:'Jambe gauche',side:'left'},{id:'jambe-d',label:'Jambe droite',side:'right'},
+  {id:'genou-g',label:'Genou gauche',side:'left'},{id:'genou-d',label:'Genou droit',side:'right'},
+  {id:'tibia-g',label:'Tibia gauche',side:'left'},{id:'tibia-d',label:'Tibia droit',side:'right'},
+  {id:'cheville-g',label:'Cheville gauche',side:'left'},{id:'cheville-d',label:'Cheville droite',side:'right'},
+  {id:'pied-g',label:'Pied gauche',side:'left'},{id:'pied-d',label:'Pied droit',side:'right'},
+  {id:'orteils-g',label:'Orteils gauches',side:'left'},{id:'orteils-d',label:'Orteils droits',side:'right'},
+  {id:'dos',label:'Dos / Colonne',side:'center'},{id:'reins',label:'Reins',side:'center'},
+];
+
+let appData = {
+  version:'2.0',
+  profile:{prenom:'',nom:'',age:'',taille:'',poids:'',groupeSanguin:'',allergies:'',vue:'',ouie:'',ddn:'',medecin:'',secu:'',notes:'',
+    urlCarnetSante:'', urlCarteSang:'', urlDirectivesAnticipees:''},
+  bodyParts: JSON.parse(JSON.stringify(DEFAULT_BODY_PARTS)),
+  healthRecords:[],
+  weightHistory:[],
+  alertStatus:{},
+  theme:'auto'
+};
+
+let undoStack = [], redoStack = [];
+let editingRecordId = null;
+let currentBodyPart = null;
+let mapEditMode = false;
+let chartPoids = null, chartEtat = null;
+
+// =================== INIT ===================
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  detectTheme();
+  window.addEventListener('keydown', e => {
+    if((e.ctrlKey||e.metaKey) && e.key==='z') { e.preventDefault(); undo(); }
+    if((e.ctrlKey||e.metaKey) && e.key==='y') { e.preventDefault(); redo(); }
+    if((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); saveData(); }
+    if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectTheme);
+  renderAll();
+});
+
+function detectTheme() {
+  if(appData.theme==='auto') {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    updateThemeIcon(dark);
+  } else {
+    document.documentElement.setAttribute('data-theme', appData.theme);
+    updateThemeIcon(appData.theme==='dark');
+  }
+}
+function updateThemeIcon(isDark) {
+  document.getElementById('icon-moon').style.display = isDark ? 'none' : '';
+  document.getElementById('icon-sun').style.display = isDark ? '' : 'none';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur==='dark' ? 'light' : 'dark';
+  appData.theme = next;
+  document.documentElement.setAttribute('data-theme', next);
+  updateThemeIcon(next==='dark');
+  saveData();
+  // Redraw charts
+  setTimeout(() => { renderCharts(); }, 100);
+}
+
+// =================== STATE MANAGEMENT ===================
+function snapshot() { return JSON.parse(JSON.stringify(appData)); }
+function pushUndo() { undoStack.push(snapshot()); if(undoStack.length>50) undoStack.shift(); redoStack=[]; updateUndoButtons(); }
+function undo() { if(!undoStack.length) return; redoStack.push(snapshot()); appData=undoStack.pop(); renderAll(); updateUndoButtons(); toast('Annulé'); }
+function redo() { if(!redoStack.length) return; undoStack.push(snapshot()); appData=redoStack.pop(); renderAll(); updateUndoButtons(); toast('Rétabli'); }
+function updateUndoButtons() {
+  document.getElementById('btn-undo').style.opacity = undoStack.length ? '1' : '0.4';
+  document.getElementById('btn-redo').style.opacity = redoStack.length ? '1' : '0.4';
+}
+
+// =================== STORAGE ===================
+function saveData() {
+  try { localStorage.setItem('corps_sante_v2', JSON.stringify(appData)); updateStatus('Sauvegardé ✓'); toast('Données sauvegardées', 'success'); }
+  catch(e) { toast('Erreur sauvegarde: '+e.message, 'error'); }
+}
+function loadData() {
+  try {
+    const raw = localStorage.getItem('corps_sante_v2');
+    if(raw) { const d = JSON.parse(raw); if(d.version) appData = d; }
+    // Merge any missing body parts
+    if(!appData.bodyParts) appData.bodyParts = JSON.parse(JSON.stringify(DEFAULT_BODY_PARTS));
+    if(!appData.weightHistory) appData.weightHistory = [];
+    if(!appData.healthRecords) appData.healthRecords = [];
+    if(!appData.alertStatus) appData.alertStatus = {};
+    if(!appData.profile.urlCarnetSante) appData.profile.urlCarnetSante = '';
+    if(!appData.profile.urlCarteSang) appData.profile.urlCarteSang = '';
+    if(!appData.profile.urlDirectivesAnticipees) appData.profile.urlDirectivesAnticipees = '';
+  } catch(e) { console.warn('Load error', e); }
+}
+function updateStatus(msg) { const el=document.getElementById('tb-status'); el.textContent=msg; setTimeout(()=>el.textContent='',3000); }
+
+// =================== EXPORT / IMPORT JSON ===================
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(appData, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'corps_sante_'+new Date().toISOString().split('T')[0]+'.json'; a.click();
+  toast('Export JSON effectué', 'success');
+}
+function importJSON() { document.getElementById('json-file-input').click(); }
+function handleJSONImport(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      pushUndo();
+      appData = JSON.parse(ev.target.result);
+      if(!appData.bodyParts) appData.bodyParts = JSON.parse(JSON.stringify(DEFAULT_BODY_PARTS));
+      if(!appData.weightHistory) appData.weightHistory = [];
+      if(!appData.healthRecords) appData.healthRecords = [];
+      renderAll(); saveData(); toast('Import JSON réussi', 'success');
+    } catch(err) { toast('Erreur import: '+err.message, 'error'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// =================== TABS ===================
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  if(idx===0) setTimeout(renderCharts, 100);
+}
+
+// =================== RENDER ALL ===================
+function renderAll() {
+  renderProfile();
+  renderKPIs();
+  renderCharts();
+  renderBodyMap();
+  renderTable();
+  renderRecentEntries();
+  renderDocLinks();
+  checkAlerts();
+}
+
+// =================== PROFILE ===================
+function renderProfile() {
+  const p = appData.profile;
+  const items = [
+    {k:'Prénom & Nom', v: [p.prenom,p.nom].filter(Boolean).join(' ') || '—'},
+    {k:'Âge', v: p.age ? p.age+' ans' : '—'},
+    {k:'Taille', v: p.taille ? p.taille+' cm' : '—'},
+    {k:'Poids', v: p.poids ? p.poids+' kg' : '—'},
+    {k:'Groupe sanguin', v: p.groupeSanguin || '—'},
+    {k:'Allergies', v: p.allergies || 'Aucune connue'},
+    {k:'Vue', v: p.vue || '—'},
+    {k:'Ouïe', v: p.ouie || '—'},
+    {k:'Médecin traitant', v: p.medecin || '—'},
+    {k:'Notes', v: p.notes ? p.notes.substring(0,80)+(p.notes.length>80?'…':'') : '—'},
+  ];
+  document.getElementById('profile-grid').innerHTML = items.map(it=>
+    `<div class="profile-item"><div class="profile-item-label">${it.k}</div><div class="profile-item-value">${escHtml(it.v)}</div></div>`
+  ).join('');
+}
+
+function openProfileModal() {
+  const p = appData.profile;
+  document.getElementById('p-prenom').value = p.prenom||'';
+  document.getElementById('p-nom').value = p.nom||'';
+  document.getElementById('p-age').value = p.age||'';
+  document.getElementById('p-taille').value = p.taille||'';
+  document.getElementById('p-poids').value = p.poids||'';
+  document.getElementById('p-groupe').value = p.groupeSanguin||'';
+  document.getElementById('p-ddn').value = p.ddn||'';
+  document.getElementById('p-allergies').value = p.allergies||'';
+  document.getElementById('p-vue').value = p.vue||'';
+  document.getElementById('p-ouie').value = p.ouie||'';
+  document.getElementById('p-medecin').value = p.medecin||'';
+  document.getElementById('p-secu').value = p.secu||'';
+  document.getElementById('p-notes').value = p.notes||'';
+  openModal('modal-profile');
+}
+function saveProfile() {
+  pushUndo();
+  appData.profile = {
+    prenom: document.getElementById('p-prenom').value,
+    nom: document.getElementById('p-nom').value,
+    age: document.getElementById('p-age').value,
+    taille: document.getElementById('p-taille').value,
+    poids: document.getElementById('p-poids').value,
+    groupeSanguin: document.getElementById('p-groupe').value,
+    ddn: document.getElementById('p-ddn').value,
+    allergies: document.getElementById('p-allergies').value,
+    vue: document.getElementById('p-vue').value,
+    ouie: document.getElementById('p-ouie').value,
+    medecin: document.getElementById('p-medecin').value,
+    secu: document.getElementById('p-secu').value,
+    notes: document.getElementById('p-notes').value,
+  };
+  renderProfile(); renderKPIs(); renderCharts(); saveData();
+  closeModal('modal-profile'); toast('Profil mis à jour', 'success');
+}
+
+// =================== KPIs ===================
+function renderKPIs() {
+  const p = appData.profile;
+  const h = appData.healthRecords;
+  // IMC
+  if(p.taille && p.poids) {
+    const t = parseFloat(p.taille)/100, po = parseFloat(p.poids);
+    const imc = (po/(t*t)).toFixed(1);
+    document.getElementById('imc-val').innerHTML = imc+'<span class="unit">kg/m²</span>';
+    let pct = Math.min(100, Math.max(0, ((parseFloat(imc)-15)/25)*100));
+    document.getElementById('bmi-fill').style.width = pct+'%';
+    document.getElementById('bmi-marker').style.left = pct+'%';
+    let lbl='', col='var(--c-text2)';
+    if(imc<18.5){lbl='Insuffisance pondérale';col='var(--c-info)';}
+    else if(imc<25){lbl='Poids normal ✓';col='var(--c-success)';}
+    else if(imc<30){lbl='Surpoids';col='var(--c-warning)';}
+    else{lbl='Obésité';col='var(--c-danger)';}
+    document.getElementById('imc-label').innerHTML = `<span style="color:${col};font-weight:700">${lbl}</span>`;
+  } else {
+    document.getElementById('imc-val').textContent = '—';
+    document.getElementById('imc-label').textContent = 'Renseignez taille et poids';
+  }
+  document.getElementById('kpi-total').textContent = h.length;
+  document.getElementById('kpi-soigner').textContent = h.filter(r=>r.etat==='soigner').length;
+  document.getElementById('kpi-surveiller').textContent = h.filter(r=>r.etat==='surveiller').length;
+}
+
+// =================== CHARTS ===================
+function renderCharts() {
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+  const textColor = isDark ? '#8da4bc' : '#4a5568';
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--c-accent').trim() || '#0a7c7c';
+
+  // Poids chart
+  const wh = [...appData.weightHistory].sort((a,b)=>a.date.localeCompare(b.date));
+  const ctxP = document.getElementById('chart-poids').getContext('2d');
+  if(chartPoids) chartPoids.destroy();
+  chartPoids = new Chart(ctxP, {
+    type:'line', data:{
+      labels: wh.length ? wh.map(w=>w.date) : ['—'],
+      datasets:[{label:'Poids (kg)', data: wh.length ? wh.map(w=>w.val) : [],
+        borderColor: accent, backgroundColor: accent+'22',
+        pointBackgroundColor: accent, fill:true, tension:0.4, pointRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}},
+               y:{ticks:{color:textColor,font:{size:10}},grid:{color:gridColor}}}}
+  });
+
+  // État chart
+  const etats = {ras:0,fragile:0,surveiller:0,soigner:0};
+  appData.healthRecords.forEach(r => { if(etats[r.etat]!==undefined) etats[r.etat]++; });
+  const ctxE = document.getElementById('chart-etat').getContext('2d');
+  if(chartEtat) chartEtat.destroy();
+  chartEtat = new Chart(ctxE, {
+    type:'doughnut',
+    data:{
+      labels:['RAS','Fragile','À surveiller','À soigner'],
+      datasets:[{data:[etats.ras,etats.fragile,etats.surveiller,etats.soigner],
+        backgroundColor:['#16a34a','#d97706','#dc8a1a','#e53e3e'],
+        borderColor: isDark ? '#111d2b' : '#ffffff', borderWidth:3}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{
+      legend:{position:'bottom',labels:{color:textColor,font:{size:11},padding:10}}
+    }}
+  });
+}
+
+// =================== WEIGHT ===================
+function addWeightEntry() {
+  document.getElementById('w-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('w-val').value = appData.profile.poids || '';
+  openModal('modal-weight');
+}
+function saveWeightEntry() {
+  const d = document.getElementById('w-date').value;
+  const v = parseFloat(document.getElementById('w-val').value);
+  if(!d||isNaN(v)) { toast('Renseignez date et poids', 'error'); return; }
+  pushUndo();
+  const existing = appData.weightHistory.findIndex(w=>w.date===d);
+  if(existing>=0) appData.weightHistory[existing].val = v;
+  else appData.weightHistory.push({date:d,val:v});
+  appData.weightHistory.sort((a,b)=>a.date.localeCompare(b.date));
+  saveData(); closeModal('modal-weight'); renderCharts(); toast('Mesure ajoutée', 'success');
+}
+
+// =================== RECENT ENTRIES ===================
+function renderRecentEntries() {
+  const recent = [...appData.healthRecords].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const el = document.getElementById('recent-entries');
+  if(!recent.length) {
+    el.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><p>Aucune entrée. Utilisez l\'onglet "Historique santé".</p></div>';
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Date</th><th>Partie</th><th>Médecin</th><th>État</th><th>Résumé</th></tr></thead><tbody>${
+    recent.map(r=>`<tr><td><span style="font-family:var(--font-mono);font-size:0.8rem">${r.date||''}</span></td><td>${escHtml(getPartLabel(r.partieCorps))}</td><td>${escHtml(r.medecin||'—')}</td><td>${badgeHtml(r.etat)}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml((r.observations||'').substring(0,80))}</td></tr>`).join('')
+  }</tbody></table></div>`;
+}
+
+// =================== BODY MAP ===================
+function migrateBodyPartsCol() {
+  // Assign 'col' property if missing, for display column (independent of anatomical 'side')
+  let centerIdx = 0;
+  appData.bodyParts.forEach(bp => {
+    if (!bp.col) {
+      if (bp.side === 'left') bp.col = 'left';
+      else if (bp.side === 'right') bp.col = 'right';
+      else { bp.col = (centerIdx % 2 === 0) ? 'left' : 'right'; centerIdx++; }
+    }
+  });
+}
+
+function renderBodyMap() {
+  migrateBodyPartsCol();
+  const colL = document.getElementById('bp-col-left');
+  const colR = document.getElementById('bp-col-right');
+  colL.innerHTML = '';
+  colR.innerHTML = '';
+
+  appData.bodyParts.filter(b => b.col === 'left').forEach(bp => colL.appendChild(createBpItem(bp)));
+  appData.bodyParts.filter(b => b.col === 'right').forEach(bp => colR.appendChild(createBpItem(bp)));
+
+  setupColumnDropZone(colL, 'left');
+  setupColumnDropZone(colR, 'right');
+  applyEditModeVisual();
+}
+
+function createBpItem(bp) {
+  const records = appData.healthRecords.filter(r => r.partieCorps === bp.id)
+    .sort((a,b) => b.date.localeCompare(a.date));
+  const worst = getWorstState(records);
+  const isRight = bp.col === 'right';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'bp-item';
+  wrapper.setAttribute('data-id', bp.id);
+  wrapper.draggable = false;
+  // Override to allow column layout for preview panel
+  wrapper.style.cssText = 'flex-direction:column;align-items:stretch;border-radius:10px;';
+
+  // ── Row: handle + inner + switch ──
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;gap:4px;width:100%';
+
+  // Drag handle
+  const handle = document.createElement('span');
+  handle.className = 'drag-handle';
+  handle.innerHTML = '⠿';
+  handle.title = 'Glisser pour repositionner';
+
+  // Side switch button
+  const switchBtn = document.createElement('button');
+  switchBtn.className = 'side-switch-btn';
+  switchBtn.title = isRight ? 'Déplacer à gauche' : 'Déplacer à droite';
+  switchBtn.innerHTML = isRight ? '←' : '→';
+  switchBtn.onclick = (e) => { e.stopPropagation(); switchSide(bp.id); };
+
+  // Inner column (btn + preview)
+  const inner = document.createElement('div');
+  inner.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;gap:0';
+
+  // Main button
+  const btn = document.createElement('button');
+  btn.className = 'bp-btn' + (records.length ? ' has-data' : '') + (worst ? ' state-' + worst : '');
+  btn.setAttribute('data-id', bp.id);
+  btn.onclick = () => { if (!mapEditMode) openBodyPartModal(bp.id); };
+
+  // Preview toggle button (only if records exist)
+  const hasRec = records.length > 0;
+  const toggleSpan = hasRec
+    ? `<button class="bp-toggle" onclick="event.stopPropagation();toggleBpPreview('${bp.id}',this)" title="Aperçu rapide">▾</button>`
+    : '';
+
+  btn.innerHTML = `<span class="bp-dot" style="background:${stateColor(worst||'ras')};opacity:${hasRec?1:0.3}"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis">${escHtml(bp.label)}</span>${toggleSpan}<span class="bp-del" onclick="event.stopPropagation();deleteBodyPart('${bp.id}')" title="Supprimer">✕</span>`;
+
+  inner.appendChild(btn);
+
+  // Preview panel (only if records exist)
+  if (hasRec) {
+    const panel = document.createElement('div');
+    panel.id = 'bp-preview-' + bp.id;
+    panel.className = 'bp-preview-panel';
+    const rows = records.slice(0, 4).map(r =>
+      `<div class="bp-preview-row">
+        <span class="bp-preview-date">${r.date||''}</span>
+        ${badgeHtml(r.etat)}
+        <span class="bp-preview-obs">${escHtml((r.observations||r.resultats||'—').substring(0,38))}</span>
+      </div>`
+    ).join('');
+    const more = records.length > 4
+      ? `<div style="font-size:0.68rem;color:var(--c-text3);text-align:center;padding-top:3px;cursor:pointer" onclick="openBodyPartModal('${bp.id}')">+ ${records.length-4} entrée(s) — voir tout</div>`
+      : '';
+    panel.innerHTML = rows + more;
+    inner.appendChild(panel);
+  }
+
+  if (isRight) {
+    row.appendChild(switchBtn);
+    row.appendChild(inner);
+    row.appendChild(handle);
+  } else {
+    row.appendChild(handle);
+    row.appendChild(inner);
+    row.appendChild(switchBtn);
+  }
+
+  wrapper.appendChild(row);
+
+  setupItemDrag(wrapper, bp.id);
+  return wrapper;
+}
+
+// ─── Drag state ───
+let dragSrcId = null;
+
+function setupItemDrag(wrapper, bpId) {
+  wrapper.addEventListener('dragstart', e => {
+    dragSrcId = bpId;
+    wrapper.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', bpId);
+  });
+  wrapper.addEventListener('dragend', () => {
+    wrapper.classList.remove('dragging');
+    document.querySelectorAll('.bp-item').forEach(el => el.classList.remove('drag-over-top','drag-over-bottom'));
+    document.querySelectorAll('.body-col').forEach(el => el.classList.remove('drop-target'));
+    dragSrcId = null;
+  });
+  wrapper.addEventListener('dragover', e => {
+    if (!dragSrcId || dragSrcId === bpId) return;
+    e.preventDefault(); e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.bp-item').forEach(el => el.classList.remove('drag-over-top','drag-over-bottom'));
+    const rect = wrapper.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    wrapper.classList.add(e.clientY < mid ? 'drag-over-top' : 'drag-over-bottom');
+  });
+  wrapper.addEventListener('dragleave', () => {
+    wrapper.classList.remove('drag-over-top','drag-over-bottom');
+  });
+  wrapper.addEventListener('drop', e => {
+    if (!dragSrcId || dragSrcId === bpId) return;
+    e.preventDefault(); e.stopPropagation();
+    const rect = wrapper.getBoundingClientRect();
+    const before = e.clientY < rect.top + rect.height / 2;
+    reorderBodyPart(dragSrcId, bpId, before);
+  });
+}
+
+function setupColumnDropZone(col, side) {
+  col.addEventListener('dragover', e => {
+    if (!dragSrcId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    col.classList.add('drop-target');
+  });
+  col.addEventListener('dragleave', e => {
+    if (!col.contains(e.relatedTarget)) col.classList.remove('drop-target');
+  });
+  col.addEventListener('drop', e => {
+    if (!dragSrcId) return;
+    e.preventDefault();
+    col.classList.remove('drop-target');
+    // If dropped on column background (not on an item), move to end of that column
+    if (e.target === col || e.target.closest('.bp-item') === null) {
+      moveToColumn(dragSrcId, side);
+    }
+  });
+}
+
+function reorderBodyPart(srcId, targetId, before) {
+  pushUndo();
+  const src = appData.bodyParts.findIndex(b => b.id === srcId);
+  const tgt = appData.bodyParts.findIndex(b => b.id === targetId);
+  if (src < 0 || tgt < 0) return;
+  const srcBp = appData.bodyParts.splice(src, 1)[0];
+  // Update col to match the target's column
+  const targetBp = appData.bodyParts.find(b => b.id === targetId);
+  if (targetBp) srcBp.col = targetBp.col;
+  const newTgt = appData.bodyParts.findIndex(b => b.id === targetId);
+  appData.bodyParts.splice(before ? newTgt : newTgt + 1, 0, srcBp);
+  saveData(); renderBodyMap();
+}
+
+function moveToColumn(bpId, col) {
+  pushUndo();
+  const bp = appData.bodyParts.find(b => b.id === bpId);
+  if (!bp || bp.col === col) return;
+  bp.col = col;
+  // Also update side for left/right anatomical parts (center stays center)
+  if (bp.side !== 'center') bp.side = col;
+  saveData(); renderBodyMap(); toast(`Zone déplacée vers la colonne ${col === 'left' ? 'gauche' : 'droite'}`, 'success');
+}
+
+function switchSide(bpId) {
+  const bp = appData.bodyParts.find(b => b.id === bpId);
+  if (!bp) return;
+  moveToColumn(bpId, bp.col === 'left' ? 'right' : 'left');
+}
+
+function applyEditModeVisual() {
+  const container = document.getElementById('body-map-container');
+  if (mapEditMode) {
+    container.classList.add('edit-map-mode');
+    document.querySelectorAll('.bp-item').forEach(el => {
+      el.draggable = true;
+    });
+  } else {
+    container.classList.remove('edit-map-mode');
+    document.querySelectorAll('.bp-item').forEach(el => {
+      el.draggable = false;
+    });
+  }
+}
+
+function getWorstState(records) {
+  if(!records.length) return null;
+  const order = ['soigner','surveiller','fragile','ras'];
+  for(const s of order) if(records.some(r=>r.etat===s)) return s;
+  return 'ras';
+}
+function stateColor(s) { return {ras:'#16a34a',fragile:'#d97706',surveiller:'#dc8a1a',soigner:'#e53e3e'}[s]||'#94a3b8'; }
+
+function openBodyPartModal(partId) {
+  currentBodyPart = partId;
+  const bp = appData.bodyParts.find(b=>b.id===partId);
+  if(!bp) return;
+  document.getElementById('modal-bp-title').textContent = '🩺 ' + bp.label;
+  renderBodyPartContent(partId);
+  openModal('modal-body-part');
+}
+
+function renderBodyPartContent(partId) {
+  const records = appData.healthRecords.filter(r=>r.partieCorps===partId)
+    .sort((a,b)=>b.date.localeCompare(a.date));
+  const el = document.getElementById('modal-bp-content');
+  if(!records.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:24px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><p>Aucune entrée pour cette zone.</p></div>';
+    return;
+  }
+  el.innerHTML = records.map(r=>`
+    <div style="margin-bottom:14px;padding:14px;background:var(--c-surface2);border-radius:var(--radius-sm);border:1px solid var(--c-border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="font-family:var(--font-mono);font-size:0.8rem;font-weight:700;color:var(--c-accent)">${r.date||''}</span>
+        ${badgeHtml(r.etat)}
+        ${r.medecin?`<span style="font-size:0.8rem;color:var(--c-text2)">👨‍⚕️ ${escHtml(r.medecin)}</span>`:''}
+        <div style="margin-left:auto;display:flex;gap:4px">
+          <button class="btn btn-sm btn-secondary" onclick="editRecord('${r.id}');closeModal('modal-body-part')">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRecord('${r.id}');renderBodyPartContent('${partId}');renderAll()">🗑️</button>
+        </div>
+      </div>
+      ${r.observations?`<p style="font-size:0.84rem;margin-bottom:6px"><strong>Observations :</strong> ${escHtml(r.observations)}</p>`:''}
+      ${r.resultats?`<p style="font-size:0.84rem;margin-bottom:6px"><strong>Résultats :</strong> ${escHtml(r.resultats)}</p>`:''}
+      ${r.urls&&r.urls.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${r.urls.filter(u=>u).map(u=>`<a href="${escHtml(u)}" target="_blank" class="url-link">🔗 Document</a>`).join('')}</div>`:''}
+    </div>
+  `).join('');
+}
+
+function toggleMapEditMode() {
+  mapEditMode = !mapEditMode;
+  const btn = document.getElementById('btn-edit-map');
+  const hint = document.getElementById('map-mode-hint');
+  if (mapEditMode) {
+    btn.style.background = 'var(--c-accent)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--c-accent)';
+    btn.innerHTML = btn.innerHTML.replace('Mode édition','✅ Mode édition actif');
+    hint.innerHTML = '<strong>Glissez</strong> les boutons pour les réordonner · Cliquez sur <strong>→ ←</strong> pour changer de colonne · Cliquez à nouveau sur "Mode édition" pour quitter.';
+  } else {
+    btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+    btn.innerHTML = btn.innerHTML.replace('✅ Mode édition actif','Mode édition');
+    hint.textContent = 'Cliquez sur une zone pour voir son historique.';
+  }
+  applyEditModeVisual();
+}
+
+function openAddBodyPartModal() { document.getElementById('new-bp-name').value=''; openModal('modal-add-bp'); }
+function confirmAddBodyPart() {
+  const name = document.getElementById('new-bp-name').value.trim();
+  if(!name) { toast('Nom requis', 'error'); return; }
+  const side = document.getElementById('new-bp-side').value;
+  pushUndo();
+  const id = 'custom-'+Date.now();
+  appData.bodyParts.push({id,label:name,side});
+  saveData(); renderBodyMap(); closeModal('modal-add-bp'); toast('Zone ajoutée', 'success');
+}
+function deleteBodyPart(id) {
+  if(!confirm('Supprimer cette zone du corps ? Les entrées de santé associées seront conservées.')) return;
+  pushUndo();
+  appData.bodyParts = appData.bodyParts.filter(b=>b.id!==id);
+  saveData(); renderBodyMap();
+}
+
+// =================== RECORDS ===================
+function openAddRecordModal(partId) {
+  editingRecordId = null;
+  document.getElementById('modal-record-title').textContent = '📝 Nouvelle entrée de santé';
+  document.getElementById('r-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('r-etat').value = 'ras';
+  document.getElementById('r-medecin').value = '';
+  document.getElementById('r-observations').value = '';
+  document.getElementById('r-resultats').value = '';
+  populatePartieSelect(partId||'');
+  document.getElementById('urls-container').innerHTML = '';
+  openModal('modal-record');
+}
+function addRecordForPart(partId) { closeModal('modal-body-part'); openAddRecordModal(partId); }
+function populatePartieSelect(selected) {
+  const sel = document.getElementById('r-partie');
+  sel.innerHTML = appData.bodyParts.map(b=>`<option value="${b.id}"${b.id===selected?' selected':''}>${escHtml(b.label)}</option>`).join('');
+}
+function editRecord(id) {
+  const r = appData.healthRecords.find(x=>x.id===id);
+  if(!r) return;
+  editingRecordId = id;
+  document.getElementById('modal-record-title').textContent = '✏️ Modifier l\'entrée';
+  document.getElementById('r-date').value = r.date||'';
+  populatePartieSelect(r.partieCorps||'');
+  document.getElementById('r-medecin').value = r.medecin||'';
+  document.getElementById('r-etat').value = r.etat||'ras';
+  document.getElementById('r-observations').value = r.observations||'';
+  document.getElementById('r-resultats').value = r.resultats||'';
+  // URLs
+  const cont = document.getElementById('urls-container'); cont.innerHTML='';
+  (r.urls||[]).forEach(u => addUrlField(u));
+  openModal('modal-record');
+}
+function saveRecord() {
+  const date = document.getElementById('r-date').value;
+  const partie = document.getElementById('r-partie').value;
+  if(!date||!partie) { toast('Date et partie du corps requis', 'error'); return; }
+  pushUndo();
+  const rec = {
+    id: editingRecordId || 'r-'+Date.now(),
+    date, partieCorps: partie,
+    medecin: document.getElementById('r-medecin').value,
+    etat: document.getElementById('r-etat').value,
+    observations: document.getElementById('r-observations').value,
+    resultats: document.getElementById('r-resultats').value,
+    urls: Array.from(document.querySelectorAll('.url-field')).map(i=>i.value).filter(Boolean),
+    createdAt: editingRecordId ? (appData.healthRecords.find(r=>r.id===editingRecordId)||{}).createdAt||new Date().toISOString() : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  if(editingRecordId) {
+    const idx = appData.healthRecords.findIndex(r=>r.id===editingRecordId);
+    if(idx>=0) appData.healthRecords[idx]=rec;
+  } else { appData.healthRecords.push(rec); }
+  saveData(); renderAll(); closeModal('modal-record');
+  toast(editingRecordId ? 'Entrée modifiée' : 'Entrée ajoutée', 'success');
+  checkAlerts();
+  editingRecordId = null;
+}
+function deleteRecord(id) {
+  if(!confirm('Supprimer cette entrée ?')) return;
+  pushUndo();
+  appData.healthRecords = appData.healthRecords.filter(r=>r.id!==id);
+  saveData(); renderAll();
+}
+
+// =================== URL FIELDS ===================
+function addUrlField(val='') {
+  const cont = document.getElementById('urls-container');
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;align-items:center';
+  wrap.innerHTML = `<input type="url" class="form-input url-field" value="${escHtml(val)}" placeholder="https://..." style="flex:1">
+    <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">✕</button>`;
+  cont.appendChild(wrap);
+}
+
+// =================== TABLE ===================
+function renderTable() {
+  let records = [...appData.healthRecords];
+  const search = document.getElementById('filter-search').value.toLowerCase();
+  const partie = document.getElementById('filter-partie').value;
+  const etat = document.getElementById('filter-etat').value;
+  const sort = document.getElementById('filter-sort').value;
+
+  if(search) records = records.filter(r => [r.date,getPartLabel(r.partieCorps),r.medecin,r.observations,r.resultats].some(v=>(v||'').toLowerCase().includes(search)));
+  if(partie) records = records.filter(r=>r.partieCorps===partie);
+  if(etat) records = records.filter(r=>r.etat===etat);
+
+  const sortFn = {
+    'date-desc':(a,b)=>b.date.localeCompare(a.date),
+    'date-asc':(a,b)=>a.date.localeCompare(b.date),
+    'partie-asc':(a,b)=>getPartLabel(a.partieCorps).localeCompare(getPartLabel(b.partieCorps)),
+    'partie-desc':(a,b)=>getPartLabel(b.partieCorps).localeCompare(getPartLabel(a.partieCorps)),
+    'etat':(a,b)=>{const o=['soigner','surveiller','fragile','ras'];return o.indexOf(a.etat)-o.indexOf(b.etat);}
+  };
+  records.sort(sortFn[sort]||sortFn['date-desc']);
+  document.getElementById('record-count').textContent = records.length + ' entrée(s)';
+
+  // Update filter dropdowns
+  const partSel = document.getElementById('filter-partie');
+  const curPart = partSel.value;
+  partSel.innerHTML = '<option value="">Toutes les parties</option>' + appData.bodyParts.map(b=>`<option value="${b.id}"${b.id===curPart?' selected':''}>${escHtml(b.label)}</option>`).join('');
+
+  const tbody = document.getElementById('health-tbody');
+  if(!records.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" style="padding:30px"><p>Aucune entrée trouvée.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = records.map(r=>`
+    <tr>
+      <td><span style="font-family:var(--font-mono);font-size:0.8rem;white-space:nowrap">${r.date||''}</span></td>
+      <td><span style="font-weight:600">${escHtml(getPartLabel(r.partieCorps))}</span></td>
+      <td>${escHtml(r.medecin||'—')}</td>
+      <td style="max-width:220px"><span style="font-size:0.82rem">${escHtml((r.observations||'').substring(0,100)+(r.observations&&r.observations.length>100?'…':''))}</span></td>
+      <td style="max-width:180px"><span style="font-size:0.82rem">${escHtml((r.resultats||'').substring(0,80)+(r.resultats&&r.resultats.length>80?'…':''))}</span></td>
+      <td>${badgeHtml(r.etat)}</td>
+      <td>${(r.urls||[]).filter(u=>u).map(u=>`<a href="${escHtml(u)}" target="_blank" class="url-link">🔗</a>`).join(' ')}</td>
+      <td><div class="td-edit">
+        <button class="btn btn-sm btn-secondary" onclick="editRecord('${r.id}')" title="Modifier">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRecord('${r.id}')" title="Supprimer">🗑️</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+let sortDir = {};
+function sortBy(field) {
+  sortDir[field] = !sortDir[field];
+  document.getElementById('filter-sort').value = field+'-'+(sortDir[field]?'asc':'desc');
+  renderTable();
+}
+
+// =================== EXPORT TABLE ===================
+function exportTableCSV() {
+  const records = appData.healthRecords;
+  const headers = ['Date','Partie du corps','Médecin','Observations','Résultats','État','URLs'];
+  const rows = records.map(r=>[r.date,getPartLabel(r.partieCorps),r.medecin||'',r.observations||'',r.resultats||'',r.etat,(r.urls||[]).join(' | ')]);
+  const csv = [headers,...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='sante_'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
+  toast('Export CSV effectué', 'success');
+}
+async function exportTablePNG() {
+  toast('Export PNG en cours...');
+  const el = document.getElementById('table-wrap');
+  const canvas = await html2canvas(el, {scale:2,backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--c-surface')});
+  const a=document.createElement('a'); a.href=canvas.toDataURL('image/png');
+  a.download='sante_'+new Date().toISOString().split('T')[0]+'.png'; a.click();
+  toast('Export PNG effectué', 'success');
+}
+async function exportTablePDF() {
+  toast('Export PDF en cours...');
+  const {jsPDF} = window.jspdf;
+  const el = document.getElementById('table-wrap');
+  const canvas = await html2canvas(el, {scale:2});
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const pw = pdf.internal.pageSize.getWidth()-20;
+  const ph = (canvas.height/canvas.width)*pw;
+  pdf.addImage(imgData,'PNG',10,10,pw,ph);
+  pdf.save('sante_'+new Date().toISOString().split('T')[0]+'.pdf');
+  toast('Export PDF effectué', 'success');
+}
+async function exportMapPNG() {
+  const el = document.getElementById('body-map-container');
+  const canvas = await html2canvas(el, {scale:2});
+  const a=document.createElement('a'); a.href=canvas.toDataURL('image/png');
+  a.download='cartographie_'+new Date().toISOString().split('T')[0]+'.png'; a.click();
+  toast('Export PNG effectué', 'success');
+}
+async function exportMapPDF() {
+  const {jsPDF} = window.jspdf;
+  const el = document.getElementById('body-map-container');
+  const canvas = await html2canvas(el, {scale:2});
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const pw = pdf.internal.pageSize.getWidth()-20;
+  const ph = (canvas.height/canvas.width)*pw;
+  pdf.addImage(imgData,'PNG',10,10,pw,Math.min(ph,pdf.internal.pageSize.getHeight()-20));
+  pdf.save('cartographie_'+new Date().toISOString().split('T')[0]+'.pdf');
+  toast('Export PDF effectué', 'success');
+}
+async function exportReport() {
+  const {jsPDF} = window.jspdf;
+  const p = appData.profile;
+  const pdf = new jsPDF({unit:'mm',format:'a4'});
+  let y=20;
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(18); pdf.setTextColor(10,124,124);
+  pdf.text('Rapport Santé Personnel', 20, y); y+=10;
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(10); pdf.setTextColor(80,80,80);
+  pdf.text('Généré le '+new Date().toLocaleDateString('fr-FR'), 20, y); y+=10;
+  pdf.setDrawColor(10,124,124); pdf.line(20,y,190,y); y+=8;
+  if(p.prenom||p.nom) { pdf.setFont('helvetica','bold'); pdf.setFontSize(12); pdf.setTextColor(20,20,20); pdf.text((p.prenom+' '+p.nom).trim(), 20, y); y+=6; }
+  const infos = [['Âge',p.age+' ans'],['Taille',p.taille+' cm'],['Poids',p.poids+' kg'],['Groupe',p.groupeSanguin]].filter(i=>i[1]&&i[1].trim()&&i[1]!='undefined');
+  infos.forEach(([k,v])=>{ pdf.setFont('helvetica','normal'); pdf.setFontSize(10); pdf.setTextColor(80,80,80); pdf.text(k+': '+v, 20, y); y+=5; });
+  y+=5;
+  const records = [...appData.healthRecords].sort((a,b)=>b.date.localeCompare(a.date));
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(12); pdf.setTextColor(10,124,124); pdf.text('Historique de santé ('+records.length+' entrées)', 20, y); y+=8;
+  records.forEach(r => {
+    if(y>270) { pdf.addPage(); y=20; }
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(20,20,20);
+    pdf.text(r.date+' — '+getPartLabel(r.partieCorps)+' ['+r.etat.toUpperCase()+']', 20, y); y+=5;
+    if(r.medecin) { pdf.setFont('helvetica','italic'); pdf.setFontSize(9); pdf.setTextColor(80,80,80); pdf.text('Dr: '+r.medecin, 22, y); y+=4; }
+    if(r.observations) { pdf.setFont('helvetica','normal'); pdf.setFontSize(9); const lines=pdf.splitTextToSize('Obs: '+r.observations, 165); pdf.text(lines, 22, y); y+=lines.length*4; }
+    if(r.resultats) { pdf.setFont('helvetica','normal'); pdf.setFontSize(9); const lines=pdf.splitTextToSize('Rés: '+r.resultats, 165); pdf.text(lines, 22, y); y+=lines.length*4; }
+    y+=3;
+  });
+  pdf.save('rapport_sante_'+new Date().toISOString().split('T')[0]+'.pdf');
+  toast('Rapport PDF généré', 'success');
+}
+
+// =================== DOC LINKS ===================
+function renderDocLinks() {
+  const p = appData.profile;
+  const fields = [
+    {inputId:'url-carnet', openId:'open-carnet', key:'urlCarnetSante'},
+    {inputId:'url-sang',   openId:'open-sang',   key:'urlCarteSang'},
+    {inputId:'url-directives', openId:'open-directives', key:'urlDirectivesAnticipees'},
+  ];
+  fields.forEach(f => {
+    const inp = document.getElementById(f.inputId);
+    const lnk = document.getElementById(f.openId);
+    if (!inp || !lnk) return;
+    const val = p[f.key] || '';
+    inp.value = val;
+    if (val) { lnk.href = val; lnk.classList.remove('disabled'); }
+    else { lnk.href = '#'; lnk.classList.add('disabled'); }
+  });
+}
+function saveDocUrl(key, val) {
+  appData.profile[key] = val.trim();
+  // update open button
+  const map = {urlCarnetSante:'open-carnet', urlCarteSang:'open-sang', urlDirectivesAnticipees:'open-directives'};
+  const lnk = document.getElementById(map[key]);
+  if (lnk) {
+    if (val.trim()) { lnk.href = val.trim(); lnk.classList.remove('disabled'); }
+    else { lnk.href = '#'; lnk.classList.add('disabled'); }
+  }
+  saveData();
+}
+function openDocLink(inputId) {
+  const inp = document.getElementById(inputId);
+  if (!inp || !inp.value.trim()) return false;
+  window.open(inp.value.trim(), '_blank');
+  return false;
+}
+
+// =================== HEALTH ALERTS ===================
+const HEALTH_ALERTS_DEF = [
+  {
+    id: 'prise-sang', label: 'Prise de sang', icon: '🩸',
+    description: 'Bilan biologique complet recommandé',
+    frequence: 'Tous les 5 ans', months: 60,
+    keywords: ['prise de sang','bilan sanguin','analyse de sang','bilan biologique','nfs ','hémogramme','glycémie','cholestérol','prélèvement','bilan sanguine','labo ','laboratoire','analyse sanguine']
+  },
+  {
+    id: 'dentaire', label: 'Bilan dentaire', icon: '🦷',
+    description: 'Visite de contrôle chez le dentiste',
+    frequence: 'Annuel', months: 12,
+    keywords: ['dentiste','dentaire','dent ','dents ','carie','détartrage','orthodontiste','stomatologue','implant','couronne dentaire','radiographie dentaire']
+  },
+  {
+    id: 'medical', label: 'Visite médicale générale', icon: '🩺',
+    description: 'Consultation de suivi chez le médecin traitant',
+    frequence: 'Annuel', months: 12,
+    keywords: ['visite médicale','bilan médical','médecin traitant','généraliste','consultation médicale','check-up','bilan annuel','visite annuelle','suivi médical']
+  }
+];
+
+function checkAlerts() {
+  if (!appData.alertStatus) appData.alertStatus = {};
+  const now = new Date();
+  HEALTH_ALERTS_DEF.forEach(def => {
+    const cutoff = new Date(now);
+    cutoff.setMonth(cutoff.getMonth() - def.months);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const satisfied = appData.healthRecords.some(r => {
+      if (!r.date || r.date < cutoffStr) return false;
+      const text = [r.observations||'', r.resultats||'', r.medecin||'', getPartLabel(r.partieCorps)||''].join(' ').toLowerCase();
+      return def.keywords.some(kw => text.includes(kw.toLowerCase()));
+    });
+    appData.alertStatus[def.id] = satisfied ? 'ok' : 'alert';
+  });
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const el = document.getElementById('health-alerts');
+  if (!el) return;
+  if (!appData.alertStatus) appData.alertStatus = {};
+  el.innerHTML = HEALTH_ALERTS_DEF.map(def => {
+    const ok = appData.alertStatus[def.id] === 'ok';
+    return `<div class="alert-item ${ok?'ok':'warn'}">
+      <div class="alert-icon">${def.icon}</div>
+      <div class="alert-text">
+        <div class="alert-title ${ok?'ok':'warn'}">${def.label}</div>
+        <div class="alert-desc">${def.description} · <strong>${def.frequence}</strong></div>
+      </div>
+      <span class="alert-badge ${ok?'ok':'warn'}">${ok ? '✅ À jour' : '🔔 À planifier'}</span>
+    </div>`;
+  }).join('');
+}
+
+// =================== BODY PART PREVIEW ===================
+function toggleAllPreviews() {
+  const panels = document.querySelectorAll('.bp-preview-panel');
+  const toggles = document.querySelectorAll('.bp-toggle');
+  const btn = document.getElementById('btn-toggle-all-previews');
+  // Determine current state: if any panel is hidden, we expand all; else collapse all
+  const anyHidden = Array.from(panels).some(p => p.style.display === 'none' || p.style.display === '');
+  const expand = anyHidden;
+  panels.forEach(p => { p.style.display = expand ? 'block' : 'none'; });
+  toggles.forEach(t => {
+    t.textContent = expand ? '▴' : '▾';
+    t.classList.toggle('open', expand);
+  });
+  btn.innerHTML = expand
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="18 15 12 9 6 15"/></svg> Tout réduire'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg> Tout développer';
+  if (expand) { btn.style.background='var(--c-accent-light)'; btn.style.color='var(--c-accent)'; btn.style.borderColor='var(--c-accent)'; }
+  else { btn.style.background=''; btn.style.color=''; btn.style.borderColor=''; }
+}
+
+function toggleBpPreview(bpId, toggleEl) {
+  const panel = document.getElementById('bp-preview-' + bpId);
+  if (!panel) return;
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'block';
+  toggleEl.textContent = visible ? '▾' : '▴';
+  toggleEl.classList.toggle('open', !visible);
+  // Sync global button label
+  const btn = document.getElementById('btn-toggle-all-previews');
+  if (!btn) return;
+  const panels = document.querySelectorAll('.bp-preview-panel');
+  const allOpen = Array.from(panels).every(p => p.style.display === 'block');
+  const allClosed = Array.from(panels).every(p => p.style.display !== 'block');
+  if (allOpen) {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="18 15 12 9 6 15"/></svg> Tout réduire';
+    btn.style.background='var(--c-accent-light)'; btn.style.color='var(--c-accent)'; btn.style.borderColor='var(--c-accent)';
+  } else if (allClosed) {
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg> Tout développer';
+    btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
+  }
+}
+
+
+function getPartLabel(id) { const bp=appData.bodyParts.find(b=>b.id===id); return bp?bp.label:id||'—'; }
+function badgeHtml(etat) {
+  const map={ras:'badge-ras',fragile:'badge-fragile',surveiller:'badge-surveiller',soigner:'badge-soigner'};
+  const labels={ras:'RAS',fragile:'Fragile',surveiller:'À surveiller',soigner:'À soigner'};
+  return `<span class="badge ${map[etat]||''}">${labels[etat]||etat}</span>`;
+}
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg, type='') {
+  const t=document.createElement('div'); t.className='toast'+(type?' '+type:''); t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2800);
+}
+</script>
+</body>
+</html>
