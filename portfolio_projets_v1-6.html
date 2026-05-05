@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio de Projets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --navy:#1a2744;--navy2:#253563;--gold:#c8a84b;--gold2:#e8c87a;
+  --cream:#f7f5f0;--cream2:#ede9df;--white:#fff;
+  --text:#1a1a28;--muted:#6b6b82;--border:#d8d2c5;
+  --danger:#c0392b;--success:#1e7e4a;--info:#1c6ca8;
+  --shadow:0 4px 20px rgba(26,39,68,.12);--shadow2:0 8px 40px rgba(26,39,68,.2);
+  --r:8px;--r2:14px;
+  --ff-d:'Syne',system-ui,sans-serif;
+  --ff-b:'DM Sans',system-ui,sans-serif;
+  --ff-m:'JetBrains Mono',monospace;
+  --bg:var(--cream);--bg2:var(--cream2);--bg3:var(--white);
+  --card:var(--white);--hdr:var(--navy);--tab:var(--navy2);
+}
+[data-theme=dark]{
+  --bg:#0f172a;--bg2:#1e293b;--bg3:#1e293b;--card:#1e293b;
+  --text:#e8e5dd;--muted:#94a3b8;--border:#334155;
+  --shadow:0 4px 20px rgba(0,0,0,.4);--shadow2:0 8px 40px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;transition:background .3s,color .3s;}
+/* HEADER */
+.hdr{background:var(--hdr);color:var(--cream);padding:14px 22px;display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:120;}
+.logo{width:46px;height:46px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--ff-d);font-size:22px;font-weight:700;color:var(--navy);flex-shrink:0;cursor:pointer;}
+.title-area{flex:1;min-width:0;}
+.app-title{font-family:var(--ff-d);font-size:20px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:6px;}
+.app-sub{font-size:11px;color:rgba(248,246,241,.65);margin-top:1px;display:flex;align-items:center;gap:6px;}
+.hdr-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:6px;font-family:var(--ff-b);font-size:12px;cursor:pointer;border:none;transition:all .2s;font-weight:600;white-space:nowrap;}
+.btn-ghost{background:rgba(248,246,241,.1);color:var(--cream);border:1px solid rgba(248,246,241,.2);}
+.btn-ghost:hover{background:rgba(248,246,241,.22);}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-gold:hover{background:var(--gold2);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{filter:brightness(1.1);}
+.btn-success{background:var(--success);color:#fff;}
+.btn-success:hover{filter:brightness(1.1);}
+.btn-navy{background:var(--navy2);color:var(--cream);border:1px solid rgba(255,255,255,.1);}
+.btn-navy:hover{background:var(--navy);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-xs{padding:3px 7px;font-size:11px;}
+.btn-ic{width:30px;height:30px;padding:0;justify-content:center;}
+.ep{background:none;border:none;cursor:pointer;color:var(--gold);font-size:12px;padding:2px 4px;border-radius:3px;opacity:.45;transition:opacity .2s;}
+.ep:hover{opacity:1;background:rgba(200,168,75,.12);}
+/* TOOLBAR / TABS */
+.toolbar{position:sticky;top:77px;z-index:100;background:var(--tab);padding:0 22px;display:flex;align-items:center;border-bottom:2px solid rgba(200,168,75,.3);min-height:52px;}
+.tabs{display:flex;}
+.tab-btn{padding:14px 20px;background:none;border:none;color:rgba(248,246,241,.65);font-family:var(--ff-d);font-size:13px;font-weight:600;cursor:pointer;position:relative;transition:color .2s;white-space:nowrap;}
+.tab-btn::after{content:'';position:absolute;bottom:0;left:50%;right:50%;height:3px;background:var(--gold);transition:left .2s,right .2s;}
+.tab-btn.active{color:var(--gold);}
+.tab-btn.active::after{left:0;right:0;}
+.tab-btn:hover{color:var(--gold2);}
+.tool-r{margin-left:auto;display:flex;gap:5px;align-items:center;padding:8px 0;}
+/* FILTER BAR */
+.fbar{background:var(--bg2);padding:10px 22px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;border-bottom:1px solid var(--border);}
+.fg{display:flex;flex-direction:column;gap:2px;}
+.fl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.fs,.fi{padding:5px 9px;border:1px solid var(--border);border-radius:5px;background:var(--bg3);color:var(--text);font-family:var(--ff-b);font-size:12px;min-width:110px;}
+.fs:focus,.fi:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+/* TAB CONTENT */
+.tc{display:none;}
+.tc.active{display:block;}
+/* CARD GRID */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:18px;padding:20px 22px;}
+.card{background:var(--card);border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;border:1px solid var(--border);animation:fin .3s ease both;}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow2);}
+@keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-img{width:100%;height:150px;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.card-img img{width:100%;height:100%;object-fit:cover;}
+.cph{font-size:44px;opacity:.35;}
+.tbadge{position:absolute;top:8px;left:8px;background:var(--gold);color:var(--navy);font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:4px;letter-spacing:.05em;}
+.ybadge{position:absolute;top:8px;right:8px;background:rgba(26,39,68,.88);color:var(--gold);font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;font-family:var(--ff-m);}
+.card-body{padding:13px 15px;}
+.card-title{font-family:var(--ff-d);font-size:14px;font-weight:600;line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cm-row{display:flex;align-items:baseline;gap:5px;font-size:11px;color:var(--muted);margin-bottom:3px;}
+.cm-lbl{font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--navy);flex-shrink:0;}
+[data-theme=dark] .cm-lbl{color:var(--gold);}
+.cm-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.card-foot{padding:9px 15px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.montant-val{font-family:var(--ff-m);font-size:12px;font-weight:600;color:var(--success);}
+.etat-badge{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:600;border:1px solid var(--border);color:var(--muted);}
+.card-acts{position:absolute;top:6px;right:38px;display:none;gap:3px;}
+.card:hover .card-acts{display:flex;}
+.cedit{background:rgba(200,168,75,.9);color:var(--navy);border:none;border-radius:4px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;transition:background .2s;}
+.cedit:hover{background:var(--gold);}
+/* MODAL */
+.mover{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s;}
+.mover.open{opacity:1;pointer-events:auto;}
+.modal{background:var(--bg3);border-radius:var(--r2);width:100%;max-width:680px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.45);transform:translateY(18px);transition:transform .3s;border:1px solid var(--border);}
+.mover.open .modal{transform:translateY(0);}
+.modal-hdr{background:var(--navy);padding:18px 22px;display:flex;align-items:flex-start;gap:12px;border-bottom:3px solid var(--gold);border-radius:var(--r2) var(--r2) 0 0;position:sticky;top:0;z-index:1;}
+.mhimg{width:72px;height:72px;border-radius:8px;background:var(--navy2);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;}
+.mhimg img{width:100%;height:100%;object-fit:cover;}
+.mh-ta{flex:1;min-width:0;}
+.mh-yr{font-family:var(--ff-m);color:var(--gold);font-size:11px;font-weight:600;margin-bottom:3px;}
+.mh-tit{font-family:var(--ff-d);font-size:18px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:5px;}
+.mh-bgs{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.mbg{padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(200,168,75,.18);color:var(--gold);border:1px solid rgba(200,168,75,.3);}
+.mcls{background:rgba(255,255,255,.1);border:none;border-radius:6px;width:30px;height:30px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.mcls:hover{background:rgba(255,255,255,.2);}
+.modal-body{padding:22px;}
+.mfig{width:100%;height:180px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:18px;position:relative;cursor:pointer;}
+.mfig img{width:100%;height:100%;object-fit:cover;}
+.mfig-hint{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:3px 8px;border-radius:4px;}
+.mfgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mf{display:flex;flex-direction:column;gap:3px;}
+.mf.fw{grid-column:1/-1;}
+.mflbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.mfval{font-size:13px;color:var(--text);padding:7px 10px;background:var(--bg2);border-radius:5px;border:1px solid var(--border);white-space:pre-wrap;word-break:break-word;min-height:34px;}
+.mfinp,.mftxa{font-size:13px;color:var(--text);padding:7px 10px;background:var(--bg3);border-radius:5px;border:2px solid var(--gold);outline:none;font-family:var(--ff-b);width:100%;}
+.mftxa{resize:vertical;min-height:56px;}
+.modal-ftr{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;background:var(--bg3);z-index:1;}
+.mfl,.mfr{display:flex;gap:6px;align-items:center;}
+/* FICHE PDF (render element) */
+#ficheEl{display:none;position:absolute;left:-9999px;top:0;width:794px;}
+.fiche{width:794px;background:#ffffff;font-family:'Arial',sans-serif;color:#1a1a28;box-sizing:border-box;}
+.fiche-hdr{background:#1a2744;color:#fff;padding:28px 32px;display:flex;gap:20px;align-items:flex-start;border-bottom:4px solid #c8a84b;}
+.fiche-hdr-img{width:88px;height:88px;border-radius:8px;object-fit:cover;background:#253563;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:36px;}
+.fiche-yr{font-size:11px;color:#c8a84b;margin-bottom:5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.fiche-tit{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:8px;}
+.fiche-badges{display:flex;flex-wrap:wrap;gap:5px;}
+.fiche-bg{padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(200,168,75,.2);color:#c8a84b;border:1px solid rgba(200,168,75,.35);}
+.fiche-content{padding:24px 32px;}
+.fiche-body{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fiche-f{display:flex;flex-direction:column;gap:3px;}
+.fiche-fw{grid-column:1/-1;}
+.fiche-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#8a8a9a;margin-bottom:2px;}
+.fiche-val{font-size:12px;padding:7px 10px;background:#f4f2ed;border-radius:5px;border:1px solid #ddd8ce;white-space:pre-wrap;word-break:break-word;line-height:1.5;min-height:32px;}
+.fiche-montant{font-size:13px;font-weight:700;color:#1e7e4a;}
+.fiche-footer{margin:20px 32px 0;padding-top:12px;border-top:2px solid #c8a84b;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#8a8a9a;}
+/* TABLE */
+.tbar{padding:10px 22px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;border-bottom:1px solid var(--border);background:var(--bg2);}
+/* Export/import buttons always readable in light + dark */
+.btn-export{background:var(--bg3);color:var(--text);border:1px solid var(--border);font-weight:600;}
+.btn-export:hover{border-color:var(--gold);color:var(--gold);background:var(--bg3);}
+[data-theme=dark] .btn-export{background:var(--bg2);color:var(--text);border-color:var(--border);}
+[data-theme=dark] .btn-export:hover{border-color:var(--gold);color:var(--gold);}
+/* Sticky thead wrapper — outside overflow-x container so position:sticky works on page scroll */
+.tcon-head{position:sticky;top:129px;z-index:30;overflow:hidden;border-bottom:2px solid var(--gold);box-shadow:0 2px 12px rgba(26,39,68,.18);}
+.tcon-head table{min-width:100%;will-change:transform;}
+/* Body scroll container — horizontal only, page scrolls vertically */
+.tcon{overflow-x:auto;overflow-y:visible;padding-bottom:32px;}
+.dtable{border-collapse:separate;border-spacing:0;min-width:100%;font-size:12px;}
+.dtable thead{position:static;}
+.dtable-head{border-collapse:separate;border-spacing:0;min-width:100%;font-size:12px;table-layout:fixed;}
+.dtable th{background:var(--navy);color:#fff;padding:0;border-right:1px solid rgba(255,255,255,.1);border-bottom:2px solid var(--gold);white-space:nowrap;position:relative;user-select:none;}
+.th-in{display:flex;align-items:center;gap:3px;padding:9px 7px;cursor:pointer;}
+.th-lbl{flex:1;font-family:var(--ff-d);font-size:11px;font-weight:600;}
+.th-s{font-size:10px;opacity:.4;}
+.th-s.on{opacity:1;color:var(--gold);}
+.th-rz{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;background:transparent;transition:background .2s;}
+.th-rz:hover,.th-rz.dragging{background:var(--gold);}
+.th-del{background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:3px;transition:all .2s;}
+.th-del:hover{color:var(--danger);background:rgba(192,57,43,.2);}
+.dtable td{padding:5px 7px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;background:var(--card);max-width:280px;word-break:break-word;transition:background .1s;}
+.dtable tr:hover td{background:var(--bg2);}
+.dtable tr.sel td{background:rgba(200,168,75,.1);}
+.td-edit:focus{outline:2px solid var(--gold);outline-offset:-2px;background:var(--bg3) !important;}
+.td-img{cursor:pointer;text-align:center;vertical-align:middle;}
+.td-img img{max-width:78px;max-height:58px;border-radius:4px;object-fit:cover;}
+.img-ph{width:78px;height:56px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;border-radius:4px;color:var(--muted);font-size:16px;margin:0 auto;cursor:pointer;transition:all .2s;}
+.img-ph:hover{border-color:var(--gold);color:var(--gold);}
+.rnum{font-family:var(--ff-m);font-size:10px;color:var(--muted);text-align:right;padding-right:5px !important;white-space:nowrap;cursor:pointer;}
+.rnum:hover{color:var(--gold);}
+/* CTX MENU */
+.ctxm{position:fixed;z-index:2000;background:var(--bg3);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow2);padding:4px;min-width:168px;display:none;}
+.ctxm.show{display:block;}
+.ci{padding:7px 11px;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:7px;transition:background .15s;}
+.ci:hover{background:var(--bg2);}
+.ci.red{color:var(--danger);}
+.cdi{height:1px;background:var(--border);margin:3px 0;}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:3000;background:var(--navy);color:#fff;padding:11px 18px;border-radius:8px;box-shadow:var(--shadow2);border-left:4px solid var(--gold);font-size:12px;font-weight:600;transform:translateY(60px);opacity:0;transition:transform .3s,opacity .3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--success);}
+.toast.err{border-color:var(--danger);}
+/* MISC */
+.es{text-align:center;padding:60px 20px;color:var(--muted);}
+.es-ico{font-size:44px;margin-bottom:10px;}
+.es-tx{font-size:15px;font-family:var(--ff-d);}
+.hidden{display:none!important;}
+input[type=file]{display:none;}
+.fcnt{color:var(--muted);font-size:11px;white-space:nowrap;align-self:flex-end;margin-left:4px;}
+/* COL MODAL */
+.cmod{max-width:340px;}
+.mf-row{margin-top:12px;}
+/* ENUM CELL */
+.td-enum{cursor:pointer;position:relative;padding:0!important;}
+.enum-display{padding:5px 7px;min-height:30px;display:flex;align-items:center;gap:4px;}
+.enum-arrow{font-size:9px;color:var(--muted);margin-left:auto;flex-shrink:0;}
+.td-enum:hover .enum-arrow{color:var(--gold);}
+.enum-sel{position:absolute;left:0;top:0;width:100%;min-height:100%;border:2px solid var(--gold);background:var(--bg3);color:var(--text);font-family:var(--ff-b);font-size:12px;cursor:pointer;z-index:20;outline:none;padding:4px 6px;}
+/* LIST MGMT MODAL */
+.lmod{max-width:500px;}
+.lm-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto;}
+.lm-tab{padding:8px 14px;background:none;border:none;font-family:var(--ff-b);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.lm-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.lm-tab:hover{color:var(--text);}
+.lm-items{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;margin-bottom:12px;}
+.lm-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg2);border-radius:5px;font-size:12px;}
+.lm-item-val{flex:1;}
+.lm-item-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px 5px;border-radius:3px;transition:all .2s;}
+.lm-item-del:hover{color:var(--danger);background:rgba(192,57,43,.1);}
+.lm-add-row{display:flex;gap:6px;}
+.lm-add-inp{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:5px;background:var(--bg3);color:var(--text);font-family:var(--ff-b);font-size:12px;}
+/* RESPONSIVE */
+@media(max-width:768px){
+  .hdr{padding:10px 14px;gap:10px;}
+  .app-title{font-size:16px;}
+  .hdr-acts .btn:not(.btn-ic) span{display:none;}
+  .toolbar{padding:0 10px;top:64px;}
+  .tab-btn{padding:12px 12px;font-size:12px;}
+  .fbar{padding:8px 14px;}
+  .cgrid{padding:14px;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
+  .mfgrid{grid-template-columns:1fr;}
+  .tcon{padding-bottom:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo" id="logoEl" title="Éditer le logo" onclick="editField('logo')">P</div>
+  <div class="title-area">
+    <div class="app-title">
+      <span id="appTitle">Portfolio de Projets</span>
+      <button class="ep" onclick="editField('title')" title="Modifier le titre">✏️</button>
+    </div>
+    <div class="app-sub">
+      <span id="appSub">Références de réalisations – Romain BLACHON</span>
+      <button class="ep" onclick="editField('sub')" title="Modifier le sous-titre">✏️</button>
+    </div>
+  </div>
+  <div class="hdr-acts">
+    <button class="btn btn-ghost btn-ic" id="themeBtn" onclick="toggleTheme()" title="Thème clair/sombre">🌙</button>
+    <button class="btn btn-ghost btn-sm" onclick="undo()" id="undoBtn" title="Annuler (Ctrl+Z)" disabled>↩ <span>Annuler</span></button>
+    <button class="btn btn-ghost btn-sm" onclick="redo()" id="redoBtn" title="Rétablir (Ctrl+Y)" disabled>↪ <span>Rétablir</span></button>
+    <button class="btn btn-ghost btn-sm" onclick="saveLS()" title="Sauvegarder">💾 <span>Sauvegarder</span></button>
+    <button class="btn btn-gold btn-sm" onclick="exportJSON()">⬇ <span>JSON</span></button>
+    <label class="btn btn-ghost btn-sm" title="Importer JSON">⬆ <span>Import</span><input type="file" accept=".json" onchange="importJSON(event)"></label>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('a',this)">🏠 Accueil</button>
+    <button class="tab-btn" onclick="switchTab('d',this)">📊 Données</button>
+  </div>
+  <div class="tool-r" id="toolR"></div>
+</div>
+
+<!-- TAB ACCUEIL -->
+<div id="ta" class="tc active">
+  <div class="fbar">
+    <div class="fg"><span class="fl">Recherche</span><input type="text" class="fi" id="f1s" placeholder="Titre, MOA, lieu…" oninput="renderCards()" style="min-width:150px"></div>
+    <div class="fg"><span class="fl">MOE / Employeur</span><select class="fs" id="f1moe" onchange="renderCards()"><option value="">Tous</option></select></div>
+    <div class="fg"><span class="fl">Année</span><select class="fs" id="f1yr" onchange="renderCards()"><option value="">Toutes</option></select></div>
+    <div class="fg"><span class="fl">Typologie</span><select class="fs" id="f1ty" onchange="renderCards()"><option value="">Toutes</option></select></div>
+    <div class="fg"><span class="fl">État</span><select class="fs" id="f1et" onchange="renderCards()"><option value="">Tous</option></select></div>
+    <div class="fg"><span class="fl">Missions</span><select class="fs" id="f1mi" onchange="renderCards()"><option value="">Toutes</option></select></div>
+    <div class="fg"><span class="fl">Montant HT</span>
+      <select class="fs" id="f1mo" onchange="renderCards()">
+        <option value="">Tous</option>
+        <option value="so">Non renseigné (so)</option>
+        <option value="vide">Non renseigné (vide)</option>
+        <option value="0-50000">&lt; 50 000 €</option>
+        <option value="50000-200000">50 k€ – 200 k€</option>
+        <option value="200000-99999999">&gt; 200 000 €</option>
+      </select>
+    </div>
+    <button class="btn btn-navy btn-sm" onclick="resetF1()">✕ Réinitialiser</button>
+    <span class="fcnt" id="fcnt1"></span>
+  </div>
+  <div class="cgrid" id="cgrid"></div>
+</div>
+
+<!-- TAB DONNÉES -->
+<div id="td" class="tc">
+  <div class="fbar">
+    <div class="fg"><span class="fl">Recherche</span><input type="text" class="fi" id="f2s" placeholder="Rechercher…" oninput="renderTable()" style="min-width:170px"></div>
+    <div class="fg"><span class="fl">MOE</span><select class="fs" id="f2moe" onchange="renderTable()"><option value="">Tous</option></select></div>
+    <div class="fg"><span class="fl">Typologie</span><select class="fs" id="f2ty" onchange="renderTable()"><option value="">Toutes</option></select></div>
+    <div class="fg"><span class="fl">État</span><select class="fs" id="f2et" onchange="renderTable()"><option value="">Tous</option></select></div>
+    <button class="btn btn-navy btn-sm" onclick="resetF2()">✕ Réinitialiser</button>
+    <span class="fcnt" id="fcnt2"></span>
+  </div>
+  <div class="tbar">
+    <button class="btn btn-gold btn-sm" onclick="addRow()">+ Ligne</button>
+    <button class="btn btn-navy btn-sm" onclick="openColModal()">+ Colonne</button>
+    <button class="btn btn-navy btn-sm" onclick="openListModal()">📋 Gérer les listes</button>
+    <button class="btn btn-export btn-sm" onclick="exportCSV()">⬇ CSV</button>
+    <label class="btn btn-export btn-sm">⬆ CSV<input type="file" accept=".csv,.txt" onchange="importCSV(event)"></label>
+    <button class="btn btn-export btn-sm" onclick="exportTablePDF()">⬇ PDF table</button>
+    <button class="btn btn-export btn-sm" onclick="exportTablePNG()">⬇ PNG table</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="tcnt"></span>
+  </div>
+  <!-- En-tête tableau sticky (hors conteneur scroll horizontal → sticky fonctionne sur défilement page) -->
+  <div class="tcon-head" id="theadWrap">
+    <table class="dtable-head" id="dtableHead">
+      <thead id="thead"></thead>
+    </table>
+  </div>
+  <!-- Corps du tableau : scroll horizontal uniquement, page défile verticalement -->
+  <div class="tcon" id="tconBody">
+    <table class="dtable" id="dtable">
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="mover" id="projMod" onclick="closeProjMod(event)">
+  <div class="modal" id="projModalEl">
+    <div class="modal-hdr">
+      <div class="mhimg" id="mhimg" onclick="editModalImg()" title="Cliquer pour changer l'image">
+        <span style="font-size:26px;color:var(--gold);opacity:.5">🏗</span>
+      </div>
+      <div class="mh-ta">
+        <div class="mh-yr" id="mhyr"></div>
+        <div class="mh-tit" id="mhtit"></div>
+        <div class="mh-bgs" id="mhbgs"></div>
+      </div>
+      <button class="mcls" onclick="closeProjMod()">✕</button>
+    </div>
+    <div class="modal-body" id="mbody"></div>
+    <div class="modal-ftr">
+      <div class="mfl"><button class="btn btn-danger btn-sm" onclick="delCurrent()">🗑 Supprimer</button></div>
+      <div class="mfr">
+        <button class="btn btn-ghost btn-sm" onclick="exportFichePNG()">📷 PNG</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportFichePDF()">📄 PDF</button>
+        <button class="btn btn-gold btn-sm" id="mEditBtn" onclick="toggleEdit()">✏️ Modifier</button>
+        <button class="btn btn-success btn-sm hidden" id="mSaveBtn" onclick="saveEdit()">💾 Enregistrer</button>
+        <button class="btn btn-ghost btn-sm hidden" id="mCancelBtn" onclick="cancelEdit()">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FICHE HIDDEN (for PDF/PNG export) -->
+<div id="ficheEl"></div>
+
+<!-- LIST MANAGEMENT MODAL -->
+<div class="mover" id="listMod" onclick="closeListMod(event)">
+  <div class="modal lmod">
+    <div class="modal-hdr"><div class="mh-ta"><div class="mh-tit">Gérer les listes déroulantes</div><div class="mh-yr" style="margin-top:4px;opacity:.7">Ajouter, modifier ou supprimer les valeurs disponibles</div></div><button class="mcls" onclick="closeListMod()">✕</button></div>
+    <div class="modal-body" style="padding:20px">
+      <div class="lm-tabs" id="lmTabs"></div>
+      <div id="lmBody"></div>
+    </div>
+    <div class="modal-ftr"><div></div><div class="mfr"><button class="btn btn-gold btn-sm" onclick="closeListMod()">Fermer</button></div></div>
+  </div>
+</div>
+
+<!-- COLUMN MODAL -->
+<div class="mover" id="colMod" onclick="closeColMod(event)">
+  <div class="modal cmod">
+    <div class="modal-hdr"><div class="mh-ta"><div class="mh-tit">Nouvelle colonne</div></div><button class="mcls" onclick="closeColMod()">✕</button></div>
+    <div class="modal-body">
+      <div class="mf mf-row"><label class="mflbl">Nom de la colonne</label><input type="text" class="mfinp" id="ncname" placeholder="Ex : Remarques, Surface m²…"></div>
+      <div class="mf mf-row"><label class="mflbl">Type</label>
+        <select class="fs" id="nctype" style="width:100%"><option value="text">Texte</option><option value="number">Nombre</option><option value="image">Image</option></select>
+      </div>
+    </div>
+    <div class="modal-ftr"><div></div><div class="mfr"><button class="btn btn-ghost btn-sm" onclick="closeColMod()">Annuler</button><button class="btn btn-gold btn-sm" onclick="confirmAddCol()">Ajouter</button></div></div>
+  </div>
+</div>
+
+<!-- CTX MENU -->
+<div class="ctxm" id="ctxm">
+  <div class="ci" onclick="ctxDo('above')">➕ Insérer ligne au-dessus</div>
+  <div class="ci" onclick="ctxDo('below')">➕ Insérer ligne en-dessous</div>
+  <div class="cdi"></div>
+  <div class="ci" onclick="ctxDo('open')">✏️ Ouvrir / Modifier</div>
+  <div class="cdi"></div>
+  <div class="ci red" onclick="ctxDo('del')">🗑 Supprimer la ligne</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="imgInp" accept="image/*" onchange="handleImg(event)">
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const PROJECTS_INIT = [{"id":1,"annee":2008,"moe":"Romain BLACHON","affaire":"Modification d'une maison individuelle","typologie":"Individuel","etat":"Rénovation","moa":"Cécile ESTEVES","lieu":"26400 CREST","missions":"ESQ","documents":"CAO 3D","montant":"","image":""},{"id":2,"annee":2009,"moe":"AATJ","affaire":"Construction d'un bâtiment agricole","typologie":"Artisanal","etat":"Neuf","moa":"M. LAGUT","lieu":"26600 CHANTEMERLE LES BLES","missions":"APD PC","documents":"CAO 2D / rendu 3D","montant":"","image":""},{"id":3,"annee":2009,"moe":"AATJ","affaire":"Construction d'un bâtiment de stockage","typologie":"Artisanal","etat":"Neuf","moa":"Bâtiwatt Uniservice","lieu":"34490 CORNEILHAN","missions":"PC","documents":"CAO 2D / vidéo 3D","montant":"","image":""},{"id":4,"annee":2009,"moe":"Romain BLACHON","affaire":"Construction d'une maison individuelle","typologie":"Individuel","etat":"Neuf","moa":"ROUX Babeth","lieu":"26400 ALLEX","missions":"ESQ","documents":"CAO 3D","montant":"","image":""},{"id":5,"annee":2009,"moe":"Romain BLACHON","affaire":"Extension d'une maison individuelle","typologie":"Individuel","etat":"Rénovation Extension","moa":"Eric SAUVEBOIS","lieu":"26150 DIE","missions":"ESQ","documents":"CAO 3D","montant":"","image":""},{"id":6,"annee":2010,"moe":"AATJ","affaire":"Aménagement d'un logement","typologie":"Individuel","etat":"Rénovation","moa":"M. RILLET","lieu":"22B rue de 4 septembre\n26000 VALENCE","missions":"EDL PC","documents":"CAO 2D / rendu 3D","montant":"","image":""},{"id":7,"annee":2010,"moe":"AATJ","affaire":"Aménagement de modules préfabriqués","typologie":"Scolaire","etat":"Neuf","moa":"OGEC MONTPLAISIR","lieu":"75 rue Montplaisir\n26000 VALENCE","missions":"EDL PC DCE EXE","documents":"CAO 2D / rendu 3D","montant":"","image":""},{"id":8,"annee":2010,"moe":"AATJ","affaire":"Construction d'un bâtiment d'activités","typologie":"Industriel","etat":"Neuf","moa":"Franc BTP Services","lieu":"ZA plaine de Clairac\n26760 BEAUMONT LES VALENCE","missions":"APD PC","documents":"CAO 2D / vidéo 3D","montant":"","image":""},{"id":9,"annee":2010,"moe":"AATJ","affaire":"Construction d'un bâtiment de stockage","typologie":"Artisanal","etat":"Neuf","moa":"M. GAMON","lieu":"La Passa\n07270 GILHOC SUR ORMEZE","missions":"PC","documents":"CAO 2D / 3D","montant":"","image":""},{"id":10,"annee":2010,"moe":"AATJ","affaire":"Construction d'une maison d'habitation","typologie":"Individuel","etat":"Neuf","moa":"M. BANC","lieu":"Lieu-dit \"L'homme\"\n26600 CROZES-HERMITAGE","missions":"PCMI DCE EXE DOE","documents":"CAO 2D / vidéo 3D","montant":"","image":""},{"id":11,"annee":2010,"moe":"AATJ","affaire":"Extension d'un garage existant","typologie":"Individuel","etat":"Rénovation Extension","moa":"M. et Mme SCHEININE","lieu":"142 Avenue Victor Hugo\n26000 VALENCE","missions":"EDL APD","documents":"CAO 3D","montant":"","image":""},{"id":12,"annee":2012,"moe":"AATJ","affaire":"Création du site internet www.architecture-joulie.com","typologie":"web","etat":"Création","moa":"Atelier d'architecture Thomas Joulie","lieu":"40 rue louis Barthou\n26000 VALENCE","missions":"Création / Mise en page / Gestion","documents":"Photoshop / Dreamweaver / Filezilla","montant":"","image":""},{"id":13,"annee":2012,"moe":"AATJ","affaire":"Construction d'un bâtiment agricole","typologie":"Artisanal","etat":"Neuf","moa":"GFA de Calmels","lieu":"Domaine de Calmels\n34520 LE CROS","missions":"PC","documents":"CAO 2D / rendu 3D","montant":"","image":""},{"id":14,"annee":2012,"moe":"AATJ","affaire":"Construction d'un bâtiment d'activités","typologie":"Industriel","etat":"Neuf","moa":"SC Hermitage","lieu":"ZAC des Lots\n26600 MERCUROL","missions":"APD DCE EXE","documents":"CAO 2D / rendu 3D","montant":"","image":""},{"id":15,"annee":2012,"moe":"AATJ","affaire":"Extension d'un bâtiment d'activités","typologie":"Industriel","etat":"Extension","moa":"S.A. HUOT Paul\n\"Les Jumelles\"","lieu":"Z.A. Les Creux\n26600 GERVANS","missions":"APD PC","documents":"CAO 3D / BIM","montant":"","image":""},{"id":16,"annee":2012,"moe":"AATJ","affaire":"Réaménagement d'un appartement","typologie":"Individuel","etat":"Rénovation","moa":"Mme CALVEZ","lieu":"145B Avenue Pasteur\n93170 BAGNOLET","missions":"EDL-DEMO EXE","documents":"CAO 3D","montant":"","image":""},{"id":17,"annee":2012,"moe":"AATJ","affaire":"Réaménagement d'un appartement","typologie":"Individuel","etat":"Rénovation","moa":"M. FAUGIER","lieu":"30 rue Foriel\n26000 VALENCE","missions":"EDL-DEMO APD","documents":"CAO 3D / BIM","montant":"","image":""},{"id":18,"annee":2012,"moe":"AATJ","affaire":"Rénovation et extension d'une école maternelle et primaire","typologie":"Scolaire","etat":"Rénovation Extension","moa":"Fondation Drômoise Culture et Promotion","lieu":"28 Avenue Jean Jaurès\n26240 SAINT-VALLIER","missions":"EDL-DEMO PC DCE EXE DOE","documents":"CAO 2D","montant":"","image":""},{"id":19,"annee":2012,"moe":"AATJ","affaire":"Rénovation et extension d'un bâtiment d'activités","typologie":"Artisanal","etat":"Rénovation Extension","moa":"SCI Sur le Bourg","lieu":"Lieu-dit \"Sur le Bourg\"\n07570 DESAIGNES","missions":"EDL-DEMO PC DCE EXE","documents":"CAO 3D","montant":"","image":""},{"id":20,"annee":2012,"moe":"AATJ","affaire":"Rénovation et extension d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation Extension","moa":"M. SEFFUSATTI","lieu":"Fontlembert\n07160 SAINT-JULIEN LABROUSSE","missions":"EDL PCMI DCE EXE","documents":"CAO 2D / scan","montant":"","image":""},{"id":21,"annee":2012,"moe":"Romain BLACHON","affaire":"Construction d'une maison individuelle","typologie":"Individuel","etat":"Neuf","moa":"M BOURDUGE","lieu":"26400 SOYANS","missions":"PC","documents":"CAO 3D","montant":"","image":""},{"id":22,"annee":2012,"moe":"Romain BLACHON","affaire":"Rénovation d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation","moa":"David GILLES","lieu":"38100 GRENOBLE","missions":"ESQ","documents":"CAO 3D","montant":"","image":""},{"id":23,"annee":2013,"moe":"AATJ","affaire":"Aménagement de 4 logements","typologie":"Collectif","etat":"Rénovation","moa":"SARL PGGB Associés","lieu":"23 rue Georges Bonnet\n26000 VALENCE","missions":"EDL-DEMO PC","documents":"CAO 3D","montant":"","image":""},{"id":24,"annee":2013,"moe":"AATJ","affaire":"Optimisation et automatisation des documents écrits","typologie":"Informatique","etat":"Optimisation","moa":"Atelier d'architecture Thomas Joulie","lieu":"40 rue louis Barthou\n26000 VALENCE","missions":"Gestion / Mise en forme","documents":"Word / Excel","montant":"","image":""},{"id":25,"annee":2013,"moe":"AATJ","affaire":"Construction d'une maison d'habitation","typologie":"Individuel","etat":"Neuf","moa":"M. CASU","lieu":"Allée des violettes\n26120 MONTELIER","missions":"APD PCMI DCE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":26,"annee":2013,"moe":"AATJ","affaire":"Construction d'une maison d'habitation et de 2 logements indépendants","typologie":"Individuel","etat":"Neuf","moa":"SCI GEBEIM","lieu":"33 Chemin du Pêcher\n26200 MONTÉLIMAR","missions":"EDL PC DCE EXE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":27,"annee":2013,"moe":"AATJ","affaire":"Extension d'une maison d'habitation","typologie":"Individuel","etat":"Extension","moa":"M. POULEAU et Mme THOMAS","lieu":"Chemin des Hauts d'Orfeuille\n26760 BEAUMONT-LES-VALENCE","missions":"EDL-DEMO PMCI DCE EXE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":28,"annee":2013,"moe":"AATJ","affaire":"Rénovation d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation","moa":"M. CHAUMONT","lieu":"18 rue Mathieu de la Drôme\n26000 VALENCE","missions":"EDL-DEMO DPMI DCE EXE","documents":"CAO 2D","montant":"","image":""},{"id":29,"annee":2013,"moe":"AATJ","affaire":"Rénovation d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation","moa":"M. et Mme CHAUVAT","lieu":"31 Impasse du Port\n26500 BOURG LES VALENCE","missions":"EDL-DEMO PCMI DCE EXE","documents":"CAO 3D","montant":"","image":""},{"id":30,"annee":2013,"moe":"AATJ","affaire":"Rénovation et extension d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation Extension","moa":"M. RADIGUET","lieu":"Lieu-dit Laurent la Bâtie\n07440 CHAMPIS","missions":"EDL PCMI","documents":"CAO 3D","montant":"","image":""},{"id":31,"annee":2013,"moe":"AATJ","affaire":"Rénovation partielle du Théâtre d'Annonay","typologie":"Public","etat":"Rénovation","moa":"Communauté de Communes du bassin d'Annonay","lieu":"Place des Cordeliers\n07100 ANNONAY","missions":"EDL-DEMO PC AT-ERP DCE EXE","documents":"CAO 2D","montant":"","image":""},{"id":32,"annee":2013,"moe":"Romain BLACHON","affaire":"Extension d'une maison individuelle","typologie":"Individuel","etat":"Extension","moa":"Jacques LABROSSE","lieu":"26270 LORIOL","missions":"PC","documents":"CAO 3D","montant":"","image":""},{"id":33,"annee":2014,"moe":"AATJ","affaire":"Construction d'un bâtiment d'activités","typologie":"Industriel","etat":"Neuf","moa":"SCI PAC 3","lieu":"ZA plaine de Clairac\n26760 BEAUMONT LES VALENCE","missions":"APD PC DCE EXE DOE","documents":"CAO 3D / rendu 3D","montant":"","image":""},{"id":34,"annee":2014,"moe":"AATJ","affaire":"Rénovations de 3 logements","typologie":"Collectif","etat":"Rénovation","moa":"SARL PGGB Associés","lieu":"7 rue Poncet\n26000 VALENCE","missions":"EDL-DEMO DP","documents":"CAO 2D","montant":"","image":""},{"id":35,"annee":2014,"moe":"AATJ","affaire":"Extension d'un bâtiment d'activités","typologie":"Industriel","etat":"Rénovation Extension","moa":"DADA'ART","lieu":"Lieu-dit \"Goussons\"\n26120 CHABEUIL","missions":"EDL PC","documents":"CAO 3D / BIM","montant":"","image":""},{"id":36,"annee":2014,"moe":"AATJ","affaire":"Extension de bureaux","typologie":"Bureaux","etat":"Extension","moa":"SCI ESPACE","lieu":"Rue Wolfgang Amadeus Mozart\n26000 VALENCE","missions":"EDL-DEMO","documents":"CAO 3D / BIM","montant":"","image":""},{"id":37,"annee":2014,"moe":"AATJ","affaire":"Extension de l'Institut Supérieur Technologique Montplaisir","typologie":"Scolaire","etat":"Extension","moa":"OGEC MONTPLAISIR","lieu":"14 rue Barthélemy de Laffemas\n26000 VALENCE","missions":"EDL PC AT-ERP DCE EXE DOE","documents":"CAO 2D","montant":"","image":""},{"id":38,"annee":2014,"moe":"AATJ","affaire":"Construction d'une maison d'habitation","typologie":"Individuel","etat":"Neuf","moa":"M. JOULIE Benoît","lieu":"Lieu-dit \"La Balme\"\n26120 CHABEUIL","missions":"APD PCMI DCE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":39,"annee":2014,"moe":"AATJ","affaire":"Mise en conformité d'accessibilité PMR et Sécurité incendie","typologie":"Associatif","etat":"Rénovation","moa":"Fraternité Sacerdotale Saint Pie X Maison générale","lieu":"Maison Notre Dame Les Sarrières\n05230 MONTGARDIN","missions":"EDL-DEMO PC AT-ERP DCE EXE DOE","documents":"CAO 2D","montant":"","image":""},{"id":40,"annee":2014,"moe":"AATJ","affaire":"Construction d'une maison d'habitation","typologie":"Individuel","etat":"Neuf","moa":"M. et Mme SIGAUD","lieu":"Lieu-dit Le Pérou\n26600 MERCUROL","missions":"APD PCMI DCE EXE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":41,"annee":2014,"moe":"AATJ","affaire":"Rénovation d'un appartement et Sécurisation de toiture","typologie":"Individuel","etat":"Rénovation","moa":"Immobilière GALLAND","lieu":"10 Boulevard LEAU\n13008 MARSEILLE","missions":"EDL-DEMO DP APD","documents":"CAO 3D","montant":"","image":""},{"id":42,"annee":2014,"moe":"AATJ","affaire":"Rénovation d'un appartement et Sécurisation de toiture","typologie":"Individuel","etat":"Rénovation","moa":"Immobilière GALLAND","lieu":"167 avenue Clôt Bey\n13008 MARSEILLE","missions":"EDL-DEMO DP APD","documents":"CAO 3D","montant":"","image":""},{"id":43,"annee":2014,"moe":"AATJ","affaire":"Rénovation d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation","moa":"M. RIGNOL","lieu":"26 Avenue Jean Clément\n26000 VALENCE","missions":"EDL PCMI","documents":"CAO 2D","montant":"","image":""},{"id":44,"annee":2014,"moe":"AATJ","affaire":"Rénovation de salles de classes","typologie":"Scolaire","etat":"Rénovation","moa":"OGEC MONTPLAISIR","lieu":"75 rue Montplaisir\n26000 VALENCE","missions":"EDL-DEMO DCE EXE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":45,"annee":2014,"moe":"AATJ","affaire":"Sécurisation de l'entrée des élèves","typologie":"Scolaire","etat":"Rénovation","moa":"OGEC MONTPLAISIR","lieu":"75 rue Montplaisir\n26000 VALENCE","missions":"EDL-DEMO DP AT-ERP DCE EXE DOE","documents":"CAO 2D","montant":"","image":""},{"id":46,"annee":2014,"moe":"AATJ","affaire":"Mise en place de l'archivage numérique","typologie":"Informatique","etat":"Création","moa":"Atelier d'architecture Thomas Joulie","lieu":"40 rue louis Barthou\n26000 VALENCE","missions":"Création / Gestion","documents":"Serveur / SyncBackFree","montant":"","image":""},{"id":47,"annee":2014,"moe":"AATJ","affaire":"Mise à jour du site internet www.architecture-joulie.com","typologie":"web","etat":"Optimisation","moa":"Atelier d'architecture Thomas Joulie","lieu":"40 rue louis Barthou\n26000 VALENCE","missions":"Création / Mise en page / Gestion","documents":"Photoshop / EditArea","montant":"","image":""},{"id":48,"annee":2014,"moe":"AATJ","affaire":"Mise en place de dossiers partagés en ligne","typologie":"web","etat":"Création","moa":"Atelier d'architecture Thomas Joulie","lieu":"40 rue louis Barthou\n26000 VALENCE","missions":"Création / Gestion","documents":"GoogleDrive / Dropbox / Box / Hightail / OneDrive","montant":"","image":""},{"id":49,"annee":2015,"moe":"AATJ","affaire":"Aménagement d'un logement PMR","typologie":"Individuel","etat":"Rénovation","moa":"M. KIEFFER","lieu":"7 avenue du Vercors\n26120 MALISSARD","missions":"EDL-DEMO PC","documents":"CAO 2D","montant":"","image":""},{"id":50,"annee":2015,"moe":"AATJ","affaire":"Aménagement d'une rampe PMR et Création d'un ascenseur","typologie":"Scolaire","etat":"Rénovation","moa":"OGEC MONTPLAISIR","lieu":"75 rue Montplaisir\n26000 VALENCE","missions":"EDL-DEMO DP AT-ERP","documents":"CAO 2D","montant":"","image":""},{"id":51,"annee":2015,"moe":"AATJ","affaire":"Construction d'une maison d'habitation","typologie":"Individuel","etat":"Neuf","moa":"M. FARAGO","lieu":"8bis rue Casablanca\n26000 VALENCE","missions":"APS PCMI DCE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":52,"annee":2015,"moe":"AATJ","affaire":"Construction d'une maison d'habitation","typologie":"Individuel","etat":"Neuf","moa":"M. MAYERE","lieu":"23 chemin de la Viannière\n42400 SAINT-CHAMOND","missions":"PCMI DCE EXE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":53,"annee":2015,"moe":"AATJ","affaire":"Extension d'un garage","typologie":"Individuel","etat":"Extension","moa":"M. BARRAULT","lieu":"Quartier PELINGRON\n26120 MONTMEYRAN","missions":"PCMI","documents":"CAO 2D","montant":"","image":""},{"id":54,"annee":2015,"moe":"AATJ","affaire":"Extension de locaux artisanaux","typologie":"Artisanal","etat":"Extension","moa":"SCI PAQUITA","lieu":"ZAE de la Grue\n26120 CHABEUIL","missions":"EDL APD PC","documents":"CAO 3D / BIM","montant":"","image":""},{"id":55,"annee":2015,"moe":"AATJ","affaire":"Rénovation d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation Extension","moa":"M. CHATEAU et Mme THIBAUT","lieu":"18 allée Augustin Fresnel 26000 VALENCE","missions":"EDL-DEMO PCMI APS","documents":"CAO 2D","montant":"","image":""},{"id":56,"annee":2015,"moe":"AATJ","affaire":"Rénovation d'une maison d'habitation","typologie":"Individuel","etat":"Rénovation","moa":"M et Mme RIOU","lieu":"Rue de l'église - Hameau de Saint-Didier 26300 CHARPEY","missions":"EDL-DEMO DPMI DCE EXE","documents":"CAO 2D","montant":"","image":""},{"id":57,"annee":2015,"moe":"AATJ","affaire":"Rénovation de 4 chambres","typologie":"Hotel","etat":"Rénovation","moa":"Hotel-Restaurant Le Carré d'Aléthius","lieu":"4 rue Paul Bertois\n07800 CHARMES SUR RHONE","missions":"EDL-DEMO PC AT-ERP DCE EXE DOE","documents":"CAO 2D","montant":"","image":""},{"id":58,"annee":2015,"moe":"AATJ","affaire":"Rénovation et Extension de l'ensemble scolaire Les Maristes","typologie":"Scolaire","etat":"Rénovation Extension","moa":"OGEC Les Maristes","lieu":"14 avenue Antonin Vallon\n26300 BOURG DE PEAGE","missions":"EDL-DEMO PC AT-ERP DCE EXE","documents":"CAO 2D","montant":"","image":""},{"id":59,"annee":2015,"moe":"AATJ","affaire":"Rénovation et Extension du collège Sainte-Anne / Lycée La Providence","typologie":"Scolaire","etat":"Rénovation Extension","moa":"OGEC Sainte-Anne","lieu":"14 rue Henri Chalamet\n26000 VALENCE","missions":"EDL-DEMO PC AT-ERP DCE EXE DOE","documents":"CAO 3D / BIM","montant":"","image":""},{"id":60,"annee":2016,"moe":"Romain BLACHON","affaire":"Modification d'un portail d'accès","typologie":"Individuel","etat":"Rénovation","moa":"BUI Minh Tuân","lieu":"69120 VAULX-EN-VELIN","missions":"DP","documents":"CAO 2D Façade sur rue","montant":"","image":""},{"id":61,"annee":2019,"moe":"MOE interne","affaire":"HDV Réhabilitation de la banque d'accueil","typologie":"Public","etat":"Réhabilitation","moa":"Ville de MEYZIEU","lieu":"HOTEL DE VILLE\n69330 MEYZIEU","missions":"EDL-DEMO DCE EXE","documents":"CAD 2D/3D Plans EXE\nEtudes","montant":"so","image":""},{"id":62,"annee":2019,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction 2 logements 68+70 rue République","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"2 log 68+70 rue République\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"114601.87","image":""},{"id":63,"annee":2019,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction 1 maison 11 rue L. Saulnier","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"1 maison 11 rue L. Saulnier\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"51663.8","image":""},{"id":64,"annee":2019,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction 1 préfabriqué CTM Tassigny","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"1 préfabriqué CTM Tassigny\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"30950.6","image":""},{"id":65,"annee":2020,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction Batiment industriel SOFECOME 5000m²","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"SOFECOME rue J. Jaurès\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"55621.14","image":""},{"id":66,"annee":2020,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction 1 maison 97 av de Verdun","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"1 maison 97 av de Verdun\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"40593.8","image":""},{"id":67,"annee":2020,"moe":"MOE interne","affaire":"Désamiantage avant travaux 3 hangars CTM TASSIGNY","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"CTM TASSIGNY\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"45562","image":""},{"id":68,"annee":2020,"moe":"MOE interne","affaire":"Réhabilitation + Déménagement CTM TASSIGNY","typologie":"Public","etat":"Réhabilitation","moa":"Ville de MEYZIEU","lieu":"CTM TASSIGNY\n69330 MEYZIEU","missions":"FAISA","documents":"CAO 2D/3D\nEtudes","montant":"so","image":""},{"id":69,"annee":2020,"moe":"MOE interne","affaire":"Mise en place d'un SIG communal","typologie":"SIG","etat":"Création","moa":"Ville de MEYZIEU","lieu":"Ville de Meyzieu\n69330 MEYZIEU","missions":"EDL PRO","documents":"Mise en place et numérisation SIG\nSensibilisation / Formation en interne","montant":"so","image":""},{"id":70,"annee":2020,"moe":"MOE interne","affaire":"Numérisation maquette numérique 3D REVIT","typologie":"BIM","etat":"Création","moa":"Ville de MEYZIEU","lieu":"69330 MEYZIEU","missions":"FAISA","documents":"Numérisation 3D batiments scolaires","montant":"so","image":""},{"id":71,"annee":2020,"moe":"MOE interne","affaire":"Désamiantage PAGNOL Élémentaire RDC Salle polyvalente 100m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"24050","image":""},{"id":72,"annee":2020,"moe":"MOE interne","affaire":"Etude pour la construction du nouveau groupe scolaire CASSIN","typologie":"Public","etat":"Neuf","moa":"Ville de MEYZIEU","lieu":"GS CASSIN\n69330 MEYZIEU","missions":"FAISA","documents":"Etudes d'opportunité, plans 3D, schémas, rendu pdf","montant":"so","image":""},{"id":73,"annee":2020,"moe":"MOE interne","affaire":"Etude pour la restructuration du groupe scolaire PAGNOL","typologie":"Public","etat":"Rénovation Extension","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL ELEM\n69330 MEYZIEU","missions":"FAISA","documents":"Etudes d'opportunité, plans 3D, schémas, rendu pdf","montant":"so","image":""},{"id":74,"annee":2020,"moe":"MOE interne","affaire":"Etude pour l'extension du groupe scolaire GRANDLARGE","typologie":"Public","etat":"Rénovation Extension","moa":"Ville de MEYZIEU","lieu":"GS GRANDLARGE\n69330 MEYZIEU","missions":"FAISA","documents":"Etudes d'opportunité, plans 3D, schémas, rendu pdf","montant":"so","image":""},{"id":75,"annee":2021,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction Bâtiments du CTM DESBOIS 3000m²","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"CTM DESBOIS\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"262588.58","image":""},{"id":76,"annee":2021,"moe":"MOE interne","affaire":"Désamiantage PAGNOL Élémentaire RDC Salles de classe 200m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"33169","image":""},{"id":77,"annee":2021,"moe":"MOE interne","affaire":"Désamiantage FERRY RDC Hall + Salle poly 350m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS FERRY ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"42980","image":""},{"id":78,"annee":2021,"moe":"MOE interne","affaire":"Etude pour la construction de la nouvelle base nautique au Grand Large","typologie":"Public","etat":"Neuf","moa":"Ville de MEYZIEU","lieu":"BASE NAUTIQUE\n69330 MEYZIEU","missions":"FAISA","documents":"Etudes d'opportunité, plans 3D, schémas, rendu pdf","montant":"so","image":""},{"id":79,"annee":2021,"moe":"MOE interne","affaire":"Etude pour la restructuration de la maison CHENEVAZ","typologie":"Public","etat":"Rénovation Extension","moa":"Ville de MEYZIEU","lieu":"Maison CHENEVAZ\n69330 MEYZIEU","missions":"FAISA","documents":"Etudes d'opportunité, plans 3D, schémas, rendu pdf","montant":"so","image":""},{"id":80,"annee":2022,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples PAGNOL Élémentaire R+1 Salles de classe 200m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"51159.5","image":""},{"id":81,"annee":2022,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples FERRY RDC Jonction Mat Elem 310m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS FERRY\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"84146.5","image":""},{"id":82,"annee":2022,"moe":"MOE interne","affaire":"Démolition WC publics Cimetière des Plantées","typologie":"Public","etat":"Déconstruction","moa":"Ville de MEYZIEU","lieu":"WC Cim Plantées\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"8703","image":""},{"id":83,"annee":2022,"moe":"MOE interne","affaire":"Démolition mur Square Gambetta","typologie":"Public","etat":"Déconstruction","moa":"Ville de MEYZIEU","lieu":"Square Gambetta\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"14180","image":""},{"id":84,"annee":2022,"moe":"MOE interne","affaire":"Remplacement terrain synthétique LEGOUAD","typologie":"Public","etat":"Gros travaux Entretien","moa":"Ville de MEYZIEU","lieu":"Terrain Legouad\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"425177.68","image":""},{"id":85,"annee":2022,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction Maison de retraite LE CHATEAU 3500m²","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"Maison de retraite LE CHATEAU\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"442973.57","image":""},{"id":86,"annee":2023,"moe":"MOE interne","affaire":"Reprise de sols souples à la Cuisine centrale 357m² + 200m²","typologie":"Public","etat":"Gros travaux Entretien","moa":"Ville de MEYZIEU","lieu":"Cuisine centrale\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"220000","image":""},{"id":87,"annee":2023,"moe":"MOE interne","affaire":"Désimperméabilisation et végétalisation de la cour d'école Maternelle PAGNOL","typologie":"Public","etat":"Rénovation","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL MAT\n69330 MEYZIEU","missions":"EDL PRO","documents":"Plans, études FAISA, PRO","montant":"200000","image":""},{"id":88,"annee":2023,"moe":"MOE interne","affaire":"Reprise de tampons EU-EV à l'Espace Jean Poperen","typologie":"Public","etat":"Gros travaux Entretien","moa":"Ville de MEYZIEU","lieu":"Espace Jean Poperen\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Etudes de FAISA, Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"2000","image":""},{"id":89,"annee":2023,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples PAGNOL Élémentaire R+1 Salles de classe 105m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"35000","image":""},{"id":90,"annee":2023,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples FERRY RDC Maternelle 175m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS FERRY MAT\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"55000","image":""},{"id":91,"annee":2024,"moe":"MOE interne","affaire":"Désamiantage et Déconstruction JACQ ELEM Bâtiment élémentaire R+1 sur 2300m²","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"GS JACQUIERE ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Suivi, Gantt, Comptabilité. 520T recyclé (92%)","montant":"390000","image":""},{"id":92,"annee":2024,"moe":"MOE interne","affaire":"Désamiantage complet avant rénovation PAGNOL Élémentaire RDC et R+1 hors façades","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS PAGNOL ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"130000","image":""},{"id":93,"annee":2024,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples FERRY R+1 élémentaire 300m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS FERRY ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"75000","image":""},{"id":94,"annee":2024,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples CARREAU R+2 élémentaire 120m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS CARREAU ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"35000","image":""},{"id":95,"annee":2024,"moe":"MOE interne","affaire":"Désamiantage et déconstruction CA BERTONE Bâtiment principal + ancien logement sur 750m²","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"BERTONE\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Suivis, Gantt, Comptabilité. Alternance SS4 et SS3","montant":"240000","image":""},{"id":96,"annee":2024,"moe":"MOE interne","affaire":"Désamiantage et déconstruction Maison LEBRUN Ancienne maison sur 200m²","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"Maison rue H. LEBRUN\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Suivis, Gantt, Comptabilité.","montant":"62000","image":""},{"id":97,"annee":2024,"moe":"MOE interne","affaire":"Déconstruction WC Allée GONON","typologie":"Public","etat":"Déconstruction","moa":"Ville de MEYZIEU","lieu":"WC GONON\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Suivis, Gantt, Comptabilité.","montant":"9000","image":""},{"id":98,"annee":2024,"moe":"MOE interne","affaire":"Intervention SS4 sur fx-plafond amianté RESTAU du coeur","typologie":"Public","etat":"Gros travaux Entretien","moa":"Ville de MEYZIEU","lieu":"RESTAU COEUR\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Suivis, Comptabilité","montant":"4150","image":""},{"id":99,"annee":2024,"moe":"MOE interne","affaire":"Etudes pour la création d'une piste d'entrainement de l'Est Lyonnais","typologie":"Public","etat":"Création","moa":"Ville de MEYZIEU","lieu":"Piste Paul de VIVIE\n69330 MEYZIEU","missions":"FAISA","documents":"EDL, ESQ, FAISA, APD","montant":"so","image":""},{"id":100,"annee":2025,"moe":"MOE interne","affaire":"Désamiantage et reprise de sols souples CARREAU R+1 élémentaire 120m²","typologie":"Public","etat":"Désamiantage","moa":"Ville de MEYZIEU","lieu":"GS CARREAU ELEM\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"30000","image":""},{"id":101,"annee":2025,"moe":"MOE interne","affaire":"Désamiantage et déconstruction de l'appentis de la maison CHENEVAZ","typologie":"Public","etat":"Désamiantage Déconstruction","moa":"Ville de MEYZIEU","lieu":"Maison CHENEVAZ\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Suivis, Comptabilité","montant":"20000","image":""},{"id":102,"annee":2025,"moe":"MOE interne","affaire":"Aménagements de bureaux à l'HDV – Sécurisation du CCAS et agrandissement bureau DRH","typologie":"Public","etat":"Amenagement","moa":"Ville de MEYZIEU","lieu":"HOTEL DE VILLE\n69330 MEYZIEU","missions":"EDL DCE AO EXE OPC AOR","documents":"Marchés, Plans, Tableau de suivi, Gantt, Comptabilité","montant":"24000","image":""},{"id":103,"annee":2025,"moe":"MOE interne","affaire":"Mise en place du suivi règlement AMIANTE","typologie":"REGLEMENTAIRE","etat":"Création","moa":"Ville de MEYZIEU","lieu":"Ville de Meyzieu\n69330 MEYZIEU","missions":"EDL PRO","documents":"Refonte des documents, plans, tableaux partagés, synthèse, procedures, formation","montant":"so","image":""},{"id":104,"annee":2025,"moe":"MOE interne","affaire":"Mise en place du suivi réglementaire LEGIONELLES","typologie":"REGLEMENTAIRE","etat":"Création","moa":"Ville de MEYZIEU","lieu":"Ville de Meyzieu\n69330 MEYZIEU","missions":"EDL PRO","documents":"Refonte des documents, plans, tableaux partagés, synthèse, procedures, formation","montant":"so","image":""},{"id":105,"annee":2025,"moe":"MOE interne","affaire":"Mise en place d'une base de données cloud pour le SIG communal","typologie":"SIG","etat":"Création","moa":"Ville de MEYZIEU","lieu":"Ville de Meyzieu\n69330 MEYZIEU","missions":"EDL PRO","documents":"Mise en place dans le cloud, refonte\nSensibilisation / Formation en interne","montant":"so","image":""},{"id":106,"annee":2025,"moe":"MOE interne","affaire":"Mise en place de tableau de bord TYPE pour le suivi des travaux","typologie":"Informatique","etat":"Création","moa":"Ville de MEYZIEU","lieu":"Ville de Meyzieu\n69330 MEYZIEU","missions":"EDL PRO","documents":"Synthèse, refonte, création, partage et diffusion, mise à jour","montant":"so","image":""}];
+
+const DEFAULT_COLS = [
+  {id:'annee',label:'Année',type:'number',width:70},
+  {id:'moe',label:'MOE',type:'text',width:140},
+  {id:'affaire',label:'Affaire',type:'text',width:250},
+  {id:'typologie',label:'Typologie',type:'text',width:110},
+  {id:'etat',label:'État',type:'text',width:145},
+  {id:'moa',label:'MOA',type:'text',width:170},
+  {id:'lieu',label:'Lieu',type:'text',width:170},
+  {id:'missions',label:'Missions',type:'text',width:170},
+  {id:'documents',label:'Documents / Rendus',type:'text',width:190},
+  {id:'montant',label:'Montant HT',type:'text',width:105},
+  {id:'image',label:'Image',type:'image',width:100}
+];
+
+// Colonnes avec liste déroulante
+const ENUM_COLS=['annee','moe','typologie','etat','moa','missions'];
+
+const DEFAULT_LISTS={
+  annee:['2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026'],
+  moe:['Romain BLACHON','AATJ','MOE interne'],
+  typologie:['Individuel','Artisanal','Scolaire','Industriel','Collectif','Public','Bureaux','Associatif','Hotel','web','Informatique','SIG','BIM','REGLEMENTAIRE'],
+  etat:['Neuf','Rénovation','Rénovation Extension','Extension','Réhabilitation','Désamiantage','Désamiantage Déconstruction','Déconstruction','Gros travaux Entretien','Création','Optimisation','Amenagement'],
+  moa:['Ville de MEYZIEU','OGEC MONTPLAISIR','OGEC Les Maristes','OGEC Sainte-Anne','Atelier d\'architecture Thomas Joulie','SARL PGGB Associés','SCI PAQUITA','SCI ESPACE','SCI Sur le Bourg','SC Hermitage','SCI PAC 3','SCI GEBEIM','Franc BTP Services','Immobilière GALLAND','GFA de Calmels','Fondation Drômoise Culture et Promotion','Communauté de Communes du bassin d\'Annonay','Fraternité Sacerdotale Saint Pie X Maison générale'],
+  missions:['ESQ','APD','PC','DP','PCMI','APD PC','APD PCMI DCE','APD PCMI DCE EXE','APD PC DCE EXE DOE','APD DCE EXE','EDL APD','EDL APD PC','EDL PC','EDL PCMI','EDL PRO','EDL PRO FAISA','FAISA','APS PCMI DCE','EDL-DEMO','EDL-DEMO PC','EDL-DEMO DP','EDL-DEMO APD','EDL-DEMO EXE','EDL-DEMO PC DCE EXE','EDL-DEMO PC DCE EXE DOE','EDL-DEMO PC AT-ERP DCE EXE','EDL-DEMO PC AT-ERP DCE EXE DOE','EDL-DEMO DP AT-ERP DCE EXE DOE','EDL-DEMO PCMI DCE EXE','EDL-DEMO DPMI DCE EXE','EDL-DEMO PMCI DCE EXE','EDL DCE AO EXE OPC AOR','PCMI DCE EXE','PCMI DCE EXE DOE','Création / Gestion','Création / Mise en page / Gestion','Gestion / Mise en forme']
+};
+let state = {
+  meta:{title:'Portfolio de Projets',sub:'Références de réalisations – Romain BLACHON',logo:'P'},
+  columns: JSON.parse(JSON.stringify(DEFAULT_COLS)),
+  lists: JSON.parse(JSON.stringify(DEFAULT_LISTS)),
+  projects: JSON.parse(JSON.stringify(PROJECTS_INIT))
+};
+let history=[], future=[];
+let sortCol=null, sortDir=1;
+let currentTab='a';
+let currentProjId=null, editMode=false;
+let imgTargetId=null, imgTargetField='image';
+let ctxRow=null;
+let resizing={active:false,colId:null,startX:0,startW:0};
+let idCounter=200;
+
+// ============================================================
+// HISTORY
+// ============================================================
+function pushH(){future=[];history.push(JSON.stringify(state));if(history.length>60)history.shift();updHBtn();}
+function undo(){if(!history.length)return;future.push(JSON.stringify(state));state=JSON.parse(history.pop());updHBtn();render();}
+function redo(){if(!future.length)return;history.push(JSON.stringify(state));state=JSON.parse(future.pop());updHBtn();render();}
+function updHBtn(){
+  document.getElementById('undoBtn').disabled=!history.length;
+  document.getElementById('redoBtn').disabled=!future.length;
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function applyTheme(){
+  const t=localStorage.getItem('theme')||'auto';
+  const el=document.documentElement;
+  if(t==='dark'){el.dataset.theme='dark';document.getElementById('themeBtn').textContent='☀️';}
+  else if(t==='light'){el.dataset.theme='light';document.getElementById('themeBtn').textContent='🌙';}
+  else{
+    const pref=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    el.dataset.theme=pref?'dark':'light';
+    document.getElementById('themeBtn').textContent=pref?'☀️':'🌙';
+  }
+}
+function toggleTheme(){
+  const t=localStorage.getItem('theme')||'auto';
+  localStorage.setItem('theme',t==='light'?'dark':t==='dark'?'auto':'light');
+  applyTheme();
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(t,btn){
+  currentTab=t;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ta').classList.toggle('active',t==='a');
+  document.getElementById('td').classList.toggle('active',t==='d');
+  if(t==='a') renderCards();
+  else { renderTable(); setTimeout(syncTheadScroll,50); }
+}
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
+function saveLS(){localStorage.setItem('portfolio_v1',JSON.stringify(state));toast('Sauvegardé ✓','ok');}
+function loadLS(){
+  try{const d=localStorage.getItem('portfolio_v1');if(d){state=JSON.parse(d);return true;}}catch(e){}
+  return false;
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function uniq(arr){return [...new Set(arr)].filter(Boolean).sort();}
+function populateFilters(){
+  const projs=state.projects;
+  const moes=uniq(projs.map(p=>p.moe));
+  const yrs=uniq(projs.map(p=>String(p.annee))).sort().reverse();
+  const typs=uniq(projs.map(p=>p.typologie));
+  const etats=uniq(projs.map(p=>p.etat));
+  const mis=uniq(projs.map(p=>p.missions));
+  function fill(id,vals,first='Tous'){
+    const sel=document.getElementById(id);if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML=`<option value="">${first}</option>`+vals.map(v=>`<option value="${esc(v)}">${v}</option>`).join('');
+    sel.value=cur;
+  }
+  fill('f1moe',moes);fill('f1yr',yrs,'Toutes');fill('f1ty',typs,'Toutes');
+  fill('f1et',etats);fill('f1mi',mis,'Toutes');
+  fill('f2moe',moes);fill('f2ty',typs,'Toutes');fill('f2et',etats);
+}
+function getF1(){
+  return {
+    s:document.getElementById('f1s').value.toLowerCase(),
+    moe:document.getElementById('f1moe').value,
+    yr:document.getElementById('f1yr').value,
+    ty:document.getElementById('f1ty').value,
+    et:document.getElementById('f1et').value,
+    mi:document.getElementById('f1mi').value,
+    mo:document.getElementById('f1mo').value
+  };
+}
+function getF2(){
+  return {
+    s:document.getElementById('f2s').value.toLowerCase(),
+    moe:document.getElementById('f2moe').value,
+    ty:document.getElementById('f2ty').value,
+    et:document.getElementById('f2et').value
+  };
+}
+function matchMontant(m,filter){
+  if(!filter)return true;
+  if(filter==='so')return m==='so';
+  if(filter==='vide')return !m||m==='';
+  const v=parseFloat(m);if(isNaN(v))return false;
+  const [mn,mx]=filter.split('-').map(Number);
+  return v>=mn&&v<=mx;
+}
+function filterProjs(f){
+  return state.projects.filter(p=>{
+    if(f.s&&!JSON.stringify(p).toLowerCase().includes(f.s))return false;
+    if(f.moe&&p.moe!==f.moe)return false;
+    if(f.yr&&String(p.annee)!==f.yr)return false;
+    if(f.ty&&p.typologie!==f.ty)return false;
+    if(f.et&&p.etat!==f.et)return false;
+    if(f.mi&&p.missions!==f.mi)return false;
+    if(f.mo&&!matchMontant(p.montant,f.mo))return false;
+    return true;
+  });
+}
+function filterProjs2(f){
+  return state.projects.filter(p=>{
+    if(f.s){const txt=JSON.stringify(p).toLowerCase();if(!txt.includes(f.s))return false;}
+    if(f.moe&&p.moe!==f.moe)return false;
+    if(f.ty&&p.typologie!==f.ty)return false;
+    if(f.et&&p.etat!==f.et)return false;
+    return true;
+  });
+}
+function resetF1(){
+  ['f1s','f1moe','f1yr','f1ty','f1et','f1mi','f1mo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderCards();
+}
+function resetF2(){
+  ['f2s','f2moe','f2ty','f2et'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderTable();
+}
+
+// ============================================================
+// TYPOGRAPHY HELPERS
+// ============================================================
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtMontant(m){
+  if(!m||m==='')return '–';
+  if(m==='so')return '<span style="color:var(--muted);font-size:10px">non renseigné</span>';
+  const v=parseFloat(m);
+  if(isNaN(v))return esc(m);
+  return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v);
+}
+function typoIcon(t){
+  const m={Individuel:'🏠',Artisanal:'🔧',Industriel:'🏭',Scolaire:'🏫',Public:'🏛',Collectif:'🏢',Bureaux:'🗂',Associatif:'⚜',Hotel:'🏨',web:'🌐',Informatique:'💻',SIG:'🗺',BIM:'🧊',REGLEMENTAIRE:'📋'};
+  return m[t]||'🏗';
+}
+function typoColor(t){
+  const m={Individuel:'#3b82f6',Artisanal:'#f97316',Industriel:'#6b7280',Scolaire:'#10b981',Public:'#8b5cf6',Collectif:'#ec4899',Bureaux:'#14b8a6',Associatif:'#f59e0b',Hotel:'#f43f5e',web:'#22d3ee',Informatique:'#a78bfa',SIG:'#84cc16',BIM:'#fb923c',REGLEMENTAIRE:'#ef4444'};
+  return m[t]||'#c8a84b';
+}
+
+// ============================================================
+// RENDER CARDS
+// ============================================================
+function renderCards(){
+  const f=getF1(), projs=filterProjs(f);
+  // sort desc by year
+  projs.sort((a,b)=>b.annee-a.annee);
+  const grid=document.getElementById('cgrid');
+  document.getElementById('fcnt1').textContent=`${projs.length} / ${state.projects.length} projets`;
+  if(!projs.length){grid.innerHTML=`<div class="es" style="grid-column:1/-1"><div class="es-ico">🔍</div><div class="es-tx">Aucun projet ne correspond aux filtres</div></div>`;return;}
+  grid.innerHTML=projs.map((p,i)=>{
+    const bg=p.image?`<img src="${p.image}" alt="">`:`<span class="cph">${typoIcon(p.typologie)}</span>`;
+    const col=typoColor(p.typologie);
+    return `<div class="card" style="animation-delay:${i*18}ms" onclick="openProj(${p.id})" data-id="${p.id}">
+  <div class="card-acts">
+    <button class="cedit" onclick="event.stopPropagation();openProjEdit(${p.id})" title="Modifier">✏️</button>
+  </div>
+  <div class="card-img" style="background:linear-gradient(135deg,#0f1e3c,#1e3a60)">
+    ${bg}
+    <span class="tbadge" style="background:${col};color:${col==='#f97316'||col==='#f59e0b'?'#fff':'#fff'}">${esc(p.typologie)}</span>
+    <span class="ybadge">${p.annee||'–'}</span>
+  </div>
+  <div class="card-body">
+    <div class="card-title">${esc(p.affaire)}</div>
+    <div class="cm-row"><span class="cm-lbl">MOE</span><span class="cm-val">${esc(p.moe)}</span></div>
+    <div class="cm-row"><span class="cm-lbl">MOA</span><span class="cm-val">${esc(p.moa)}</span></div>
+    <div class="cm-row"><span class="cm-lbl">Lieu</span><span class="cm-val">${esc((p.lieu||'').replace(/\n/g,' '))}</span></div>
+    <div class="cm-row"><span class="cm-lbl">Missions</span><span class="cm-val">${esc(p.missions)}</span></div>
+  </div>
+  <div class="card-foot">
+    <span class="montant-val">${fmtMontant(p.montant)}</span>
+    <span class="etat-badge">${esc(p.etat)}</span>
+  </div>
+</div>`;
+  }).join('');
+}
+
+// ============================================================
+// RENDER TABLE
+// ============================================================
+function renderTable(){
+  const f=getF2();
+  let projs=filterProjs2(f);
+  // sort
+  if(sortCol){
+    projs=projs.slice().sort((a,b)=>{
+      const av=String(a[sortCol]||''), bv=String(b[sortCol]||'');
+      return av.localeCompare(bv,'fr',{numeric:true})*sortDir;
+    });
+  }
+  document.getElementById('fcnt2').textContent=`${projs.length} / ${state.projects.length} lignes`;
+  document.getElementById('tcnt').textContent=`${projs.length} projet(s) affiché(s)`;
+
+  // Colgroup partagé pour synchroniser les largeurs entre les deux tables
+  const colW=`<col style="width:36px;min-width:36px;">`+state.columns.map(c=>`<col style="width:${c.width}px;min-width:50px;">`).join('');
+
+  // ── En-tête (table sticky séparée) ────────────────────────
+  const extraCols=state.columns.filter(c=>!DEFAULT_COLS.some(d=>d.id===c.id));
+  const theadHtml=`<colgroup>${colW}</colgroup><thead id="thead"><tr>
+    <th style="width:36px;min-width:36px"><div class="th-in" style="cursor:default"><span class="th-lbl">#</span></div></th>
+    ${state.columns.map(c=>`
+    <th data-col="${c.id}" style="width:${c.width}px;min-width:50px">
+      <div class="th-in" onclick="sortBy('${c.id}')">
+        <span class="th-lbl">${esc(c.label)}</span>
+        ${c.type!=='image'?`<span class="th-s ${sortCol===c.id?'on':''}">
+          ${sortCol===c.id?(sortDir===1?'▲':'▼'):'⇅'}
+        </span>`:''}
+        ${extraCols.includes(c)?`<button class="th-del" onclick="event.stopPropagation();delCol('${c.id}')" title="Supprimer colonne">✕</button>`:''}
+      </div>
+      <div class="th-rz" data-col="${c.id}" onmousedown="startResize(event,'${c.id}')"></div>
+    </th>`).join('')}
+  </tr></thead>`;
+  document.getElementById('dtableHead').innerHTML=theadHtml;
+
+  // Colgroup dans la table corps (synchronise les largeurs)
+  const dtable=document.getElementById('dtable');
+  let cg=dtable.querySelector('colgroup');
+  if(!cg){cg=document.createElement('colgroup');dtable.insertBefore(cg,dtable.firstChild);}
+  cg.innerHTML=colW;
+
+  // Réinitialiser le scroll sync après re-rendu
+  syncTheadScroll();
+
+  // ── Corps ───────────────────────────────────────────────────
+  const tbody=document.getElementById('tbody');
+  if(!projs.length){tbody.innerHTML=`<tr><td colspan="${state.columns.length+2}" class="es"><div class="es-ico">🔍</div><div class="es-tx">Aucun résultat</div></td></tr>`;return;}
+  tbody.innerHTML=projs.map((p,i)=>`
+  <tr data-id="${p.id}" oncontextmenu="showCtx(event,${p.id})">
+    <td class="rnum" ondblclick="openProj(${p.id})" title="Double-clic : ouvrir fiche">${i+1}</td>
+    ${state.columns.map(c=>{
+      if(c.type==='image'){
+        return `<td class="td-img" onclick="pickImg(${p.id},'image')" title="Cliquer pour changer l'image">
+          ${p.image?`<img src="${p.image}" alt="">`:`<div class="img-ph">📷</div>`}
+        </td>`;
+      }
+      if(ENUM_COLS.includes(c.id)){
+        const opts=(state.lists[c.id]||[]);
+        const val=String(p[c.id]??'');
+        return `<td class="td-enum" data-id="${p.id}" data-col="${c.id}" style="min-width:${c.width}px" onclick="openEnumCell(this)">
+          <div class="enum-display"><span class="enum-txt">${esc(val)}</span><span class="enum-arrow">▾</span></div>
+          <select class="enum-sel hidden" data-id="${p.id}" data-col="${c.id}" onchange="enumChange(this)" onblur="closeEnumCell(this)">
+            <option value="">— vide —</option>
+            ${opts.map(v=>`<option value="${esc(v)}"${val===v?' selected':''}>${esc(v)}</option>`).join('')}
+          </select>
+        </td>`;
+      }
+      return `<td class="td-edit" contenteditable="true" data-id="${p.id}" data-col="${c.id}"
+        style="min-width:${c.width}px;max-width:${Math.max(c.width,350)}px"
+        onblur="cellEdit(this)"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
+      >${esc(String(p[c.id]??''))}</td>`;
+    }).join('')}
+  </tr>`).join('');
+}
+function sortBy(colId){
+  if(sortCol===colId)sortDir*=-1;
+  else{sortCol=colId;sortDir=1;}
+  renderTable();
+}
+
+// Synchronise le décalage horizontal du thead avec le scroll du tconBody
+function syncTheadScroll(){
+  const tcon=document.getElementById('tconBody');
+  const tbl=document.querySelector('#theadWrap table');
+  if(!tcon||!tbl)return;
+  // Appliquer offset courant immédiatement
+  tbl.style.transform=`translateX(-${tcon.scrollLeft}px)`;
+  // Listener (ajouté une seule fois via flag)
+  if(!tcon._scrollBound){
+    tcon.addEventListener('scroll',()=>{
+      const t=document.querySelector('#theadWrap table');
+      if(t)t.style.transform=`translateX(-${tcon.scrollLeft}px)`;
+    },{passive:true});
+    tcon._scrollBound=true;
+  }
+}
+
+// ============================================================
+// CELL EDIT
+// ============================================================
+function cellEdit(td){
+  const id=parseInt(td.dataset.id), col=td.dataset.col;
+  const p=state.projects.find(p=>p.id===id);
+  if(!p)return;
+  const val=td.textContent;
+  if(String(p[col]||'')===val)return;
+  pushH();
+  p[col]=val;
+}
+
+// ============================================================
+// ENUM CELL (liste déroulante dans tableau)
+// ============================================================
+function openEnumCell(td){
+  td.querySelector('.enum-display').classList.add('hidden');
+  const sel=td.querySelector('.enum-sel');
+  sel.classList.remove('hidden');
+  sel.focus();
+}
+function closeEnumCell(sel){
+  const td=sel.parentElement;
+  if(!td)return;
+  sel.classList.add('hidden');
+  td.querySelector('.enum-display').classList.remove('hidden');
+}
+function enumChange(sel){
+  const id=parseInt(sel.dataset.id),col=sel.dataset.col;
+  const p=state.projects.find(p=>p.id===id);
+  if(!p)return;
+  const val=sel.value;
+  if(String(p[col]||'')===val){closeEnumCell(sel);return;}
+  pushH();
+  p[col]=val;
+  const txt=sel.parentElement.querySelector('.enum-txt');
+  if(txt)txt.textContent=val;
+  closeEnumCell(sel);
+  // sync filters
+  populateFilters();
+}
+
+// ============================================================
+// LIST MANAGEMENT
+// ============================================================
+const LIST_LABELS={annee:'Année',moe:'MOE / Employeur',typologie:'Typologie',etat:'État',moa:'MOA / Client',missions:'Missions'};
+let currentListCol='annee';
+function openListModal(){
+  renderListModal();
+  openMod('listMod');
+}
+function closeListMod(e){if(e&&e.target!==document.getElementById('listMod'))return;closeMod('listMod');}
+function renderListModal(){
+  // tabs
+  const tabs=document.getElementById('lmTabs');
+  tabs.innerHTML=ENUM_COLS.map(col=>`<button class="lm-tab ${col===currentListCol?'active':''}" onclick="switchListCol('${col}')">${LIST_LABELS[col]||col}</button>`).join('');
+  // body
+  renderListBody();
+}
+function switchListCol(col){currentListCol=col;renderListModal();}
+function renderListBody(){
+  const items=state.lists[currentListCol]||[];
+  document.getElementById('lmBody').innerHTML=`
+    <div class="lm-items" id="lmItems">
+      ${items.length?items.map((v,i)=>`
+        <div class="lm-item">
+          <span class="lm-item-val">${esc(v)}</span>
+          <button class="lm-item-del" onclick="delListItem(${i})" title="Supprimer">✕</button>
+        </div>`).join(''):'<div style="color:var(--muted);font-size:12px;padding:8px">Aucune valeur dans la liste</div>'}
+    </div>
+    <div class="lm-add-row">
+      <input type="text" class="lm-add-inp" id="lmNewVal" placeholder="Nouvelle valeur…" onkeydown="if(event.key==='Enter')addListItem()">
+      <button class="btn btn-gold btn-sm" onclick="addListItem()">+ Ajouter</button>
+    </div>`;
+}
+function addListItem(){
+  const inp=document.getElementById('lmNewVal');
+  const val=inp.value.trim();
+  if(!val)return;
+  if(!state.lists[currentListCol])state.lists[currentListCol]=[];
+  if(state.lists[currentListCol].includes(val)){toast('Valeur déjà présente','err');return;}
+  pushH();
+  state.lists[currentListCol].push(val);
+  inp.value='';
+  renderListBody();
+  renderTable();
+  toast('Valeur ajoutée','ok');
+}
+function delListItem(idx){
+  pushH();
+  state.lists[currentListCol].splice(idx,1);
+  renderListBody();
+  renderTable();
+  toast('Valeur supprimée');
+}
+function startResize(e,colId){
+  e.preventDefault();
+  const th=document.querySelector(`th[data-col="${colId}"]`);
+  if(!th)return;
+  resizing={active:true,colId,startX:e.clientX,startW:th.offsetWidth};
+  th.querySelector('.th-rz').classList.add('dragging');
+  document.addEventListener('mousemove',doResize);
+  document.addEventListener('mouseup',stopResize);
+}
+function doResize(e){
+  if(!resizing.active)return;
+  const delta=e.clientX-resizing.startX;
+  const nw=Math.max(50,resizing.startW+delta);
+  const col=state.columns.find(c=>c.id===resizing.colId);
+  if(col)col.width=nw;
+  // Update th + td widths
+  document.querySelectorAll(`th[data-col="${resizing.colId}"],td[data-col="${resizing.colId}"]`).forEach(el=>{
+    el.style.width=nw+'px';el.style.minWidth=nw+'px';
+  });
+  // Update colgroup cols in both tables
+  const idx=state.columns.findIndex(c=>c.id===resizing.colId);
+  if(idx>=0){
+    document.querySelectorAll('colgroup col').forEach((col,i)=>{
+      if(i===idx+1){col.style.width=nw+'px';col.style.minWidth=nw+'px';}
+    });
+  }
+}
+function stopResize(){
+  if(!resizing.active)return;
+  resizing.active=false;
+  document.querySelectorAll('.th-rz.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.removeEventListener('mousemove',doResize);
+  document.removeEventListener('mouseup',stopResize);
+}
+
+// ============================================================
+// CONTEXT MENU
+// ============================================================
+function showCtx(e,id){
+  e.preventDefault();
+  ctxRow=id;
+  const m=document.getElementById('ctxm');
+  m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';
+  m.classList.add('show');
+}
+function ctxDo(action){
+  document.getElementById('ctxm').classList.remove('show');
+  if(!ctxRow)return;
+  if(action==='open'){openProj(ctxRow);return;}
+  const idx=state.projects.findIndex(p=>p.id===ctxRow);
+  if(idx<0)return;
+  pushH();
+  if(action==='above'||action==='below'){
+    const newP=newProject();
+    state.projects.splice(action==='above'?idx:idx+1,0,newP);
+  } else if(action==='del'){
+    state.projects.splice(idx,1);
+  }
+  renderTable();
+}
+document.addEventListener('click',()=>document.getElementById('ctxm').classList.remove('show'));
+
+// ============================================================
+// ROW / COL ADD
+// ============================================================
+function newProject(){
+  return {id:++idCounter,annee:new Date().getFullYear(),moe:'',affaire:'Nouveau projet',typologie:'',etat:'',moa:'',lieu:'',missions:'',documents:'',montant:'',image:''};
+}
+function addRow(){
+  pushH();
+  state.projects.push(newProject());
+  renderTable();
+  toast('Ligne ajoutée','ok');
+}
+function openColModal(){document.getElementById('ncname').value='';document.getElementById('nctype').value='text';openMod('colMod');}
+function confirmAddCol(){
+  const name=document.getElementById('ncname').value.trim();
+  if(!name){toast('Nom requis','err');return;}
+  const id='col_'+Date.now();
+  pushH();
+  state.columns.push({id,label:name,type:document.getElementById('nctype').value,width:130});
+  state.projects.forEach(p=>p[id]='');
+  closeColMod();
+  renderTable();
+  toast('Colonne ajoutée','ok');
+}
+function delCol(colId){
+  if(!confirm('Supprimer cette colonne ?'))return;
+  pushH();
+  state.columns=state.columns.filter(c=>c.id!==colId);
+  closeColMod();
+  renderTable();
+  toast('Colonne supprimée');
+}
+
+// ============================================================
+// MODAL OPEN / CLOSE
+// ============================================================
+function openMod(id){const el=document.getElementById(id);el.style.display='flex';requestAnimationFrame(()=>el.classList.add('open'));}
+function closeMod(id){const el=document.getElementById(id);el.classList.remove('open');setTimeout(()=>el.style.display='',250);}
+function closeColMod(e){if(e&&e.target!==document.getElementById('colMod'))return;closeMod('colMod');}
+function closeProjMod(e){if(e&&e.target!==document.getElementById('projMod'))return;closeProjModalDo();}
+function closeProjModalDo(){closeMod('projMod');editMode=false;currentProjId=null;}
+
+// ============================================================
+// PROJECT MODAL
+// ============================================================
+function openProj(id,edit=false){
+  currentProjId=id; editMode=edit;
+  renderProjModal();
+  openMod('projMod');
+}
+function openProjEdit(id){openProj(id,true);}
+function getProjCols(){return state.columns.filter(c=>c.type!=='image');}
+function renderProjModal(){
+  const p=state.projects.find(p=>p.id===currentProjId);
+  if(!p)return;
+  // Header
+  const mhimg=document.getElementById('mhimg');
+  mhimg.innerHTML=p.image?`<img src="${p.image}" alt="">`:`<span style="font-size:26px">${typoIcon(p.typologie)}</span>`;
+  document.getElementById('mhyr').textContent=p.annee||'';
+  document.getElementById('mhtit').textContent=p.affaire||'Projet sans titre';
+  document.getElementById('mhbgs').innerHTML=[p.typologie,p.etat,p.moe].filter(Boolean).map(b=>`<span class="mbg">${esc(b)}</span>`).join('');
+  // Buttons
+  document.getElementById('mEditBtn').classList.toggle('hidden',editMode);
+  document.getElementById('mSaveBtn').classList.toggle('hidden',!editMode);
+  document.getElementById('mCancelBtn').classList.toggle('hidden',!editMode);
+  // Body
+  const imgSrc=p.image;
+  const body=document.getElementById('mbody');
+  const cols=getProjCols();
+  body.innerHTML=`
+    <div class="mfig" onclick="pickImg(${p.id},'image')" title="Cliquer pour changer l'image">
+      ${imgSrc?`<img src="${imgSrc}" alt="">`:`<span style="font-size:48px;opacity:.2">${typoIcon(p.typologie)}</span>`}
+      <div class="mfig-hint">📷 Changer l'image</div>
+    </div>
+    <div class="mfgrid">
+      ${cols.map(c=>{
+        const fw=c.id==='affaire'||c.id==='documents'||c.id==='lieu'?'fw':'';
+        if(editMode){
+          const isEnum=ENUM_COLS.includes(c.id);
+          const isMulti=c.id==='affaire'||c.id==='documents'||c.id==='lieu';
+          let inp;
+          if(isEnum){
+            const opts=state.lists[c.id]||[];
+            const curVal=String(p[c.id]||'');
+            const hasVal=opts.includes(curVal);
+            inp=`<select class="mfinp" data-col="${c.id}" style="cursor:pointer">
+              <option value="">— vide —</option>
+              ${opts.map(v=>`<option value="${esc(v)}"${curVal===v?' selected':''}>${esc(v)}</option>`).join('')}
+              ${!hasVal&&curVal?`<option value="${esc(curVal)}" selected>${esc(curVal)} (actuel)</option>`:''}
+            </select>`;
+          } else if(isMulti){
+            inp=`<textarea class="mftxa" data-col="${c.id}">${esc(String(p[c.id]||''))}</textarea>`;
+          } else {
+            inp=`<input type="${c.type==='number'?'number':'text'}" class="mfinp" data-col="${c.id}" value="${esc(String(p[c.id]||''))}">`;
+          }
+          return `<div class="mf ${fw}"><label class="mflbl">${esc(c.label)}</label>${inp}</div>`;
+        }
+        return `<div class="mf ${fw}"><label class="mflbl">${esc(c.label)}</label>
+          <div class="mfval">${c.id==='montant'?fmtMontant(p[c.id]):esc(String(p[c.id]||'–'))}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+function toggleEdit(){editMode=true;renderProjModal();}
+function cancelEdit(){editMode=false;renderProjModal();}
+function saveEdit(){
+  const p=state.projects.find(p=>p.id===currentProjId);
+  if(!p)return;
+  pushH();
+  document.querySelectorAll('#mbody [data-col]').forEach(el=>{
+    const v=el.tagName==='SELECT'?el.value:(el.value!==undefined?el.value:el.textContent);
+    p[el.dataset.col]=v;
+  });
+  editMode=false;
+  renderProjModal();
+  renderCards();
+  renderTable();
+  populateFilters();
+  toast('Modifications enregistrées','ok');
+}
+function delCurrent(){
+  if(!confirm('Supprimer ce projet ?'))return;
+  pushH();
+  state.projects=state.projects.filter(p=>p.id!==currentProjId);
+  closeProjModalDo();
+  renderCards();renderTable();populateFilters();
+  toast('Projet supprimé');
+}
+function editModalImg(){pickImg(currentProjId,'image');}
+
+// ============================================================
+// IMAGE
+// ============================================================
+function pickImg(id,field){
+  imgTargetId=id; imgTargetField=field;
+  document.getElementById('imgInp').click();
+}
+function handleImg(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const src=ev.target.result;
+    const p=state.projects.find(p=>p.id===imgTargetId);
+    if(!p)return;
+    pushH();
+    p[imgTargetField]=src;
+    renderCards();
+    renderTable();
+    if(currentProjId===imgTargetId)renderProjModal();
+    toast('Image importée','ok');
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+// ============================================================
+// EDIT META
+// ============================================================
+function editField(field){
+  if(field==='title'){
+    const el=document.getElementById('appTitle');
+    const v=prompt('Titre de l\'application :',state.meta.title);
+    if(v===null)return;pushH();state.meta.title=v;el.textContent=v;document.title=v;
+  } else if(field==='sub'){
+    const el=document.getElementById('appSub');
+    const v=prompt('Sous-titre :',state.meta.sub);
+    if(v===null)return;pushH();state.meta.sub=v;el.textContent=v;
+  } else if(field==='logo'){
+    const el=document.getElementById('logoEl');
+    const v=prompt('Lettre ou emoji pour le logo :',state.meta.logo);
+    if(v===null)return;pushH();state.meta.logo=v;el.textContent=v;
+  }
+}
+
+// ============================================================
+// EXPORT / IMPORT JSON
+// ============================================================
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  dl(blob,'portfolio_'+ts()+'.json');
+  toast('Export JSON ✓','ok');
+}
+function importJSON(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!d.projects||!d.columns)throw new Error('Format invalide');
+      pushH();state=d;render();
+      toast('Import JSON ✓','ok');
+    }catch(err){toast('Erreur import JSON : '+err.message,'err');}
+  };
+  reader.readAsText(file);e.target.value='';
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV(){
+  const cols=state.columns.filter(c=>c.type!=='image');
+  const header=cols.map(c=>'"'+c.label.replace(/"/g,'""')+'"').join(';');
+  const rows=state.projects.map(p=>cols.map(c=>'"'+(String(p[c.id]||'').replace(/"/g,'""'))+'"').join(';'));
+  const csv='\uFEFF'+header+'\n'+rows.join('\n');
+  dl(new Blob([csv],{type:'text/csv;charset=utf-8'}),'portfolio_'+ts()+'.csv');
+  toast('Export CSV ✓','ok');
+}
+function importCSV(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const text=ev.target.result.replace(/^\uFEFF/,'');
+      const lines=text.split('\n').filter(l=>l.trim());
+      if(lines.length<2)throw new Error('Fichier vide');
+      const parseRow=line=>{const r=[];let cur='',inQ=false;for(const ch of line){if(ch==='"'){inQ=!inQ;}else if((ch===';'||ch===',')&&!inQ){r.push(cur.trim());cur='';}else cur+=ch;}r.push(cur.trim());return r;};
+      const headers=parseRow(lines[0]);
+      const colMap={};
+      headers.forEach((h,i)=>{
+        const found=state.columns.find(c=>c.label.toLowerCase()===h.replace(/^"/,'').replace(/"$/,'').toLowerCase());
+        if(found)colMap[i]=found.id;
+      });
+      pushH();
+      const newProjs=lines.slice(1).map(line=>{
+        const vals=parseRow(line);
+        const p={id:++idCounter,...Object.fromEntries(state.columns.map(c=>[c.id,c.type==='image'?'':'']).filter(Boolean))};
+        vals.forEach((v,i)=>{if(colMap[i])p[colMap[i]]=v.replace(/^"/,'').replace(/"$/,'');});
+        return p;
+      });
+      if(confirm(`Importer ${newProjs.length} ligne(s) ? (remplace les données actuelles)`)){
+        state.projects=newProjs;
+        render();toast('Import CSV ✓','ok');
+      } else pushH(); // undo the pushH
+    }catch(err){toast('Erreur CSV : '+err.message,'err');}
+  };
+  reader.readAsText(file,'UTF-8');e.target.value='';
+}
+
+// ============================================================
+// EXPORT TABLE PDF / PNG
+// ============================================================
+function buildCleanTable(){
+  // Combiner le thead (dans dtableHead) et le tbody (dans dtable) en une seule table propre
+  const theadSrc=document.getElementById('thead');
+  const tbodySrc=document.getElementById('tbody');
+  if(!theadSrc||!tbodySrc)return null;
+
+  const tbl=document.createElement('table');
+  tbl.className='dtable';
+
+  // Colgroup
+  const cg=document.createElement('colgroup');
+  cg.innerHTML=`<col style="width:36px">`+state.columns.map(c=>`<col style="width:${c.width}px">`).join('');
+  tbl.appendChild(cg);
+
+  // Thead cloné et nettoyé
+  const thead=theadSrc.cloneNode(true);
+  thead.style.position='static';
+  thead.querySelectorAll('.th-rz,.th-del').forEach(el=>el.remove());
+  tbl.appendChild(thead);
+
+  // Tbody cloné et nettoyé
+  const tbody=tbodySrc.cloneNode(true);
+  tbody.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+  tbody.querySelectorAll('.enum-sel,.enum-arrow').forEach(el=>el.remove());
+  tbody.querySelectorAll('.enum-display').forEach(el=>{
+    const txt=el.querySelector('.enum-txt');
+    const td=el.closest('td');
+    if(td)td.textContent=txt?txt.textContent:'';
+  });
+  // Masquer colonne image
+  tbody.querySelectorAll('td[data-col="image"]').forEach(el=>el.remove());
+  thead.querySelectorAll('th[data-col="image"]').forEach(el=>el.remove());
+  tbl.appendChild(tbody);
+  return tbl;
+}
+
+async function exportTablePDF(){
+  toast('Génération PDF tableau…');
+  try{
+    const tbl=buildCleanTable();
+    if(!tbl){toast('Erreur : tableau vide','err');return;}
+
+    const SCALE=1.6;
+    const styleEl=document.createElement('style');
+    styleEl.textContent=`
+      table{border-collapse:collapse;width:max-content;font-size:10px;font-family:Arial,sans-serif;}
+      thead{position:static!important;}
+      th{background:#1a2744!important;color:#fff!important;padding:6px 8px!important;border:1px solid #2a3a5e!important;font-size:10px!important;font-weight:700!important;white-space:nowrap!important;}
+      td{background:#ffffff!important;color:#1a1a28!important;padding:5px 8px!important;border:1px solid #d8d2c5!important;vertical-align:top!important;white-space:normal!important;max-width:180px!important;word-break:break-word!important;}
+      tr:nth-child(even) td{background:#f7f5f0!important;}
+    `;
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:absolute;left:-9999px;top:0;background:#fff;padding:0;overflow:visible;';
+    wrap.appendChild(styleEl);
+    wrap.appendChild(tbl);
+    document.body.appendChild(wrap);
+    await new Promise(r=>setTimeout(r,110));
+
+    // ── 1. Mesurer hauteurs dans le DOM (avant capture) ────────
+    const theadEl=wrap.querySelector('thead');
+    const theadHpx=Math.ceil((theadEl?theadEl.getBoundingClientRect().height:0)*SCALE);
+    const tbodyRows=[...wrap.querySelectorAll('tbody tr')];
+    const rowHpx=tbodyRows.map(tr=>Math.ceil(tr.getBoundingClientRect().height*SCALE));
+
+    // ── 2. Capturer le canvas complet ──────────────────────────
+    const canvas=await html2canvas(wrap,{
+      scale:SCALE,useCORS:true,allowTaint:true,
+      backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0
+    });
+    document.body.removeChild(wrap);
+
+    // ── 3. Paramètres PDF ──────────────────────────────────────
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth();   // 297 mm
+    const pageH=pdf.internal.pageSize.getHeight();  // 210 mm
+    const marginX=10, marginY=8, hdrH=14, ftrH=10;
+    const contentW=pageW-marginX*2;                 // 277 mm
+    const contentH=pageH-marginY*2-hdrH-ftrH;       // hauteur utile : ~170 mm
+    const mmPerPx=contentW/canvas.width;
+    const contentHPx=Math.floor(contentH/mmPerPx);  // hauteur utile en pixels canvas
+    const theadHmm=theadHpx*mmPerPx;
+    // Place disponible pour les données (sous l'en-tête colonnes répété)
+    const availDataPx=Math.max(contentHPx-theadHpx, 1);
+
+    // ── 4. Découpage respectant les frontières de lignes ───────
+    // cumul[i] = hauteur cumulée des i premières lignes (pixels canvas)
+    const cumul=[0];
+    rowHpx.forEach(h=>cumul.push(cumul[cumul.length-1]+h));
+
+    const pages=[]; // [{startRow, endRow}]
+    let r=0;
+    while(r<rowHpx.length){
+      let e=r;
+      // Faire rentrer un maximum de lignes sans couper
+      while(e<rowHpx.length && cumul[e+1]-cumul[r]<=availDataPx) e++;
+      // Si même la 1re ligne ne rentre pas, l'inclure quand même (ligne trop haute)
+      if(e===r) e=r+1;
+      pages.push({startRow:r, endRow:Math.min(e,rowHpx.length)});
+      r=e;
+    }
+    if(!pages.length) pages.push({startRow:0,endRow:0}); // tableau vide
+
+    // ── 5. Extraire l'image de l'en-tête colonnes (thead) ──────
+    // Elle sera répétée en tête de chaque page du PDF
+    const theadCvs=document.createElement('canvas');
+    theadCvs.width=canvas.width; theadCvs.height=Math.max(1,theadHpx);
+    theadCvs.getContext('2d').drawImage(canvas,0,0,canvas.width,theadHpx,0,0,canvas.width,theadHpx);
+    const theadImg=theadCvs.toDataURL('image/jpeg',0.97);
+
+    const title=state.meta.title||'Portfolio de Projets';
+    const date=new Date().toLocaleDateString('fr-FR');
+    const nProjs=filterProjs2(getF2()).length;
+    const totalPages=pages.length;
+
+    // ── 6. Génération page par page ────────────────────────────
+    for(let pg=0;pg<pages.length;pg++){
+      if(pg>0) pdf.addPage();
+      const {startRow,endRow}=pages[pg];
+
+      // Bandeau navy en-tête PDF
+      pdf.setFillColor(26,39,68);
+      pdf.rect(0,0,pageW,marginY+hdrH,'F');
+      pdf.setDrawColor(200,168,75); pdf.setLineWidth(0.7);
+      pdf.line(0,marginY+hdrH,pageW,marginY+hdrH);
+      pdf.setFontSize(11); pdf.setTextColor(200,168,75); pdf.setFont('helvetica','bold');
+      pdf.text(title,marginX,marginY+9);
+      pdf.setFontSize(8); pdf.setTextColor(180,180,180); pdf.setFont('helvetica','normal');
+      pdf.text(`${nProjs} projets · ${date}`,pageW-marginX,marginY+9,{align:'right'});
+
+      const yC=marginY+hdrH; // y de départ du contenu tableau
+
+      // En-tête colonnes répété sur chaque page
+      if(theadHpx>0) pdf.addImage(theadImg,'JPEG',marginX,yC,contentW,theadHmm);
+
+      // Lignes de données — JAMAIS coupées en milieu de ligne
+      const dataSrcY=theadHpx+cumul[startRow];
+      const dataSrcH=cumul[endRow]-cumul[startRow];
+      if(dataSrcH>0){
+        const dataCvs=document.createElement('canvas');
+        dataCvs.width=canvas.width; dataCvs.height=Math.ceil(dataSrcH);
+        dataCvs.getContext('2d').drawImage(
+          canvas, 0,dataSrcY, canvas.width,dataSrcH, 0,0, canvas.width,dataSrcH
+        );
+        pdf.addImage(
+          dataCvs.toDataURL('image/jpeg',0.92),'JPEG',
+          marginX, yC+theadHmm, contentW, dataSrcH*mmPerPx
+        );
+      }
+
+      // Pied de page
+      const fY=pageH-marginY-ftrH+5;
+      pdf.setDrawColor(200,168,75); pdf.setLineWidth(0.4);
+      pdf.line(marginX,fY-3,pageW-marginX,fY-3);
+      pdf.setFontSize(8); pdf.setTextColor(110,110,120); pdf.setFont('helvetica','normal');
+      pdf.text(state.meta.sub||'',marginX,fY+2,{maxWidth:80});
+      pdf.text(`Page ${pg+1} / ${totalPages}`,pageW/2,fY+2,{align:'center'});
+      pdf.text(`Généré le ${date}`,pageW-marginX,fY+2,{align:'right'});
+    }
+
+    pdf.save('portfolio_tableau_'+ts()+'.pdf');
+    toast('PDF tableau ✓','ok');
+  }catch(e){toast('Erreur PDF : '+e.message,'err');console.error(e);}
+}
+async function exportTablePNG(){
+  toast('Génération PNG tableau…');
+  try{
+    const tbl=buildCleanTable();
+    const style=document.createElement('style');
+    style.textContent=`
+      table{border-collapse:collapse;width:max-content;font-size:11px;font-family:Arial,sans-serif;}
+      thead{position:static!important;}
+      th{background:#1a2744!important;color:#fff!important;padding:7px 9px!important;border:1px solid #2a3a5e!important;font-weight:700!important;white-space:nowrap!important;}
+      td{background:#ffffff!important;color:#1a1a28!important;padding:6px 9px!important;border:1px solid #d8d2c5!important;vertical-align:top!important;word-break:break-word!important;max-width:200px!important;}
+      tr:nth-child(even) td{background:#f7f5f0!important;}
+    `;
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:absolute;left:-9999px;top:0;background:#fff;padding:12px;overflow:visible;';
+    wrap.appendChild(style);wrap.appendChild(tbl);
+    document.body.appendChild(wrap);
+    await new Promise(r=>setTimeout(r,80));
+    const canvas=await html2canvas(wrap,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0});
+    document.body.removeChild(wrap);
+    canvas.toBlob(blob=>{dl(blob,'portfolio_tableau_'+ts()+'.png');toast('PNG tableau ✓','ok');},'image/png');
+  }catch(e){toast('Erreur PNG : '+e.message,'err');console.error(e);}
+}
+
+// ============================================================
+// EXPORT FICHE PDF / PNG
+// ============================================================
+function buildFicheEl(p){
+  const cols=getProjCols();
+  const montantFmt=()=>{
+    if(!p.montant||p.montant==='')return '–';
+    if(p.montant==='so')return 'Non renseigné';
+    const v=parseFloat(p.montant);
+    return isNaN(v)?p.montant:new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v);
+  };
+  const date=new Date().toLocaleDateString('fr-FR');
+  const mainFields=cols.filter(c=>c.id!=='annee'&&c.id!=='affaire'&&c.id!=='moe'&&c.id!=='typologie'&&c.id!=='etat'&&c.id!=='montant');
+
+  // Images : on utilise background-image+cover car html2canvas ne supporte pas object-fit sur <img>
+  const thumbStyle=p.image
+    ? `background:url('${p.image}') center/cover no-repeat;background-color:#253563;`
+    : `background:#253563;display:flex;align-items:center;justify-content:center;font-size:36px;`;
+  const thumbContent=p.image?'': `<span>${typoIcon(p.typologie)}</span>`;
+
+  const fullImgHtml=p.image
+    ? `<div style="width:100%;height:200px;border-radius:8px;margin-bottom:20px;background:url('${p.image}') center/cover no-repeat;"></div>`
+    : '';
+
+  return `<div class="fiche">
+  <div class="fiche-hdr">
+    <div class="fiche-hdr-img" style="${thumbStyle}width:88px;height:88px;border-radius:8px;flex-shrink:0;">${thumbContent}</div>
+    <div style="flex:1;min-width:0">
+      <div class="fiche-yr">Réf. ${p.annee||'–'} &nbsp;·&nbsp; ${esc(p.moe||'')}</div>
+      <div class="fiche-tit">${esc(p.affaire||'Projet sans titre')}</div>
+      <div class="fiche-badges">${[p.typologie,p.etat].filter(Boolean).map(b=>`<span class="fiche-bg">${esc(b)}</span>`).join('')}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;color:#c8a84b;font-size:11px;font-weight:700;white-space:nowrap;align-self:flex-start;margin-top:4px">
+      ${montantFmt()}
+    </div>
+  </div>
+  <div class="fiche-content">
+    ${fullImgHtml}
+    <div class="fiche-body">
+      ${mainFields.map(c=>{
+        const fw=c.id==='documents'||c.id==='lieu'||c.id==='missions'?'fiche-fw':'';
+        return `<div class="fiche-f ${fw}"><div class="fiche-lbl">${esc(c.label)}</div><div class="fiche-val">${esc(String(p[c.id]||'–'))}</div></div>`;
+      }).join('')}
+    </div>
+    <div class="fiche-footer">
+      <span>${esc(state.meta.title||'Portfolio de Projets')}</span>
+      <span>Généré le ${date}</span>
+    </div>
+  </div>
+</div>`;
+}
+async function exportFichePDF(){
+  const p=state.projects.find(p=>p.id===currentProjId);if(!p)return;
+  toast('Génération PDF fiche…');
+  try{
+    const canvas=await captureFiche(p,2);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const marginX=10, marginY=10;
+    const contentW=pageW-marginX*2;
+    const mmPerPx=contentW/canvas.width;
+    const contentHPx=(pageH-marginY*2)/mmPerPx;
+    const totalPages=Math.ceil(canvas.height/contentHPx);
+    for(let pg=0;pg<totalPages;pg++){
+      if(pg>0)pdf.addPage();
+      const srcY=Math.round(pg*contentHPx);
+      const srcH=Math.min(contentHPx,canvas.height-srcY);
+      const tmp=document.createElement('canvas');
+      tmp.width=canvas.width;tmp.height=Math.ceil(srcH);
+      tmp.getContext('2d').drawImage(canvas,0,srcY,canvas.width,srcH,0,0,canvas.width,srcH);
+      pdf.addImage(tmp.toDataURL('image/jpeg',0.95),'JPEG',marginX,marginY,contentW,srcH*mmPerPx);
+      if(totalPages>1){
+        pdf.setFontSize(7);pdf.setTextColor(160,160,160);
+        pdf.text(`Page ${pg+1}/${totalPages}`,pageW-marginX,pageH-4,{align:'right'});
+      }
+    }
+    const fname='fiche_'+safeFilename(p.affaire||String(p.id))+'_'+ts()+'.pdf';
+    pdf.save(fname);
+    toast('PDF fiche ✓','ok');
+  }catch(e){toast('Erreur PDF : '+e.message,'err');console.error(e);}
+}
+async function exportFichePNG(){
+  const p=state.projects.find(p=>p.id===currentProjId);if(!p)return;
+  toast('Génération PNG fiche…');
+  try{
+    const canvas=await captureFiche(p,2.5);
+    const fname='fiche_'+safeFilename(p.affaire||String(p.id))+'_'+ts()+'.png';
+    canvas.toBlob(blob=>{dl(blob,fname);toast('PNG fiche ✓','ok');},'image/png');
+  }catch(e){toast('Erreur PNG : '+e.message,'err');console.error(e);}
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function ts(){return new Date().toISOString().slice(0,10);}
+function safeFilename(s){return String(s).slice(0,28).replace(/[\s\/\\:*?"<>|]/g,'_').replace(/[^a-zA-Z0-9_\-éàèùâêîôûäëïöüçÉÀÈ]/g,'').slice(0,24)||'projet';}
+
+// Capture fiche en canvas — utilise un wrapper temporaire hors-viewport
+async function captureFiche(p, scale=2){
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:absolute;left:-9999px;top:0;width:794px;pointer-events:none;overflow:visible;';
+  wrap.innerHTML=buildFicheEl(p);
+  document.body.appendChild(wrap);
+  // Attente rendu CSS + éventuelles images
+  await new Promise(r=>setTimeout(r,180));
+  const ficheNode=wrap.querySelector('.fiche');
+  const canvas=await html2canvas(ficheNode,{
+    scale,
+    useCORS:true,
+    allowTaint:true,
+    backgroundColor:'#ffffff',
+    logging:false,
+    scrollX:0,
+    scrollY:0
+  });
+  document.body.removeChild(wrap);
+  return canvas;
+}
+let toastTimer;
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast '+(type||'');
+  clearTimeout(toastTimer);
+  el.classList.add('show');
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function render(){
+  // sync meta
+  document.getElementById('appTitle').textContent=state.meta.title||'Portfolio';
+  document.getElementById('appSub').textContent=state.meta.sub||'';
+  document.getElementById('logoEl').textContent=state.meta.logo||'P';
+  document.title=state.meta.title||'Portfolio';
+  populateFilters();
+  if(currentTab==='a')renderCards();
+  else renderTable();
+  updHBtn();
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){e.preventDefault();undo();}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){e.preventDefault();redo();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveLS();}
+  if(e.key==='Escape'&&document.getElementById('projMod').classList.contains('open'))closeProjModalDo();
+  if(e.key==='Escape'&&document.getElementById('listMod').classList.contains('open'))closeListMod();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded',()=>{
+  applyTheme();
+  loadLS();
+  // Ensure lists exist (migration from older saves)
+  if(!state.lists)state.lists=JSON.parse(JSON.stringify(DEFAULT_LISTS));
+  ENUM_COLS.forEach(col=>{if(!state.lists[col])state.lists[col]=DEFAULT_LISTS[col]||[];});
+  idCounter=Math.max(...state.projects.map(p=>p.id||0),100)+1;
+  render();
+  document.getElementById('projMod').style.display='none';
+  document.getElementById('colMod').style.display='none';
+  document.getElementById('listMod').style.display='none';
+});
+</script>
+</body>
+</html>
