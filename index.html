@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Portfolio d'Applications</title>
+    <style>
+        :root[data-theme="light"] {
+            --bg: #f6f8fa;
+            --header-bg: #24292e;
+            --header-text: #ffffff;
+            --card-bg: #ffffff;
+            --card-border: #d1d5da;
+            --card-border-hover: #0366d6;
+            --text-main: #24292e;
+            --text-muted: #586069;
+            --accent: #0366d6;
+            --btn-bg: #eff3f6;
+            --btn-bg-grad: linear-gradient(-180deg, #fafbfc, #eff3f6 90%);
+            --btn-border: rgba(27,31,35,0.15);
+            --btn-text: #24292e;
+            --btn-hover: #e6ebf1;
+            --search-bg: #ffffff;
+            --search-border: #d1d5da;
+            --search-focus: #0366d6;
+            --footer-text: #6a737d;
+            --toggle-bg: #ffffff;
+            --toggle-icon: #f6c90e;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --empty-text: #6a737d;
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #0d1117;
+            --header-bg: #161b22;
+            --header-text: #e6edf3;
+            --card-bg: #161b22;
+            --card-border: #30363d;
+            --card-border-hover: #388bfd;
+            --text-main: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #388bfd;
+            --btn-bg: #21262d;
+            --btn-bg-grad: linear-gradient(-180deg, #2d333b, #21262d 90%);
+            --btn-border: rgba(240,246,252,0.1);
+            --btn-text: #c9d1d9;
+            --btn-hover: #30363d;
+            --search-bg: #0d1117;
+            --search-border: #30363d;
+            --search-focus: #388bfd;
+            --footer-text: #8b949e;
+            --toggle-bg: #161b22;
+            --toggle-icon: #c9d1d9;
+            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+            --empty-text: #8b949e;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 2rem 1rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        header h1 { margin: 0 0 0.25rem; font-size: 1.6rem; }
+        header p  { margin: 0 0 1.25rem; font-size: 0.9rem; opacity: 0.7; }
+
+        /* ── Toggle thème ── */
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 4px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--header-text);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+        .theme-toggle .icon { font-size: 1rem; line-height: 1; }
+        .theme-toggle .label { white-space: nowrap; }
+
+        /* ── Barre de recherche ── */
+        .search-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .search-wrapper svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            flex-shrink: 0;
+        }
+        #search {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            font-size: 0.9rem;
+            border: 1px solid var(--search-border);
+            border-radius: 6px;
+            background: var(--search-bg);
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.3s;
+        }
+        #search:focus {
+            border-color: var(--search-focus);
+            box-shadow: 0 0 0 3px rgba(3,102,214,0.2);
+        }
+        [data-theme="dark"] #search:focus {
+            box-shadow: 0 0 0 3px rgba(56,139,253,0.2);
+        }
+        #search::placeholder { color: var(--text-muted); }
+
+        /* ── Compteur ── */
+        .result-count {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0.75rem 0 0;
+            min-height: 1.2em;
+            transition: opacity 0.2s;
+        }
+
+        /* ── Grille ── */
+        .container {
+            max-width: 900px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.3s, opacity 0.25s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+            border-color: var(--card-border-hover);
+        }
+        .card.hidden {
+            display: none;
+        }
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex-grow: 1;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--btn-bg);
+            background-image: var(--btn-bg-grad);
+            border: 1px solid var(--btn-border);
+            border-radius: 6px;
+            color: var(--btn-text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 16px;
+            text-decoration: none;
+            text-align: center;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn:hover {
+            background-color: var(--btn-hover);
+            background-image: none;
+        }
+
+        /* ── Message vide ── */
+        #empty-msg {
+            display: none;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--empty-text);
+            font-size: 0.95rem;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: var(--footer-text);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="theme-toggle" id="themeToggle" title="Changer le thème" aria-label="Changer le thème">
+            <span class="icon" id="themeIcon">🌙</span>
+            <span class="label" id="themeLabel">Mode sombre</span>
+        </button>
+
+        <h1>Mes Applications</h1>
+        <p>Répertoire centralisé de mes projets et déploiements</p>
+
+        <div class="search-wrapper">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+            <input type="search" id="search" placeholder="Rechercher une application…" autocomplete="off" aria-label="Rechercher une application">
+        </div>
+        <div class="result-count" id="resultCount"></div>
+    </header>
+
+    <div class="container">
+        <div class="grid" id="grid">
+
+            <div class="card" data-title="Budget familial">
+                <h2>🧮 Budget familial</h2>
+                <p>Suivi du budget familial.</p>
+                <a href="Budget_Familial_v1" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Entretien voiture">
+                <h2>🚗 Entretien voiture</h2>
+                <p>Suivi de l'entretien de la voiture.</p>
+                <a href="SEAT_LEON_GestionAuto_v1-3" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Carnet de santé">
+                <h2>🩺 Carnet de santé</h2>
+                <p>Suivi du carnet de santé.</p>
+                <a href="CorpsSante_v2" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Portfolio">
+                <h2>📔 Portfolio</h2>
+                <p>Portfolio des projets perso et pro.</p>
+                <a href="portfolio_projets_v1-6" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Partition chords">
+                <h2>🎹 Partition chords</h2>
+                <p>Pour écrire et lire les accords d'une musique.</p>
+                <a href="chordsheet_v3_cloud" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Chronomètre">
+                <h2>⌛ Chronomètre</h2>
+                <p>Simple chronomètre.</p>
+                <a href="chrono_v4" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Simulateur immo">
+                <h2>📊 Simulateur immo</h2>
+                <p>Calculatrice pour emprunt immobilier.</p>
+                <a href="simulateur_immo_v3_2" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Solfège">
+                <h2>🎼 Solfège</h2>
+                <p>Pour apprendre à lire les notes de solfège.</p>
+                <a href="solfege_app_v1-3" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Sport timer">
+                <h2>⏲ Sport timer</h2>
+                <p>Compte à rebours pour séance de sport.</p>
+                <a href="sport-timer_v2" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <div class="card" data-title="Transfert d'appels">
+                <h2>📲 Transfert d'appels</h2>
+                <p>Pour lancer les transferts d'appels.</p>
+                <a href="transfert_appels-1" class="btn" target="_blank">Ouvrir l'application</a>
+            </div>
+
+            <p id="empty-msg">Aucune application ne correspond à votre recherche.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 - Répertoire personnel</p>
+    </footer>
+
+    <script>
+        /* ── Thème ── */
+        const html        = document.documentElement;
+        const toggleBtn   = document.getElementById('themeToggle');
+        const themeIcon   = document.getElementById('themeIcon');
+        const themeLabel  = document.getElementById('themeLabel');
+
+        const DARK  = { theme: 'dark',  icon: '☀️', label: 'Mode clair'  };
+        const LIGHT = { theme: 'light', icon: '🌙', label: 'Mode sombre' };
+
+        function applyTheme(isDark) {
+            const cfg = isDark ? DARK : LIGHT;
+            html.setAttribute('data-theme', cfg.theme);
+            themeIcon.textContent  = cfg.icon;
+            themeLabel.textContent = cfg.label;
+            localStorage.setItem('theme', cfg.theme);
+        }
+
+        // Lecture de la préférence sauvegardée ou système
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(saved ? saved === 'dark' : prefersDark);
+
+        toggleBtn.addEventListener('click', () => {
+            applyTheme(html.getAttribute('data-theme') !== 'dark');
+        });
+
+        /* ── Recherche ── */
+        const searchInput = document.getElementById('search');
+        const resultCount = document.getElementById('resultCount');
+        const cards       = document.querySelectorAll('.card[data-title]');
+        const emptyMsg    = document.getElementById('empty-msg');
+
+        function normalize(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function filterCards() {
+            const q = normalize(searchInput.value.trim());
+            let visible = 0;
+
+            cards.forEach(card => {
+                const title = normalize(card.dataset.title);
+                const desc  = normalize(card.querySelector('p').textContent);
+                const match = !q || title.includes(q) || desc.includes(q);
+                card.classList.toggle('hidden', !match);
+                if (match) visible++;
+            });
+
+            // Message vide
+            emptyMsg.style.display = (visible === 0) ? 'block' : 'none';
+
+            // Compteur
+            if (q) {
+                resultCount.textContent = visible === 0
+                    ? ''
+                    : `${visible} application${visible > 1 ? 's' : ''} trouvée${visible > 1 ? 's' : ''}`;
+            } else {
+                resultCount.textContent = '';
+            }
+        }
+
+        searchInput.addEventListener('input', filterCards);
+    </script>
+</body>
+</html>
