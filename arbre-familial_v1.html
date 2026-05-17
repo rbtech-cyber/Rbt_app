@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbre Familial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2ede4;
+  --card:#fffef8;
+  --a:#7c4f28;
+  --al:#c4906a;
+  --as:#f5e8d5;
+  --td:#2a1a08;
+  --tm:#6b4c28;
+  --tl:#a07848;
+  --lc:#9a5820;
+  --shd:0 3px 16px rgba(80,40,10,.14);
+  --shd2:0 6px 28px rgba(80,40,10,.22);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);height:100vh;overflow:hidden;display:flex;flex-direction:column;user-select:none}
+
+/* ── Toolbar ── */
+#tb{
+  background:var(--a);color:#fff;
+  padding:8px 14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.25);z-index:100;
+}
+#tb h1{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;margin-right:8px;letter-spacing:.4px}
+.sep{width:1px;height:26px;background:rgba(255,255,255,.28);margin:0 3px}
+.btn{
+  padding:5px 11px;border:none;border-radius:6px;
+  font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;
+  cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px;
+}
+.bl{background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.28)}
+.bl:hover{background:rgba(255,255,255,.24)}
+.bp{background:#e8c07a;color:#3a1f00}.bp:hover{background:#f0d090}
+.blink{background:#e07828;color:#fff}.blink:hover{background:#f08838}
+.blink.on{background:#d0601a;box-shadow:0 0 0 3px rgba(208,96,26,.4)}
+.bd{background:#b03020;color:#fff}.bd:hover{background:#d04030}
+.bsave{background:#2a6e48;color:#fff}.bsave:hover{background:#368558}
+.bsave.saved{background:#1e5236}
+.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+/* ── Canvas ── */
+#cw{flex:1;position:relative;overflow:hidden}
+#cw.lm{cursor:crosshair}
+#svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+/* ── Bubble ── */
+.bubble{
+  position:absolute;width:118px;
+  background:var(--card);border-radius:15px;
+  box-shadow:var(--shd);border:2px solid transparent;
+  cursor:grab;z-index:10;transition:box-shadow .18s,border-color .18s,transform .12s;
+  text-align:center;padding:11px 7px 9px;
+}
+.bubble:hover{box-shadow:var(--shd2);transform:translateY(-2px)}
+.bubble.sel{border-color:var(--al);box-shadow:0 0 0 3px rgba(196,144,106,.38),var(--shd2)}
+.bubble.lf{border-color:#e07828;box-shadow:0 0 0 3px rgba(224,120,40,.45),var(--shd2)}
+.bubble:active{cursor:grabbing}
+.bphoto{
+  width:70px;height:70px;border-radius:50%;object-fit:cover;
+  border:2.5px solid var(--al);display:block;margin:0 auto 7px;
+}
+.binit{
+  width:70px;height:70px;border-radius:50%;
+  background:linear-gradient(135deg,var(--al),var(--a));
+  color:#fff;font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 7px;border:2.5px solid var(--al);flex-shrink:0;
+}
+.bnom{font-size:9.5px;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:.8px;line-height:1.3}
+.bpre{font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--tm);margin-top:1px;line-height:1.2}
+.blien{
+  display:inline-block;background:var(--as);color:var(--a);
+  font-size:8.5px;font-weight:700;padding:2px 7px;border-radius:20px;
+  margin-top:4px;letter-spacing:.3px;text-transform:uppercase;
+  max-width:102px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bact{display:none;gap:3px;justify-content:center;margin-top:5px}
+.bubble:hover .bact{display:flex}
+.bb{
+  width:24px;height:24px;border-radius:50%;border:none;
+  cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.bbe{background:var(--as);color:var(--a)}.bbe:hover{background:var(--al);color:#fff}
+.bbd{background:#fde8e8;color:#b02020}.bbd:hover{background:#b02020;color:#fff}
+
+/* ── SVG links ── */
+.lpath{fill:none;stroke:var(--lc);stroke-width:1.8;opacity:.65;pointer-events:stroke;cursor:pointer}
+.lpath:hover{stroke-width:2.8;opacity:1}
+.llbl{font-family:'DM Sans',sans-serif;font-size:9.5px;fill:var(--lc);font-weight:700;pointer-events:none}
+
+/* ── Modals ── */
+.ov{
+  position:fixed;inset:0;background:rgba(40,20,5,.5);
+  z-index:1000;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(3px);
+}
+.ov.h{display:none}
+.modal{
+  background:var(--card);border-radius:18px;padding:26px;
+  width:370px;max-width:95vw;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(80,40,10,.28);
+}
+.modal h2{
+  font-family:'Cormorant Garamond',serif;color:var(--td);
+  font-size:21px;margin-bottom:18px;padding-bottom:10px;
+  border-bottom:2px solid var(--as);
+}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--tm);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:8px 11px;border:1.5px solid #e0d0b8;border-radius:7px;
+  font-family:'DM Sans',sans-serif;font-size:13px;color:var(--td);
+  background:#fff;transition:border-color .18s;
+}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--al)}
+.pua{
+  border:2px dashed var(--al);border-radius:11px;padding:14px;
+  text-align:center;cursor:pointer;transition:all .18s;background:var(--as);
+}
+.pua:hover{background:#eedfc8}
+.pprev{width:76px;height:76px;border-radius:50%;object-fit:cover;border:2.5px solid var(--al);margin:0 auto 6px;display:block}
+.pua p{font-size:10.5px;color:var(--tl);margin-top:3px}
+.mact{display:flex;gap:7px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--as)}
+.mbtn{padding:8px 18px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s}
+.mcan{background:#f0e8dc;color:var(--tm)}.mcan:hover{background:#e0d0c0}
+.msav{background:var(--a);color:#fff}.msav:hover{background:#6a3f20}
+.mdng{background:#b03020;color:#fff}.mdng:hover{background:#d04030}
+
+/* link preview */
+.lprev{display:flex;align-items:center;gap:10px;background:var(--as);border-radius:9px;padding:11px;margin-bottom:14px}
+.lpn{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--td);text-align:center;flex:1;font-weight:600}
+.larr{color:var(--al);font-size:18px;font-weight:700}
+
+/* ── Context menu ── */
+#cm{
+  position:fixed;background:var(--card);border:1px solid #e0d0b8;
+  border-radius:9px;padding:5px;z-index:500;
+  box-shadow:var(--shd2);min-width:155px;display:none;
+}
+#cm.show{display:block}
+.ci{padding:7px 11px;border-radius:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--td);transition:background .12s}
+.ci:hover{background:var(--as)}
+.ci.dg{color:#b02020}.ci.dg:hover{background:#fde8e8}
+.csep{height:1px;background:var(--as);margin:3px 5px}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:18px;left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--td);color:#fff;
+  padding:9px 20px;border-radius:28px;font-size:12.5px;
+  z-index:2000;transition:transform .28s ease;white-space:nowrap;
+}
+#toast.sh{transform:translateX(-50%) translateY(0)}
+
+/* ── Help panel ── */
+#help{
+  position:absolute;bottom:14px;right:14px;
+  background:rgba(255,254,248,.92);border:1px solid var(--as);
+  border-radius:10px;padding:11px 14px;font-size:10.5px;
+  color:var(--tm);max-width:190px;z-index:50;
+  line-height:1.75;box-shadow:var(--shd);
+}
+#help strong{display:block;font-size:11.5px;color:var(--td);margin-bottom:3px;font-family:'Cormorant Garamond',serif;font-size:14px}
+
+/* ── Import bar ── */
+#ibar{padding:4px 14px 6px;background:rgba(124,79,40,.08);font-size:11px;color:var(--tm);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--as)}
+#ibar label{cursor:pointer;text-decoration:underline;text-underline-offset:2px;color:var(--a);font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="tb">
+  <h1>🌿 Arbre Familial</h1>
+  <div class="sep"></div>
+  <button class="btn bp" onclick="openAdd()">✚ Ajouter</button>
+  <button class="btn blink" id="lmbtn" onclick="toggleLinkMode()">🔗 Lier</button>
+  <div class="sep"></div>
+  <button class="btn bl" onclick="doExport('json')">⬇ JSON</button>
+  <button class="btn bl" onclick="doExport('csv')">⬇ CSV</button>
+  <button class="btn bl" onclick="doExport('png')">⬇ PNG</button>
+  <button class="btn bl" onclick="doExport('pdf')">⬇ PDF</button>
+  <div class="sep"></div>
+  <button class="btn bl" onclick="resetLayout()">⊞ Réorganiser</button>
+  <button class="btn bl" onclick="document.getElementById('jimport').click()">⬆ Importer JSON</button>
+  <div class="sep"></div>
+  <button class="btn bl" id="undobtn" onclick="undo()" title="Annuler — Ctrl+Z" disabled>↩ Annuler</button>
+  <button class="btn bl" id="redobtn" onclick="redo()" title="Rétablir — Ctrl+Y" disabled>↪ Rétablir</button>
+  <button class="btn bsave" id="savebtn" onclick="saveLocal()" title="Enregistrer dans le navigateur — Ctrl+S">💾 Enregistrer</button>
+  <input type="file" id="jimport" accept=".json" style="display:none" onchange="importJSON(this)">
+</div>
+
+<div id="cw">
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+        <polygon points="0 0,7 2.5,0 5" fill="#9a5820" opacity=".65"/>
+      </marker>
+    </defs>
+  </svg>
+</div>
+
+<div id="help">
+  <strong>Aide rapide</strong>
+  🖱 Glisser pour déplacer<br>
+  ✏️ Survol → modifier / supprimer<br>
+  🔗 Lier → cliquer 2 personnes<br>
+  🖱 Clic droit → options du lien<br>
+  ⌨️ Ctrl+Z / Ctrl+Y → annuler/rétablir<br>
+  ⌨️ Ctrl+S → enregistrer
+</div>
+
+<div id="toast"></div>
+
+<!-- Modal: Personne -->
+<div class="ov h" id="pm">
+<div class="modal">
+  <h2 id="ptitle">Ajouter une personne</h2>
+  <div class="fg"><label>Nom de famille</label><input id="fnom" placeholder="ex: NGUYEN" autocomplete="off"></div>
+  <div class="fg"><label>Prénom</label><input id="fpre" placeholder="ex: Julie" autocomplete="off"></div>
+  <div class="fg">
+    <label>Lien de parenté</label>
+    <input id="flien" placeholder="ex: Mère, Père, Époux…" list="lsugg" autocomplete="off">
+    <datalist id="lsugg">
+      <option value="Père"><option value="Mère"><option value="Fils"><option value="Fille">
+      <option value="Frère"><option value="Sœur"><option value="Époux"><option value="Épouse">
+      <option value="Grand-père"><option value="Grand-mère"><option value="Petit-fils"><option value="Petite-fille">
+      <option value="Oncle"><option value="Tante"><option value="Neveu"><option value="Nièce">
+      <option value="Cousin"><option value="Cousine"><option value="Beau-père"><option value="Belle-mère">
+      <option value="Beau-frère"><option value="Belle-sœur"><option value="Demi-frère"><option value="Demi-sœur">
+    </datalist>
+  </div>
+  <div class="fg">
+    <label>Photo de visage</label>
+    <div class="pua" onclick="document.getElementById('fphoto').click()">
+      <img id="pprev" class="pprev" style="display:none">
+      <div id="pph"><div style="font-size:30px">📷</div><p>Cliquer pour charger une photo<br>(JPG · PNG · WebP)</p></div>
+      <input type="file" id="fphoto" accept="image/*" style="display:none" onchange="loadPhoto(this)">
+    </div>
+    <button class="btn bl" id="clrph" style="margin-top:5px;font-size:10px;padding:3px 9px;background:#eee;color:#888;border:none;border-radius:5px" onclick="clearPhoto()">✕ Retirer la photo</button>
+  </div>
+  <div class="mact">
+    <button class="mbtn mcan" onclick="closeModal('pm')">Annuler</button>
+    <button class="mbtn msav" onclick="savePerson()">💾 Enregistrer</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal: Lien -->
+<div class="ov h" id="lm">
+<div class="modal" style="width:340px">
+  <h2>Créer un lien familial</h2>
+  <div class="lprev">
+    <div class="lpn" id="lf-name">—</div>
+    <div class="larr">⟶</div>
+    <div class="lpn" id="lt-name">—</div>
+  </div>
+  <div class="fg">
+    <label>Type de lien</label>
+    <select id="flt">
+      <option value="Époux / Épouse">Époux / Épouse</option>
+      <option value="Parent → Enfant">Parent → Enfant</option>
+      <option value="Enfant → Parent">Enfant → Parent</option>
+      <option value="Frère / Sœur">Frère / Sœur</option>
+      <option value="Cousin(e)">Cousin(e)</option>
+      <option value="Oncle / Tante">Oncle / Tante</option>
+      <option value="Grand-parent → Petit-enfant">Grand-parent → Petit-enfant</option>
+      <option value="Autre">Autre…</option>
+    </select>
+  </div>
+  <div class="fg" id="lcg" style="display:none">
+    <label>Préciser</label>
+    <input id="flcust" placeholder="Décrivez le lien">
+  </div>
+  <div class="mact">
+    <button class="mbtn mcan" onclick="cancelLink()">Annuler</button>
+    <button class="mbtn msav" onclick="confirmLink()">✓ Créer</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal: Confirmer suppression -->
+<div class="ov h" id="delm">
+<div class="modal" style="width:310px">
+  <h2>Confirmer la suppression</h2>
+  <p id="deltext" style="color:var(--tm);font-size:13.5px;line-height:1.6;margin-bottom:18px"></p>
+  <div class="mact">
+    <button class="mbtn mcan" onclick="closeModal('delm')">Annuler</button>
+    <button class="mbtn mdng" onclick="execDelete()">🗑 Supprimer</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal: Modifier lien (clic droit) -->
+<div class="ov h" id="lem">
+<div class="modal" style="width:320px">
+  <h2>Modifier le lien</h2>
+  <div class="fg">
+    <label>Type de lien</label>
+    <input id="fle" autocomplete="off">
+  </div>
+  <div class="mact">
+    <button class="mbtn mcan" onclick="closeModal('lem')">Annuler</button>
+    <button class="mbtn msav" onclick="saveEditLink()">💾 Enregistrer</button>
+  </div>
+</div>
+</div>
+
+<!-- Context menu -->
+<div id="cm">
+  <div class="ci" onclick="ctxEdit()">✏️ Modifier le lien</div>
+  <div class="csep"></div>
+  <div class="ci dg" onclick="ctxDel()">🗑 Supprimer le lien</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let S = { people: [], links: [] };
+let editId = null, curPhoto = null;
+let linkMode = false, linkA = null, linkB = null;
+let drag = null, dox = 0, doy = 0;
+let pendDel = null, ctxLinkId = null;
+
+// ═══════════════════════════════════════════════
+// HISTORY (UNDO / REDO)
+// ═══════════════════════════════════════════════
+const HIST_MAX = 60;
+let undoStack = [], redoStack = [];
+
+function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+function pushHistory(){
+  undoStack.push(deepClone(S));
+  if(undoStack.length > HIST_MAX) undoStack.shift();
+  redoStack = [];
+  updateHistBtns();
+  markUnsaved();
+}
+
+function undo(){
+  if(!undoStack.length) return;
+  redoStack.push(deepClone(S));
+  S = undoStack.pop();
+  render(); updateHistBtns(); markUnsaved();
+  toast('Annulé');
+}
+
+function redo(){
+  if(!redoStack.length) return;
+  undoStack.push(deepClone(S));
+  S = redoStack.pop();
+  render(); updateHistBtns(); markUnsaved();
+  toast('Rétabli');
+}
+
+function updateHistBtns(){
+  const u=document.getElementById('undobtn');
+  const r=document.getElementById('redobtn');
+  if(u) u.disabled = undoStack.length===0;
+  if(r) r.disabled = redoStack.length===0;
+}
+
+// ═══════════════════════════════════════════════
+// LOCAL SAVE
+// ═══════════════════════════════════════════════
+const LS_KEY = 'arbre-familial-v1';
+let _saved = true;
+
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(S));
+    _saved = true;
+    const btn = document.getElementById('savebtn');
+    if(btn){ btn.textContent='💾 Enregistré !'; btn.classList.add('saved'); }
+    setTimeout(()=>{
+      const b=document.getElementById('savebtn');
+      if(b){ b.textContent='💾 Enregistrer'; b.classList.remove('saved'); }
+    }, 2000);
+    toast('Sauvegardé dans le navigateur');
+  } catch(e){ toast('Erreur : stockage navigateur indisponible'); }
+}
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d.people && Array.isArray(d.people)){ S=d; return true; }
+    }
+  } catch(e){}
+  return false;
+}
+
+function markUnsaved(){
+  _saved = false;
+  const btn = document.getElementById('savebtn');
+  if(btn && !btn.classList.contains('saved')) btn.textContent = '💾 Enregistrer *';
+}
+
+// Ctrl+Z / Ctrl+Y / Ctrl+S
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+  if(e.ctrlKey||e.metaKey){
+    if(e.key==='z'&&!e.shiftKey){ e.preventDefault(); undo(); }
+    else if(e.key==='y'||(e.key==='z'&&e.shiftKey)){ e.preventDefault(); redo(); }
+    else if(e.key==='s'){ e.preventDefault(); saveLocal(); }
+  }
+});
+
+// ═══════════════════════════════════════════════
+// INIT DATA
+// ═══════════════════════════════════════════════
+const RAW = [
+  ['BLACHON','Romain'],['BLACHON','Trang'],
+  ['BUI','Minh-Tuan'],['BUI','Minh-Thong'],['BUI','Julie (Thao Lien)'],
+  ['DUONG','Thanh Su'],['HOANG','Thi Gai'],['LOISON','Kim-Lien'],
+  ['NGUYEN','Anh-Nguyet'],['NGUYEN','Emilie'],['NGUYEN','Johanna'],
+  ['NGUYEN','Julie'],['NGUYEN','ThI Nhien'],['NGUYEN','Van Hoang'],
+  ['TRAN','Kim-Van'],['TRAN','Thanh-Tam'],
+  ['VO','Françoise'],['VU','Thi Van']
+];
+
+function uid(){ return 'p'+Date.now()+Math.random().toString(36).slice(2,6) }
+
+function initData(){
+  const cols=6, sx=50, sy=55, gx=162, gy=185;
+  RAW.forEach(([nom,prenom],i)=>{
+    S.people.push({ id:uid()+'_'+i, nom, prenom, lien:'', photo:null, x:sx+(i%cols)*gx, y:sy+Math.floor(i/cols)*gy });
+  });
+}
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function render(){
+  const cw = document.getElementById('cw');
+  cw.querySelectorAll('.bubble').forEach(e=>e.remove());
+  S.people.forEach(p => cw.appendChild(makeBubble(p)));
+  renderLinks();
+}
+
+function makeBubble(p){
+  const d = document.createElement('div');
+  d.className = 'bubble';
+  d.id = 'b'+p.id;
+  d.style.left = p.x+'px';
+  d.style.top  = p.y+'px';
+  const ini = (p.prenom[0]||'')+(p.nom[0]||'');
+  const ph = p.photo
+    ? `<img class="bphoto" src="${p.photo}" alt="${p.prenom}">`
+    : `<div class="binit">${ini.toUpperCase()}</div>`;
+  d.innerHTML =
+    ph+
+    `<div class="bnom">${p.nom}</div>`+
+    `<div class="bpre">${p.prenom}</div>`+
+    (p.lien?`<div class="blien">${p.lien}</div>`:'')+
+    `<div class="bact">
+      <button class="bb bbe" title="Modifier" onclick="openEdit('${p.id}')">✏</button>
+      <button class="bb bbd" title="Supprimer" onclick="askDelPerson('${p.id}')">🗑</button>
+    </div>`;
+  d.addEventListener('mousedown', e=>startDrag(e,p.id));
+  d.addEventListener('click', e=>{ if(linkMode){ e.stopPropagation(); handleLinkClick(p.id); } });
+  return d;
+}
+
+function renderLinks(){
+  const svg = document.getElementById('svg');
+  svg.querySelectorAll('.lg').forEach(e=>e.remove());
+  S.links.forEach(lk=>{
+    const fr = S.people.find(p=>p.id===lk.from);
+    const to = S.people.find(p=>p.id===lk.to);
+    if(!fr||!to) return;
+    const bw=59; // half bubble width
+    const x1=fr.x+bw, y1=fr.y+bw;
+    const x2=to.x+bw, y2=to.y+bw;
+    const cx=(x1+x2)/2, cy=(y1+y2)/2-40;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.classList.add('lg');
+    g.dataset.lid = lk.id;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} Q${cx},${cy} ${x2},${y2}`);
+    path.setAttribute('class','lpath');
+    path.setAttribute('marker-end','url(#arr)');
+    path.addEventListener('contextmenu', e=>showCtx(e,lk.id));
+    const mx=.25*x1+.5*cx+.25*x2, my=.25*y1+.5*cy+.25*y2;
+    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',mx); txt.setAttribute('y',my-5);
+    txt.setAttribute('text-anchor','middle'); txt.setAttribute('class','llbl');
+    txt.textContent = lk.type;
+    g.appendChild(path); g.appendChild(txt);
+    svg.appendChild(g);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// DRAG
+// ═══════════════════════════════════════════════
+function startDrag(e,id){
+  if(linkMode) return;
+  if(e.target.closest('.bb')) return;
+  const p = S.people.find(x=>x.id===id); if(!p) return;
+  pushHistory();
+  drag=id; dox=e.clientX-p.x; doy=e.clientY-p.y;
+  const el=document.getElementById('b'+id);
+  if(el){ el.style.zIndex=20; el.style.cursor='grabbing'; }
+  e.preventDefault();
+}
+document.addEventListener('mousemove',e=>{
+  if(!drag) return;
+  const p=S.people.find(x=>x.id===drag); if(!p) return;
+  const cw=document.getElementById('cw');
+  const r=cw.getBoundingClientRect();
+  p.x=Math.max(0,Math.min(e.clientX-dox, r.width-126));
+  p.y=Math.max(0,Math.min(e.clientY-doy, r.height-220));
+  const el=document.getElementById('b'+drag);
+  if(el){ el.style.left=p.x+'px'; el.style.top=p.y+'px'; }
+  renderLinks();
+});
+document.addEventListener('mouseup',()=>{
+  if(drag){
+    const el=document.getElementById('b'+drag);
+    if(el){ el.style.zIndex=10; el.style.cursor='grab'; }
+    drag=null;
+  }
+});
+
+// ═══════════════════════════════════════════════
+// LINK MODE
+// ═══════════════════════════════════════════════
+function toggleLinkMode(){
+  linkMode=!linkMode; linkA=null; linkB=null;
+  const btn=document.getElementById('lmbtn');
+  const cw=document.getElementById('cw');
+  btn.classList.toggle('on',linkMode);
+  btn.textContent = linkMode ? '✕ Annuler lien' : '🔗 Lier';
+  cw.classList.toggle('lm',linkMode);
+  document.querySelectorAll('.bubble').forEach(el=>el.classList.remove('lf'));
+  toast(linkMode?'Cliquez sur la 1ère personne…':'Mode lien désactivé');
+}
+
+function handleLinkClick(id){
+  if(!linkA){
+    linkA=id;
+    const el=document.getElementById('b'+id);
+    if(el) el.classList.add('lf');
+    toast('Cliquez sur la 2ème personne…');
+  } else if(linkA===id){
+    document.getElementById('b'+id).classList.remove('lf');
+    linkA=null; toast('Sélection annulée');
+  } else {
+    linkB=id;
+    const fa=S.people.find(p=>p.id===linkA);
+    const fb=S.people.find(p=>p.id===linkB);
+    if(fa&&fb){
+      document.getElementById('lf-name').textContent=fa.nom+' '+fa.prenom;
+      document.getElementById('lt-name').textContent=fb.nom+' '+fb.prenom;
+      document.getElementById('flt').value='Époux / Épouse';
+      document.getElementById('lcg').style.display='none';
+      showModal('lm');
+    }
+  }
+}
+
+function cancelLink(){
+  document.querySelectorAll('.bubble').forEach(el=>el.classList.remove('lf'));
+  linkA=null; linkB=null; closeModal('lm');
+  if(linkMode) toggleLinkMode();
+}
+
+function confirmLink(){
+  const t=document.getElementById('flt').value;
+  const custom=document.getElementById('flcust').value.trim();
+  const type=(t==='Autre'&&custom)?custom:t;
+  if(linkA&&linkB){
+    const dup=S.links.find(l=>(l.from===linkA&&l.to===linkB)||(l.from===linkB&&l.to===linkA));
+    if(dup){ toast('Ce lien existe déjà !'); return; }
+    pushHistory();
+    S.links.push({ id:'l'+Date.now(), from:linkA, to:linkB, type });
+    toast('Lien créé !');
+  }
+  document.querySelectorAll('.bubble').forEach(el=>el.classList.remove('lf'));
+  linkA=null; linkB=null;
+  closeModal('lm');
+  if(linkMode) toggleLinkMode();
+  renderLinks();
+}
+
+document.getElementById('flt').addEventListener('change',function(){
+  document.getElementById('lcg').style.display=this.value==='Autre'?'block':'none';
+});
+
+// ═══════════════════════════════════════════════
+// CONTEXT MENU
+// ═══════════════════════════════════════════════
+function showCtx(e,lid){
+  e.preventDefault();
+  ctxLinkId=lid;
+  const m=document.getElementById('cm');
+  m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px';
+  m.classList.add('show');
+}
+document.addEventListener('click',()=>document.getElementById('cm').classList.remove('show'));
+function ctxDel(){
+  if(!ctxLinkId) return;
+  pushHistory();
+  S.links=S.links.filter(l=>l.id!==ctxLinkId);
+  ctxLinkId=null;
+  document.getElementById('cm').classList.remove('show');
+  renderLinks(); toast('Lien supprimé');
+}
+function ctxEdit(){
+  const lk=S.links.find(l=>l.id===ctxLinkId); if(!lk) return;
+  document.getElementById('fle').value=lk.type;
+  document.getElementById('cm').classList.remove('show');
+  showModal('lem');
+}
+function saveEditLink(){
+  const lk=S.links.find(l=>l.id===ctxLinkId); if(!lk) return;
+  const v=document.getElementById('fle').value.trim();
+  if(v){ pushHistory(); lk.type=v; }
+  closeModal('lem'); renderLinks(); toast('Lien modifié');
+}
+
+// ═══════════════════════════════════════════════
+// PERSON MODAL
+// ═══════════════════════════════════════════════
+function openAdd(){
+  editId=null; curPhoto=null;
+  document.getElementById('ptitle').textContent='Ajouter une personne';
+  document.getElementById('fnom').value='';
+  document.getElementById('fpre').value='';
+  document.getElementById('flien').value='';
+  document.getElementById('pprev').style.display='none';
+  document.getElementById('pph').style.display='block';
+  document.getElementById('fphoto').value='';
+  showModal('pm');
+}
+
+function openEdit(id){
+  const p=S.people.find(x=>x.id===id); if(!p) return;
+  editId=id; curPhoto=p.photo;
+  document.getElementById('ptitle').textContent='Modifier la personne';
+  document.getElementById('fnom').value=p.nom;
+  document.getElementById('fpre').value=p.prenom;
+  document.getElementById('flien').value=p.lien||'';
+  if(p.photo){
+    const img=document.getElementById('pprev');
+    img.src=p.photo; img.style.display='block';
+    document.getElementById('pph').style.display='none';
+  } else {
+    document.getElementById('pprev').style.display='none';
+    document.getElementById('pph').style.display='block';
+  }
+  showModal('pm');
+}
+
+function savePerson(){
+  const nom=document.getElementById('fnom').value.trim().toUpperCase();
+  const prenom=document.getElementById('fpre').value.trim();
+  const lien=document.getElementById('flien').value.trim();
+  if(!nom||!prenom){ toast('Nom et prénom requis !'); return; }
+  pushHistory();
+  if(editId){
+    const p=S.people.find(x=>x.id===editId);
+    if(p){ p.nom=nom; p.prenom=prenom; p.lien=lien; p.photo=curPhoto; }
+  } else {
+    const cw=document.getElementById('cw');
+    const r=cw.getBoundingClientRect();
+    S.people.push({ id:uid(), nom, prenom, lien, photo:curPhoto, x:60+Math.random()*(r.width-200), y:60+Math.random()*(r.height-240) });
+  }
+  closeModal('pm'); render();
+  toast(editId?'Personne modifiée !':'Personne ajoutée !');
+}
+
+function loadPhoto(inp){
+  const f=inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    curPhoto=e.target.result;
+    const img=document.getElementById('pprev');
+    img.src=curPhoto; img.style.display='block';
+    document.getElementById('pph').style.display='none';
+  };
+  r.readAsDataURL(f);
+}
+
+function clearPhoto(){
+  curPhoto=null;
+  document.getElementById('pprev').style.display='none';
+  document.getElementById('pph').style.display='block';
+  document.getElementById('fphoto').value='';
+}
+
+// ═══════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════
+function askDelPerson(id){
+  const p=S.people.find(x=>x.id===id); if(!p) return;
+  pendDel={ type:'person', id };
+  document.getElementById('deltext').textContent=`Supprimer ${p.nom} ${p.prenom} ? Tous ses liens seront également supprimés.`;
+  showModal('delm');
+}
+function execDelete(){
+  if(!pendDel) return;
+  pushHistory();
+  if(pendDel.type==='person'){
+    S.people=S.people.filter(p=>p.id!==pendDel.id);
+    S.links=S.links.filter(l=>l.from!==pendDel.id&&l.to!==pendDel.id);
+  }
+  pendDel=null; closeModal('delm'); render(); toast('Supprimé !');
+}
+
+// ═══════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════
+function showModal(id){ document.getElementById(id).classList.remove('h') }
+function closeModal(id){ document.getElementById(id).classList.add('h') }
+document.querySelectorAll('.ov').forEach(ov=>{
+  ov.addEventListener('click',e=>{
+    if(e.target===ov){
+      ov.classList.add('h');
+      if(ov.id==='lm') cancelLink();
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════
+// LAYOUT RESET
+// ═══════════════════════════════════════════════
+function resetLayout(){
+  pushHistory();
+  const cols=6;
+  const cw=document.getElementById('cw');
+  const r=cw.getBoundingClientRect();
+  const gx=Math.min(162,(r.width-80)/cols);
+  const gy=185, sx=40, sy=40;
+  S.people.forEach((p,i)=>{ p.x=sx+(i%cols)*gx; p.y=sy+Math.floor(i/cols)*gy; });
+  render();
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════
+function dl(fn,content,mime){
+  const b=new Blob([content],{type:mime});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=fn; a.click();
+  URL.revokeObjectURL(u);
+}
+
+function doExport(fmt){
+  if(fmt==='json'){
+    dl('arbre-familial.json',JSON.stringify(S,null,2),'application/json');
+    toast('Export JSON OK !');
+  } else if(fmt==='csv'){
+    const rows=['Nom,Prénom,Lien de parenté,Liens familiaux'];
+    S.people.forEach(p=>{
+      const ls=S.links.filter(l=>l.from===p.id||l.to===p.id).map(l=>{
+        const oid=l.from===p.id?l.to:l.from;
+        const o=S.people.find(x=>x.id===oid);
+        return o?`${o.nom} ${o.prenom} (${l.type})`:'';
+      }).filter(Boolean).join(' | ');
+      rows.push(`"${p.nom}","${p.prenom}","${p.lien}","${ls}"`);
+    });
+    dl('arbre-familial.csv',rows.join('\n'),'text/csv');
+    toast('Export CSV OK !');
+  } else if(fmt==='png'){
+    toast('Génération PNG…');
+    html2canvas(document.getElementById('cw'),{backgroundColor:'#f2ede4',scale:2,useCORS:true,logging:false}).then(cv=>{
+      const a=document.createElement('a'); a.download='arbre-familial.png'; a.href=cv.toDataURL(); a.click();
+      toast('Export PNG OK !');
+    }).catch(()=>toast('Erreur PNG'));
+  } else if(fmt==='pdf'){
+    toast('Génération PDF…');
+    html2canvas(document.getElementById('cw'),{backgroundColor:'#f2ede4',scale:1.5,useCORS:true,logging:false}).then(cv=>{
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:cv.width>cv.height?'landscape':'portrait',unit:'px',format:[cv.width,cv.height]});
+      pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,cv.width,cv.height);
+      pdf.save('arbre-familial.pdf');
+      toast('Export PDF OK !');
+    }).catch(()=>toast('Erreur PDF'));
+  }
+}
+
+function importJSON(inp){
+  const f=inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.people&&Array.isArray(d.people)){ pushHistory(); S=d; render(); toast('Import JSON OK !'); }
+      else toast('Format JSON invalide');
+    }catch{ toast('Erreur de lecture JSON'); }
+    inp.value='';
+  };
+  r.readAsText(f);
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastT;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('sh');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('sh'),2600);
+}
+
+// ═══════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════
+const hadSaved = loadLocal();
+if(!hadSaved) initData();
+render();
+updateHistBtns();
+if(hadSaved) toast('Session précédente restaurée — Ctrl+S pour sauvegarder');
+</script>
+</body>
+</html>
